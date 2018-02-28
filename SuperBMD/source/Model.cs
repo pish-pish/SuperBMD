@@ -43,7 +43,8 @@ namespace SuperBMD
 
                 // AssImp adds dummy nodes for pivots from FBX, so we'll force them off
                 cont.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
-                Assimp.Scene aiScene = cont.ImportFile(filePath, Assimp.PostProcessSteps.Triangulate);
+                Assimp.Scene aiScene = cont.ImportFile(filePath, 
+                    Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices);
 
                 output = new Model(aiScene, filePath);
             }
