@@ -84,6 +84,19 @@
     <Compile Include="source\BMD\JNT1.cs" />
     <Compile Include="source\BMD\MAT3.cs" />
     <Compile Include="source\ExportSettings.cs" />
+    <Compile Include="source\Geometry\TriStrip\CacheSimulator.cs" />
+    <Compile Include="source\Geometry\TriStrip\Deque\Deque.cs" />
+    <Compile Include="source\Geometry\TriStrip\Deque\GenericDeque.cs" />
+    <Compile Include="source\Geometry\TriStrip\Deque\GenericDeque.Enumerator.cs" />
+    <Compile Include="source\Geometry\TriStrip\Deque\GenericDeque.Node.cs" />
+    <Compile Include="source\Geometry\TriStrip\Deque\GenericDeque.Synchronized.cs" />
+    <Compile Include="source\Geometry\TriStrip\Deque\GenericTester.cs" />
+    <Compile Include="source\Geometry\TriStrip\Deque\Tester.cs" />
+    <Compile Include="source\Geometry\TriStrip\GraphArray.cs" />
+    <Compile Include="source\Geometry\TriStrip\HeapArray.cs" />
+    <Compile Include="source\Geometry\TriStrip\Policy.cs" />
+    <Compile Include="source\Geometry\TriStrip\TriStripper.cs" />
+    <Compile Include="source\Geometry\TriStrip\Types.cs" />
     <Compile Include="source\Model.cs" />
     <Compile Include="source\BMD\SHP1.cs" />
     <Compile Include="source\BMD\TEX1.cs" />
@@ -179,6 +192,7 @@
     <Compile Include="source\Util\WrapModeUtility.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="OpenTK.dll.config" />
     <None Include="packages.config" />
   </ItemGroup>

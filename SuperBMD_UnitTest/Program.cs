@@ -37,6 +37,7 @@ namespace SuperBMD_UnitTest
             Console.WriteLine("Written by Sage_of_Mirrors/Gamma (@SageOfMirrors).");
             Console.WriteLine("Made possible with help from arookas, LordNed, xDaniel, and many others.");
             Console.WriteLine("Visit https://github.com/Sage-of-Mirrors/SuperBMD/wiki for more information.");
+            Console.WriteLine("This is an inofficial version with a Triangle Strip algorithm added from BrawlLib. Report any issues to Yoshi2#6013 (RenolY2 on github).");
         }
     }
 }
