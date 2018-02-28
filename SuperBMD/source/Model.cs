@@ -154,11 +154,11 @@ namespace SuperBMD
             }
         }
 
-        public void ExportAssImp(string fileName, string modelType, ExportSettings settings)
+        public void ExportAssImp(string fileName, string outFilepath, string modelType, ExportSettings settings)
         {
-            string outDir = Path.GetDirectoryName(fileName);
-            string fileNameNoExt = Path.GetFileNameWithoutExtension(fileName);
-            fileName = Path.Combine(outDir, fileNameNoExt + ".dae");
+            string outDir = Path.GetDirectoryName(outFilepath);
+            //string fileNameNoExt = Path.GetFileNameWithoutExtension(fileName);
+            fileName = outFilepath;//Path.Combine(outDir, fileNameNoExt + ".dae");
 
             Scene outScene = new Scene();
 

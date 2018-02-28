@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,6 +12,8 @@ namespace SuperBMD_UnitTest
     {
         static void Main(string[] args)
         {
+            //args = new string[] { "C:\\Users\\User\\Documents\\Modding\\Modding QuickAccess\\MarioKartDD\\Vocaloid\\KagamineRin_Merged_2.bmd" };
+
             if (args.Length > 0)
             {
                 if (args[0] == "help")
@@ -21,10 +24,29 @@ namespace SuperBMD_UnitTest
 
                 Model mod = Model.Load(args[0]);
 
-                if (args[0].EndsWith(".bmd") || args[0].EndsWith(".bdl"))
-                    mod.ExportAssImp(args[0], "dae", new ExportSettings());
-                else
-                    mod.ExportBMD(args[0] + ".bmd");
+                if (args[0].EndsWith(".bmd") || args[0].EndsWith(".bdl")) 
+                {
+                    string outFilepath;
+
+                    if (args.Length > 1) 
+                    {
+                        outFilepath = args[1];
+                    }
+                    else 
+                    {
+                        string inDir = Path.GetDirectoryName(args[0]);
+                        string fileNameNoExt = Path.GetFileNameWithoutExtension(args[0]);
+                        outFilepath = Path.Combine(inDir, fileNameNoExt + ".dae");
+                    }
+
+                    mod.ExportAssImp(args[0], outFilepath, "dae", new ExportSettings());
+                }
+                else {
+                    if (args.Length > 1) 
+                        mod.ExportBMD(args[1]);
+                    else
+                        mod.ExportBMD(args[0] + ".bmd");
+                } 
             }
             else
                 DisplayHelp();
