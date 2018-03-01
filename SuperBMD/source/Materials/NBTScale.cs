@@ -6,12 +6,14 @@ using System.Threading.Tasks;
 using OpenTK;
 using GameFormatReader.Common;
 using SuperBMD.Util;
+using Newtonsoft.Json;
 
 namespace SuperBMD.Materials
 {
     public struct NBTScale : IEquatable<NBTScale>
     {
         public byte Unknown1;
+        [JsonIgnore]
         public Vector3 Scale;
 
         public NBTScale(byte unk1, Vector3 scale)

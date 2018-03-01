@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using SuperBMD.Materials.Enums;
 using SuperBMD.Util;
 using OpenTK;
+using Newtonsoft.Json;
 
 namespace SuperBMD.Materials
 {
@@ -16,6 +17,7 @@ namespace SuperBMD.Materials
         public byte ColorChannelControlsCount;
         public byte NumTexGensCount;
         public byte NumTevStagesCount;
+        [JsonIgnore]
         public IndirectTexturing IndTexEntry;
         public CullMode CullMode;
 

@@ -10,6 +10,7 @@ using SuperBMD.Materials.IO;
 using GameFormatReader.Common;
 using SuperBMD.Geometry.Enums;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace SuperBMD.BMD
 {
@@ -264,15 +265,16 @@ namespace SuperBMD.BMD
             m_Materials = new List<Material>();
             for (int i = 0; i <= highestMatIndex; i++)
             {
-                LoadInitData(reader);
+                LoadInitData(reader, m_RemapIndices[i]);
             }
 
             reader.BaseStream.Seek(offset + mat3Size, System.IO.SeekOrigin.Begin);
         }
 
-        private void LoadInitData(EndianBinaryReader reader)
+        private void LoadInitData(EndianBinaryReader reader, int matindex)
         {
             Material mat = new Material();
+            mat.Name = m_MaterialNames[matindex];
 
             mat.Flag = reader.ReadByte();
             mat.CullMode = m_CullModeBlock[reader.ReadByte()];
@@ -1189,6 +1191,15 @@ namespace SuperBMD.BMD
             writer.Write((short)m_AlphaCompBlock.IndexOf(mat.AlphCompare));
             writer.Write((short)m_blendModeBlock.IndexOf(mat.BMode));
             writer.Write((short)m_NBTScaleBlock.IndexOf(mat.NBTScale));
+        }
+
+        public void DumpJson(TextWriter file) {
+            JsonSerializer serializer = new JsonSerializer();
+            serializer.Formatting = Formatting.Indented;
+
+            using (JsonWriter writer = new JsonTextWriter(file)) {
+                serializer.Serialize(writer, m_Materials);
+            }
         }
     }
 }

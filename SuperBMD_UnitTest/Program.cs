@@ -12,7 +12,7 @@ namespace SuperBMD_UnitTest
     {
         static void Main(string[] args)
         {
-            //args = new string[] { "C:\\Users\\User\\Documents\\Modding\\Modding QuickAccess\\MarioKartDD\\Vocaloid\\KagamineRin_Merged_2.bmd" };
+            //args = new string[] { "./orima1.bmd" };
             string in_file = "";
             string out_file = "";
             string mat_file = "";
@@ -60,12 +60,21 @@ namespace SuperBMD_UnitTest
                     }
 
                     mod.ExportAssImp(in_file, outFilepath, "dae", new ExportSettings(), mat_file);
+                    if (mat_file != "") {
+                        using (TextWriter file = File.CreateText(mat_file)) {
+                            mod.Materials.DumpJson(file);
+                        }
+                    }
                 }
                 else {
-                    if (out_file != "") 
+                    if (out_file != "") {
                         mod.ExportBMD(out_file, mat_file);
-                    else
+                    }
+                    else {
                         mod.ExportBMD(in_file + ".bmd", mat_file);
+                    }
+
+                    
                 } 
             }
             else
