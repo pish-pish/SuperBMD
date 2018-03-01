@@ -4,7 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using SuperBMD;
+using SuperBMD.Materials;
 
 namespace SuperBMD_UnitTest
 {
@@ -12,7 +14,10 @@ namespace SuperBMD_UnitTest
     {
         static void Main(string[] args)
         {
-            //args = new string[] { "./orima1.bmd" };
+            //args = new string[] { "./orima1.dae", "./olimar.bmd", "--mat", "./test2.json" };
+            //args = new string[] { "C:/Users/User/Documents/3dsMax/export/testlevel.dae", "C:/Users/User/Documents/Sandbox/pack stuff/NeuPacker/arc/model.bmd", "--mat", "C:/Users/User/Documents/Sandbox/pack stuff/NeuPacker/MyMaterials/tutmat.json" };
+
+
             string in_file = "";
             string out_file = "";
             string mat_file = "";
@@ -42,36 +47,53 @@ namespace SuperBMD_UnitTest
 
             if (in_file != "")
             {
-                Model mod = Model.Load(in_file);
-
                 if (in_file.EndsWith(".bmd") || in_file.EndsWith(".bdl")) 
                 {
+                    Model mod = Model.Load(in_file);
+
                     string outFilepath;
 
-                    if (out_file != "") 
-                    {
+                    if (out_file != "") {
                         outFilepath = out_file;
                     }
-                    else 
-                    {
+                    else {
                         string inDir = Path.GetDirectoryName(in_file);
                         string fileNameNoExt = Path.GetFileNameWithoutExtension(in_file);
                         outFilepath = Path.Combine(inDir, fileNameNoExt + ".dae");
+
+                        if (mat_file == "") {
+                            mat_file = Path.Combine(inDir, fileNameNoExt + "_mat.json");
+                        }
                     }
 
-                    mod.ExportAssImp(in_file, outFilepath, "dae", new ExportSettings(), mat_file);
+                    mod.ExportAssImp(in_file, outFilepath, "dae", new ExportSettings());
                     if (mat_file != "") {
                         using (TextWriter file = File.CreateText(mat_file)) {
                             mod.Materials.DumpJson(file);
                         }
                     }
                 }
+
                 else {
+                    List<Material> mat_presets = null;
+
+                    if (mat_file != "") {
+                        JsonSerializer serializer = new JsonSerializer();
+
+                        using (TextReader file = File.OpenText(mat_file)) {
+                            using (JsonTextReader reader = new JsonTextReader(file)) {
+                                mat_presets = serializer.Deserialize<List<Material>>(reader);
+                            }
+                        }
+                    }
+
+                    Model mod = Model.Load(in_file, mat_presets);
+
                     if (out_file != "") {
-                        mod.ExportBMD(out_file, mat_file);
+                        mod.ExportBMD(out_file, true);
                     }
                     else {
-                        mod.ExportBMD(in_file + ".bmd", mat_file);
+                        mod.ExportBMD(in_file + ".bmd");
                     }
 
                     

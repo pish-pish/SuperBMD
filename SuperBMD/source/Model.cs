@@ -24,7 +24,7 @@ namespace SuperBMD
         private int packetCount;
         private int vertexCount;
 
-        public static Model Load(string filePath)
+        public static Model Load(string filePath, List<Materials.Material> mat_presets = null)
         {
             string extension = Path.GetExtension(filePath);
             Model output = null;
@@ -46,7 +46,7 @@ namespace SuperBMD
                 Assimp.Scene aiScene = cont.ImportFile(filePath, 
                     Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices);
 
-                output = new Model(aiScene, filePath);
+                output = new Model(aiScene, filePath, mat_presets);
             }
 
             return output;
@@ -96,7 +96,7 @@ namespace SuperBMD
             }
         }
 
-        public Model(Scene scene, string modelDirectory)
+        public Model(Scene scene, string modelDirectory, List<Materials.Material> mat_presets = null)
         {
             VertexData = new VTX1(scene);
             Joints = new JNT1(scene, VertexData);
@@ -110,7 +110,7 @@ namespace SuperBMD
 
             Shapes = SHP1.Create(scene, Joints.BoneNameIndices, VertexData.Attributes, SkinningEnvelopes, PartialWeightData);
 
-            Materials = new MAT3(scene, Textures, Shapes);
+            Materials = new MAT3(scene, Textures, Shapes, mat_presets);
 
             foreach (Geometry.Shape shape in Shapes.Shapes)
                 packetCount += shape.Packets.Count;
@@ -118,14 +118,14 @@ namespace SuperBMD
             vertexCount = VertexData.Attributes.Positions.Count;
         }
 
-        public void ExportBMD(string fileName, string matFilepath = "")
+        public void ExportBMD(string fileName, bool overwrite = false)
         {
             string outDir = Path.GetDirectoryName(fileName);
             string fileNameNoExt = Path.GetFileNameWithoutExtension(fileName);
             fileNameNoExt = fileNameNoExt.Split('.')[0];
             fileName = Path.Combine(outDir, fileNameNoExt + ".bmd");
 
-            if (File.Exists(fileName))
+            if (File.Exists(fileName) && overwrite == false)
             {
                 fileName = Path.Combine(outDir, fileNameNoExt + "_2.bmd");
             }
@@ -154,7 +154,7 @@ namespace SuperBMD
             }
         }
 
-        public void ExportAssImp(string fileName, string outFilepath, string modelType, ExportSettings settings, string matFilepath = "")
+        public void ExportAssImp(string fileName, string outFilepath, string modelType, ExportSettings settings)
         {
             string outDir = Path.GetDirectoryName(outFilepath);
             //string fileNameNoExt = Path.GetFileNameWithoutExtension(fileName);

@@ -440,7 +440,24 @@ namespace SuperBMD.BMD
             m_Materials.Add(mat);
         }
 
-        public MAT3(Assimp.Scene scene, TEX1 textures, SHP1 shapes)
+        private Material FindMatPreset(string name, List<Material> mat_presets) {
+            Material default_mat = null;
+            Console.WriteLine(String.Format("Looking for match for {0}", name));
+            foreach (Material mat in mat_presets) {
+                Console.WriteLine(String.Format("{0}", mat.Name));
+                if (mat.Name == "__SuperBMDDefault__") {
+                    default_mat = mat;
+                }
+
+                if (mat.Name == name) {
+                    return mat;
+                }
+            }
+
+            return default_mat;
+        }
+
+        public MAT3(Assimp.Scene scene, TEX1 textures, SHP1 shapes, List<Material> mat_presets = null)
         {
             InitLists();
 
@@ -458,6 +475,49 @@ namespace SuperBMD.BMD
                 }
 
                 bmdMaterial.SetUpTev(meshMat.HasTextureDiffuse, hasVtxColor0, texIndex);
+                Material preset = FindMatPreset(meshMat.Name, mat_presets);
+
+                if (preset != null) {
+                    Console.WriteLine(String.Format("Applying material preset for {0}", meshMat.Name));
+                    // put data from preset over current material
+                    bmdMaterial.Flag = preset.Flag;
+                    bmdMaterial.ColorChannelControlsCount = preset.ColorChannelControlsCount;
+                    bmdMaterial.NumTexGensCount = preset.NumTexGensCount;
+                    bmdMaterial.NumTevStagesCount = preset.NumTevStagesCount;
+                    bmdMaterial.CullMode = preset.CullMode;
+
+                    bmdMaterial.MaterialColors = preset.MaterialColors;
+                    bmdMaterial.ChannelControls = preset.ChannelControls;
+                    bmdMaterial.AmbientColors = preset.AmbientColors;
+                    bmdMaterial.LightingColors = preset.LightingColors;
+
+                    for (int j = 0; j < bmdMaterial.TexMatrix1.Length; j++) {
+                        if ((bmdMaterial.TexMatrix1[j] != null) && (preset.TexMatrix1[j] != null)) {
+                            Materials.TexMatrix m1 = (Materials.TexMatrix)bmdMaterial.TexMatrix1[j];
+                            Materials.TexMatrix m2 = (Materials.TexMatrix)preset.TexMatrix1[j];
+
+                            m1.Projection = m2.Projection;
+                            m1.Type = m2.Type;
+                        }
+                    }
+                    // Todo: TexCoord1, PostTexCoord, PostTexMatrix?
+
+                    bmdMaterial.TevOrders = preset.TevOrders;
+                    bmdMaterial.ColorSels = preset.ColorSels;
+                    bmdMaterial.AlphaSels = preset.AlphaSels;
+                    bmdMaterial.TevColors = preset.TevColors;
+                    bmdMaterial.KonstColors = preset.KonstColors;
+                    bmdMaterial.TevStages = preset.TevStages;
+                    bmdMaterial.SwapModes = preset.SwapModes;
+                    bmdMaterial.SwapTables = preset.SwapTables;
+                    bmdMaterial.FogInfo = preset.FogInfo;
+                    bmdMaterial.AlphCompare = preset.AlphCompare;
+                    bmdMaterial.BMode = preset.BMode;
+                    bmdMaterial.ZMode = preset.ZMode;
+                    bmdMaterial.ZCompLoc = preset.ZCompLoc;
+                    bmdMaterial.Dither = preset.Dither;
+                    bmdMaterial.NBTScale = preset.NBTScale;
+                }
 
                 m_Materials.Add(bmdMaterial);
                 m_RemapIndices.Add(i);
