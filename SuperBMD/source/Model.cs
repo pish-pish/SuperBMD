@@ -118,7 +118,7 @@ namespace SuperBMD
             vertexCount = VertexData.Attributes.Positions.Count;
         }
 
-        public void ExportBMD(string fileName)
+        public void ExportBMD(string fileName, string matFilepath = "")
         {
             string outDir = Path.GetDirectoryName(fileName);
             string fileNameNoExt = Path.GetFileNameWithoutExtension(fileName);
@@ -154,7 +154,7 @@ namespace SuperBMD
             }
         }
 
-        public void ExportAssImp(string fileName, string outFilepath, string modelType, ExportSettings settings)
+        public void ExportAssImp(string fileName, string outFilepath, string modelType, ExportSettings settings, string matFilepath = "")
         {
             string outDir = Path.GetDirectoryName(outFilepath);
             //string fileNameNoExt = Path.GetFileNameWithoutExtension(fileName);

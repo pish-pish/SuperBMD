@@ -13,39 +13,59 @@ namespace SuperBMD_UnitTest
         static void Main(string[] args)
         {
             //args = new string[] { "C:\\Users\\User\\Documents\\Modding\\Modding QuickAccess\\MarioKartDD\\Vocaloid\\KagamineRin_Merged_2.bmd" };
+            string in_file = "";
+            string out_file = "";
+            string mat_file = "";
 
-            if (args.Length > 0)
-            {
-                if (args[0] == "help")
-                {
+            int processed_args = 0;
+
+            for (int i = 0; i < args.Length; i++) {
+                if (args[i] == "--mat") {
+                    mat_file = args[i + 1];
+                    i++;
+                }
+                else if (args[i] == "help") {
                     DisplayHelp();
                     return;
                 }
+                else {
+                    if (processed_args == 0) {
+                        in_file = args[i];
+                    }
+                    else if (processed_args == 1) {
+                        out_file = args[i];
+                    }
 
-                Model mod = Model.Load(args[0]);
+                    processed_args++;
+                }
+            }
 
-                if (args[0].EndsWith(".bmd") || args[0].EndsWith(".bdl")) 
+            if (in_file != "")
+            {
+                Model mod = Model.Load(in_file);
+
+                if (in_file.EndsWith(".bmd") || in_file.EndsWith(".bdl")) 
                 {
                     string outFilepath;
 
-                    if (args.Length > 1) 
+                    if (out_file != "") 
                     {
-                        outFilepath = args[1];
+                        outFilepath = out_file;
                     }
                     else 
                     {
-                        string inDir = Path.GetDirectoryName(args[0]);
-                        string fileNameNoExt = Path.GetFileNameWithoutExtension(args[0]);
+                        string inDir = Path.GetDirectoryName(in_file);
+                        string fileNameNoExt = Path.GetFileNameWithoutExtension(in_file);
                         outFilepath = Path.Combine(inDir, fileNameNoExt + ".dae");
                     }
 
-                    mod.ExportAssImp(args[0], outFilepath, "dae", new ExportSettings());
+                    mod.ExportAssImp(in_file, outFilepath, "dae", new ExportSettings(), mat_file);
                 }
                 else {
-                    if (args.Length > 1) 
-                        mod.ExportBMD(args[1]);
+                    if (out_file != "") 
+                        mod.ExportBMD(out_file, mat_file);
                     else
-                        mod.ExportBMD(args[0] + ".bmd");
+                        mod.ExportBMD(in_file + ".bmd", mat_file);
                 } 
             }
             else
