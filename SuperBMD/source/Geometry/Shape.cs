@@ -80,7 +80,7 @@ namespace SuperBMD.Geometry
                 for (int j = 0; j < 3; j++) {
                     //vertexindex = (face.Indices[j]);
                     //found = false;
-                    triindices[i * 3 + j] = (uint)face.Indices[j];
+                    triindices[i * 3 + j] = (uint)face.Indices[2-j];
                     /*for (int k = 0; k < mesh.Vertices.Count; k++) {
                         if (mesh.Vertices[k].Equals(mesh.Vertices[vertexindex])
                             && (mesh.Normals.Count == 0 || mesh.Normals[k].Equals(mesh.Normals[vertexindex]))) {
