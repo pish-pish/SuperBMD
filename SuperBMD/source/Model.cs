@@ -154,7 +154,7 @@ namespace SuperBMD
             }
         }
 
-        public void ExportAssImp(string fileName, string outFilepath, string modelType, ExportSettings settings)
+        public void ExportAssImp(string fileName, string outFilepath, string modelType, ExportSettings settings, bool keepmatnames = false)
         {
             string outDir = Path.GetDirectoryName(outFilepath);
             //string fileNameNoExt = Path.GetFileNameWithoutExtension(fileName);
@@ -223,13 +223,18 @@ namespace SuperBMD
                 {
                     foreach (Mesh mesh in outScene.Meshes)
                     {
+                        string matname = "mat";
+                        if (keepmatnames == true) {
+                            matname = outScene.Materials[mesh.MaterialIndex].Name.Replace("#", "_").Replace(" ", "_");
+                        }
+
                         test.WriteLine($"      <node id=\"{ mesh.Name }\" name=\"{ mesh.Name }\" type=\"NODE\">");
 
                         test.WriteLine($"       <instance_controller url=\"#{ mesh.Name }-skin\">");
                         test.WriteLine("        <skeleton>#skeleton_root</skeleton>");
                         test.WriteLine("        <bind_material>");
                         test.WriteLine("         <technique_common>");
-                        test.WriteLine($"          <instance_material symbol=\"theresonlyone\" target=\"#m{ mesh.MaterialIndex }mat\" />");
+                        test.WriteLine($"          <instance_material symbol=\"theresonlyone\" target=\"#m{ mesh.MaterialIndex }{matname}\" />");
                         test.WriteLine("         </technique_common>");
                         test.WriteLine("        </bind_material>");
                         test.WriteLine("       </instance_controller>");

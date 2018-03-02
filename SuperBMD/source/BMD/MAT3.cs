@@ -722,7 +722,7 @@ namespace SuperBMD.BMD
             }
         }
 
-        public void FillScene(Assimp.Scene scene, TEX1 textures, string fileDir)
+        public void FillScene(Assimp.Scene scene, TEX1 textures, string fileDir, bool keepmatnames = false)
         {
             foreach (Material mat in m_Materials)
             {
@@ -749,6 +749,9 @@ namespace SuperBMD.BMD
                 if (mat.AmbientColors[0] != null)
                 {
                     assMat.ColorAmbient = mat.AmbientColors[0].Value.ToColor4D();
+                }
+                if (mat.Name != null && keepmatnames == true) {
+                    assMat.Name = mat.Name;
                 }
 
                 scene.Materials.Add(assMat);
