@@ -362,10 +362,13 @@ namespace SuperBMD.BMD
             for (int i = 0; i < 8; i++)
             {
                 int texIndex = reader.ReadInt16();
-                if (texIndex == -1)
+                if (texIndex == -1) {
                     continue;
-                else
+                }
+                else {
                     mat.TextureIndices[i] = m_TexRemapBlock[texIndex];
+                }
+                
             }
 
             for (int i = 0; i < 4; i++)
@@ -468,13 +471,14 @@ namespace SuperBMD.BMD
 
                 bool hasVtxColor0 = shapes.Shapes[i].AttributeData.CheckAttribute(GXVertexAttribute.Color0);
                 int texIndex = -1;
+                string texName = null;
                 if (meshMat.HasTextureDiffuse)
                 {
-                    string texName = Path.GetFileNameWithoutExtension(meshMat.TextureDiffuse.FilePath);
+                    texName = Path.GetFileNameWithoutExtension(meshMat.TextureDiffuse.FilePath);
                     texIndex = textures.Textures.IndexOf(textures[texName]);
                 }
 
-                bmdMaterial.SetUpTev(meshMat.HasTextureDiffuse, hasVtxColor0, texIndex);
+                bmdMaterial.SetUpTev(meshMat.HasTextureDiffuse, hasVtxColor0, texIndex, texName);
                 Material preset = FindMatPreset(meshMat.Name, mat_presets);
 
                 if (preset != null) {
@@ -495,7 +499,7 @@ namespace SuperBMD.BMD
                     bmdMaterial.PostTexCoordGens = preset.PostTexCoordGens;
                     bmdMaterial.TexMatrix1 = preset.TexMatrix1;
                     bmdMaterial.PostTexMatrix = preset.PostTexMatrix;
-
+                    bmdMaterial.TextureRefs = preset.TextureRefs;
                     // Todo: TexCoord1, PostTexCoord, PostTexMatrix?
 
                     bmdMaterial.TevOrders = preset.TevOrders;
@@ -1250,6 +1254,47 @@ namespace SuperBMD.BMD
             writer.Write((short)m_AlphaCompBlock.IndexOf(mat.AlphCompare));
             writer.Write((short)m_blendModeBlock.IndexOf(mat.BMode));
             writer.Write((short)m_NBTScaleBlock.IndexOf(mat.NBTScale));
+        }
+
+        public void FillTextureNames(TEX1 textures) {
+            foreach (Material mat in m_Materials) {
+                for (int i = 0; i < 8; i++) {
+                    if (mat.TextureIndices[i] != -1) {
+                        int index = mat.TextureIndices[i];
+                        string texname = textures.Textures[index].Name;
+                        mat.TextureRefs[i] = texname;
+                    }
+                }
+            }
+        }
+
+        public void MapTextureNamesToIndices(TEX1 textures) {
+            foreach (Material mat in m_Materials) {
+                for (int i = 0; i < 8; i++) {
+                    if (mat.TextureRefs[i] != null) {
+                        int j = 0;
+                        mat.TextureIndices[i] = -1;
+
+                        foreach (BinaryTextureImage tex in textures.Textures) {
+                            if (tex.Name == mat.TextureRefs[i]) {
+                                mat.TextureIndices[i] = j;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public void LoadAdditionalTextures(TEX1 tex1, string modeldir) {
+            foreach (Material mat in m_Materials) {
+                foreach (string texname in mat.TextureRefs) {
+                    if (texname != null) {
+                        if (tex1[texname] == null) {
+                            tex1.AddTextureFromPath(Path.Combine(modeldir, texname + ".png"));
+                        }
+                    }
+                }
+            }
         }
 
         public void DumpJson(TextWriter file) {

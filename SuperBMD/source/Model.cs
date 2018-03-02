@@ -81,6 +81,9 @@ namespace SuperBMD
             SkipMDL3(reader);
             Textures          = new TEX1(reader, (int)reader.BaseStream.Position);
 
+            // This is useful for dumping material data to json
+            Materials.FillTextureNames(Textures); 
+
             foreach (Geometry.Shape shape in Shapes.Shapes)
                 packetCount += shape.Packets.Count;
 
@@ -111,6 +114,8 @@ namespace SuperBMD
             Shapes = SHP1.Create(scene, Joints.BoneNameIndices, VertexData.Attributes, SkinningEnvelopes, PartialWeightData);
 
             Materials = new MAT3(scene, Textures, Shapes, mat_presets);
+            Materials.LoadAdditionalTextures(Textures, modelDirectory);
+            Materials.MapTextureNamesToIndices(Textures);
 
             foreach (Geometry.Shape shape in Shapes.Shapes)
                 packetCount += shape.Packets.Count;
@@ -225,6 +230,8 @@ namespace SuperBMD
                     {
                         string matname = "mat";
                         if (keepmatnames == true) {
+                            // attempt to keep the original material names
+                            // this is experimental because AssImp sanitizes the names
                             matname = outScene.Materials[mesh.MaterialIndex].Name.Replace("#", "_").Replace(" ", "_");
                         }
 

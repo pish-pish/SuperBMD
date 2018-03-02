@@ -58,6 +58,18 @@ namespace SuperBMD.BMD
             }
         }
 
+        public void AddTextureFromPath(string path) {
+            string modelDirectory = System.IO.Path.GetDirectoryName(path);
+            BinaryTextureImage img = new BinaryTextureImage();
+
+            // Only the path and the wrap mode are relevant, the rest doesn't matter for img.Load
+            TextureSlot tex = new TextureSlot(path, 0, 0, 0, 0, (float)0.0, 0, TextureWrapMode.Wrap, TextureWrapMode.Wrap, 0);
+
+            img.Load(tex, modelDirectory);
+            
+            Textures.Add(img);
+        }
+
         public void DumpTextures(string directory)
         {
             if (!System.IO.Directory.Exists(directory))

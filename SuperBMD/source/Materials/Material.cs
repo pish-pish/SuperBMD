@@ -29,7 +29,11 @@ namespace SuperBMD.Materials
         public TexCoordGen?[] PostTexCoordGens;
         public TexMatrix?[] TexMatrix1;
         public TexMatrix?[] PostTexMatrix;
+        [JsonIgnore]
         public int[] TextureIndices;
+
+        public string[] TextureRefs; // This field is for convenience in json material extraction/replacement
+
         public TevOrder?[] TevOrders;
         public KonstColorSel[] ColorSels;
         public KonstAlphaSel[] AlphaSels;
@@ -66,6 +70,7 @@ namespace SuperBMD.Materials
             PostTexMatrix = new TexMatrix?[20];
 
             TextureIndices = new int[8] { -1, -1, -1, -1, -1, -1, -1, -1 };
+            TextureRefs = new string[8] { null, null, null, null, null, null, null, null };
 
             KonstColors = new Color?[4];
             KonstColors[0] = new Color(1, 1, 1, 1);
@@ -94,7 +99,7 @@ namespace SuperBMD.Materials
             FogInfo = new Fog(0, false, 0, 0, 0, 0, 0, new Color(0, 0, 0, 0), new float[10]);
         }
 
-        public void SetUpTev(bool hasTexture, bool hasVtxColor, int texIndex)
+        public void SetUpTev(bool hasTexture, bool hasVtxColor, int texIndex, string texName)
         {
             // Set up channel control 0 to use vertex colors, if they're present
             if (hasVtxColor)
