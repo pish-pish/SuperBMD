@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GameFormatReader.Common;
+using Newtonsoft.Json;
 using SuperBMD.Materials.Enums;
 
 namespace SuperBMD.Materials
@@ -19,6 +20,7 @@ namespace SuperBMD.Materials
         /// </summary>
         public IndirectScale ScaleT { get; private set; }
 
+        [JsonConstructor]
         public IndirectTexScale(IndirectScale s, IndirectScale t)
         {
             ScaleS = s;

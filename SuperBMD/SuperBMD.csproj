@@ -168,6 +168,7 @@
     <Compile Include="source\Scenegraph\Enums\NodeType.cs" />
     <Compile Include="source\Scenegraph\SceneNode.cs" />
     <Compile Include="source\Util\BoundingVolume.cs" />
+    <Compile Include="source\Util\IO\Json.cs" />
     <Compile Include="source\Util\IO\NameTableIO.cs" />
     <Compile Include="source\Materials\IO\NBTScaleIO.cs" />
     <Compile Include="source\Materials\IO\TevOrderIO.cs" />

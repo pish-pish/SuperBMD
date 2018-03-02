@@ -445,7 +445,7 @@ namespace SuperBMD.BMD
             Console.WriteLine(String.Format("Looking for match for {0}", name));
             foreach (Material mat in mat_presets) {
                 Console.WriteLine(String.Format("{0}", mat.Name));
-                if (mat.Name == "__SuperBMDDefault__") {
+                if (mat.Name == "__MatDefault") {
                     default_mat = mat;
                 }
 
@@ -491,15 +491,11 @@ namespace SuperBMD.BMD
                     bmdMaterial.AmbientColors = preset.AmbientColors;
                     bmdMaterial.LightingColors = preset.LightingColors;
 
-                    for (int j = 0; j < bmdMaterial.TexMatrix1.Length; j++) {
-                        if ((bmdMaterial.TexMatrix1[j] != null) && (preset.TexMatrix1[j] != null)) {
-                            Materials.TexMatrix m1 = (Materials.TexMatrix)bmdMaterial.TexMatrix1[j];
-                            Materials.TexMatrix m2 = (Materials.TexMatrix)preset.TexMatrix1[j];
+                    bmdMaterial.TexCoord1Gens = preset.TexCoord1Gens;
+                    bmdMaterial.PostTexCoordGens = preset.PostTexCoordGens;
+                    bmdMaterial.TexMatrix1 = preset.TexMatrix1;
+                    bmdMaterial.PostTexMatrix = preset.PostTexMatrix;
 
-                            m1.Projection = m2.Projection;
-                            m1.Type = m2.Type;
-                        }
-                    }
                     // Todo: TexCoord1, PostTexCoord, PostTexMatrix?
 
                     bmdMaterial.TevOrders = preset.TevOrders;
@@ -1254,6 +1250,7 @@ namespace SuperBMD.BMD
         }
 
         public void DumpJson(TextWriter file) {
+            //config.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             JsonSerializer serializer = new JsonSerializer();
             serializer.Formatting = Formatting.Indented;
 

@@ -17,7 +17,7 @@ namespace SuperBMD.Materials
         public byte ColorChannelControlsCount;
         public byte NumTexGensCount;
         public byte NumTevStagesCount;
-        [JsonIgnore]
+
         public IndirectTexturing IndTexEntry;
         public CullMode CullMode;
 
