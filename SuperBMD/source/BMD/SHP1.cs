@@ -261,7 +261,7 @@ namespace SuperBMD.BMD
                                     if (inverseBindMatrices.Count > vert.VertexWeight.BoneIndices[0])
                                     {
                                         Matrix4 test = inverseBindMatrices[vert.VertexWeight.BoneIndices[0]].Inverted();
-                                        test.Transpose();
+                                        //test.Transpose();
                                         Vector4 trans = OpenTK.Vector4.Transform(openTKVec, test);
                                         vertVec = new Vector3D(trans.X, trans.Y, trans.Z);
                                     }
