@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
+using SuperBMD.Rigging;
 
 namespace BrawlLib.Modeling.Triangle_Converter
 {
@@ -43,12 +44,14 @@ namespace BrawlLib.Modeling.Triangle_Converter
         private bool m_FirstRun;
         private ushort[] m_Nodes;
         private int[] m_ImpTable;
-        private List<ushort> m_CurrentNodes;
+        private List<Weight> m_CurrentWeights;
+        private Weight[] m_Weights;
 
-        public TriStripper(uint[] TriIndices) //, ushort[] NodeIds, int[] ImpTable)
+        public TriStripper(uint[] TriIndices, Weight[] weights = null) //, ushort[] NodeIds, int[] ImpTable)
         {
             //m_ImpTable = ImpTable;
             //m_Nodes = NodeIds;
+            m_Weights = weights;
             m_Triangles = new GraphArray<Triangle>((uint)TriIndices.Length / 3);
             m_StripID = 0;
             m_FirstRun = true;
@@ -249,7 +252,7 @@ namespace BrawlLib.Modeling.Triangle_Converter
         {
             TriOrder StartOrder = Order;
 
-            m_CurrentNodes = new List<ushort>();
+            m_CurrentWeights = new List<Weight>();
             _checkNodes = true;
 
             //Begin a new strip
@@ -286,13 +289,13 @@ namespace BrawlLib.Modeling.Triangle_Converter
             }
 
             _checkNodes = false;
-            m_CurrentNodes.Clear();
+            m_CurrentWeights.Clear();
 
             return new Strip(Start, StartOrder, Size);
         }
         private	Strip BackExtendToStrip(uint Start, TriOrder Order, bool ClockWise)
         {
-            m_CurrentNodes = new List<ushort>();
+            m_CurrentWeights = new List<Weight>();
             _checkNodes = true;
 
             //Begin a new strip
@@ -306,7 +309,7 @@ namespace BrawlLib.Modeling.Triangle_Converter
             else
             {
                 _checkNodes = false;
-                m_CurrentNodes.Clear();
+                m_CurrentWeights.Clear();
                 return null;
             }
 
@@ -332,7 +335,7 @@ namespace BrawlLib.Modeling.Triangle_Converter
             }
 
             _checkNodes = false;
-            m_CurrentNodes.Clear();
+            m_CurrentWeights.Clear();
 
             //We have to start from a counterclockwise triangle.
             //Simply return an empty strip in the case where the first triangle is clockwise.
@@ -352,18 +355,29 @@ namespace BrawlLib.Modeling.Triangle_Converter
         private bool _checkNodes = false;
         private bool TryAddNode(uint index)
         {
-            return true;
-            /*if (!_checkNodes)
+            if (m_Weights == null)
                 return true;
 
-            ushort node = m_Nodes[m_ImpTable[index]];
-            if (!m_CurrentNodes.Contains(node))
+            if (!_checkNodes)
+                return true;
+
+            Weight weight = m_Weights[index]; //m_Nodes[m_ImpTable[index]];
+            if (!m_CurrentWeights.Contains(weight))
             {
-                if (m_CurrentNodes.Count == PrimitiveGroup._nodeCountMax)
+                int matcount = 0;
+                foreach (Weight w in m_CurrentWeights) {
+                    matcount += w.WeightCount;
+                }
+
+                //if (m_CurrentWeights.Count == PrimitiveGroup._nodeCountMax)
+                //    return false;
+                if (matcount + weight.WeightCount > 19) {
                     return false;
-                m_CurrentNodes.Add(node);
+                }
+
+                m_CurrentWeights.Add(weight);
             }
-            return true;*/
+            return true;
         }
         private GraphArray<Triangle>.Arc LinkToNeighbour(GraphArray<Triangle>.Node Node, bool ClockWise, ref TriOrder Order, bool NotSimulation)
         {
