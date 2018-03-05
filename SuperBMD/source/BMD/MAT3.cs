@@ -50,7 +50,7 @@ namespace SuperBMD.BMD
         private List<byte> NumTexGensBlock;
         private List<byte> NumTevStagesBlock;
 
-        public MAT3(EndianBinaryReader reader, int offset)
+        public MAT3(EndianBinaryReader reader, int offset, List<Material> mat_presets = null)
         {
             InitLists();
 
@@ -62,8 +62,7 @@ namespace SuperBMD.BMD
             long matInitOffset = 0;
             reader.SkipInt16();
 
-            for (Mat3OffsetIndex i = 0; i <= Mat3OffsetIndex.NBTScaleData; ++i)
-            {
+            for (Mat3OffsetIndex i = 0; i <= Mat3OffsetIndex.NBTScaleData; ++i) {
                 int sectionOffset = reader.ReadInt32();
 
                 if (sectionOffset == 0)
@@ -73,13 +72,11 @@ namespace SuperBMD.BMD
                 int nextOffset = reader.PeekReadInt32();
                 int sectionSize = 0;
 
-                if (i == Mat3OffsetIndex.NBTScaleData)
-                {
+                if (i == Mat3OffsetIndex.NBTScaleData) {
 
                 }
 
-                if (nextOffset == 0 && i != Mat3OffsetIndex.NBTScaleData)
-                {
+                if (nextOffset == 0 && i != Mat3OffsetIndex.NBTScaleData) {
                     long saveReaderPos = reader.BaseStream.Position;
 
                     reader.BaseStream.Position += 4;
@@ -99,8 +96,7 @@ namespace SuperBMD.BMD
 
                 reader.BaseStream.Position = (offset) + sectionOffset;
 
-                switch (i)
-                {
+                switch (i) {
                     case Mat3OffsetIndex.MaterialData:
                         matInitOffset = reader.BaseStream.Position;
                         break;
@@ -126,8 +122,7 @@ namespace SuperBMD.BMD
                     case Mat3OffsetIndex.ColorChannelCount:
                         NumColorChannelsBlock = new List<byte>();
 
-                        for (int chanCnt = 0; chanCnt < sectionSize; chanCnt++)
-                        {
+                        for (int chanCnt = 0; chanCnt < sectionSize; chanCnt++) {
                             byte chanCntIn = reader.ReadByte();
 
                             if (chanCntIn < 84)
@@ -146,8 +141,7 @@ namespace SuperBMD.BMD
                     case Mat3OffsetIndex.TexGenCount:
                         NumTexGensBlock = new List<byte>();
 
-                        for (int genCnt = 0; genCnt < sectionSize; genCnt++)
-                        {
+                        for (int genCnt = 0; genCnt < sectionSize; genCnt++) {
                             byte genCntIn = reader.ReadByte();
 
                             if (genCntIn < 84)
@@ -187,8 +181,7 @@ namespace SuperBMD.BMD
                     case Mat3OffsetIndex.TevStageCount:
                         NumTevStagesBlock = new List<byte>();
 
-                        for (int stgCnt = 0; stgCnt < sectionSize; stgCnt++)
-                        {
+                        for (int stgCnt = 0; stgCnt < sectionSize; stgCnt++) {
                             byte stgCntIn = reader.ReadByte();
 
                             if (stgCntIn < 84)
@@ -220,8 +213,7 @@ namespace SuperBMD.BMD
                     case Mat3OffsetIndex.ZCompLoc:
                         m_zCompLocBlock = new List<bool>();
 
-                        for (int zcomp = 0; zcomp < sectionSize; zcomp++)
-                        {
+                        for (int zcomp = 0; zcomp < sectionSize; zcomp++) {
                             byte boolIn = reader.ReadByte();
 
                             if (boolIn > 1)
@@ -234,8 +226,7 @@ namespace SuperBMD.BMD
                     case Mat3OffsetIndex.DitherData:
                         m_ditherBlock = new List<bool>();
 
-                        for (int dith = 0; dith < sectionSize; dith++)
-                        {
+                        for (int dith = 0; dith < sectionSize; dith++) {
                             byte boolIn = reader.ReadByte();
 
                             if (boolIn > 1)
@@ -255,17 +246,24 @@ namespace SuperBMD.BMD
 
             int highestMatIndex = 0;
 
-            for (int i = 0; i < matCount; i++)
-            {
+            for (int i = 0; i < matCount; i++) {
                 if (m_RemapIndices[i] > highestMatIndex)
                     highestMatIndex = m_RemapIndices[i];
             }
 
             reader.BaseStream.Position = matInitOffset;
             m_Materials = new List<Material>();
-            for (int i = 0; i <= highestMatIndex; i++)
-            {
+            for (int i = 0; i <= highestMatIndex; i++) {
                 LoadInitData(reader, m_RemapIndices[i]);
+            }
+
+            foreach (Material mat in m_Materials) {
+                Material preset = FindMatPreset(mat.Name, mat_presets);
+
+                if (preset != null) {
+                    Console.WriteLine(String.Format("Applying material preset for {0}", mat.Name));
+                    SetPreset(mat, preset);
+                }
             }
 
             reader.BaseStream.Seek(offset + mat3Size, System.IO.SeekOrigin.Begin);
@@ -444,6 +442,9 @@ namespace SuperBMD.BMD
         }
 
         private Material FindMatPreset(string name, List<Material> mat_presets) {
+            if (mat_presets == null) {
+                return null;
+            } 
             Material default_mat = null;
             Console.WriteLine(String.Format("Looking for match for {0}", name));
             foreach (Material mat in mat_presets) {
@@ -483,40 +484,7 @@ namespace SuperBMD.BMD
 
                 if (preset != null) {
                     Console.WriteLine(String.Format("Applying material preset for {0}", meshMat.Name));
-                    // put data from preset over current material
-                    bmdMaterial.Flag = preset.Flag;
-                    bmdMaterial.ColorChannelControlsCount = preset.ColorChannelControlsCount;
-                    bmdMaterial.NumTexGensCount = preset.NumTexGensCount;
-                    bmdMaterial.NumTevStagesCount = preset.NumTevStagesCount;
-                    bmdMaterial.CullMode = preset.CullMode;
-
-                    bmdMaterial.MaterialColors = preset.MaterialColors;
-                    bmdMaterial.ChannelControls = preset.ChannelControls;
-                    bmdMaterial.AmbientColors = preset.AmbientColors;
-                    bmdMaterial.LightingColors = preset.LightingColors;
-
-                    bmdMaterial.TexCoord1Gens = preset.TexCoord1Gens;
-                    bmdMaterial.PostTexCoordGens = preset.PostTexCoordGens;
-                    bmdMaterial.TexMatrix1 = preset.TexMatrix1;
-                    bmdMaterial.PostTexMatrix = preset.PostTexMatrix;
-                    bmdMaterial.TextureRefs = preset.TextureRefs;
-                    // Todo: TexCoord1, PostTexCoord, PostTexMatrix?
-
-                    bmdMaterial.TevOrders = preset.TevOrders;
-                    bmdMaterial.ColorSels = preset.ColorSels;
-                    bmdMaterial.AlphaSels = preset.AlphaSels;
-                    bmdMaterial.TevColors = preset.TevColors;
-                    bmdMaterial.KonstColors = preset.KonstColors;
-                    bmdMaterial.TevStages = preset.TevStages;
-                    bmdMaterial.SwapModes = preset.SwapModes;
-                    bmdMaterial.SwapTables = preset.SwapTables;
-                    bmdMaterial.FogInfo = preset.FogInfo;
-                    bmdMaterial.AlphCompare = preset.AlphCompare;
-                    bmdMaterial.BMode = preset.BMode;
-                    bmdMaterial.ZMode = preset.ZMode;
-                    bmdMaterial.ZCompLoc = preset.ZCompLoc;
-                    bmdMaterial.Dither = preset.Dither;
-                    bmdMaterial.NBTScale = preset.NBTScale;
+                    SetPreset(bmdMaterial, preset);
                 }
 
                 m_Materials.Add(bmdMaterial);
@@ -525,6 +493,44 @@ namespace SuperBMD.BMD
             }
 
             FillMaterialDataBlocks();
+        }
+
+        private void SetPreset(Material bmdMaterial, Material preset) {
+            
+            // put data from preset over current material
+            bmdMaterial.Flag = preset.Flag;
+            bmdMaterial.ColorChannelControlsCount = preset.ColorChannelControlsCount;
+            bmdMaterial.NumTexGensCount = preset.NumTexGensCount;
+            bmdMaterial.NumTevStagesCount = preset.NumTevStagesCount;
+            bmdMaterial.CullMode = preset.CullMode;
+
+            bmdMaterial.MaterialColors = preset.MaterialColors;
+            bmdMaterial.ChannelControls = preset.ChannelControls;
+            bmdMaterial.AmbientColors = preset.AmbientColors;
+            bmdMaterial.LightingColors = preset.LightingColors;
+
+            bmdMaterial.TexCoord1Gens = preset.TexCoord1Gens;
+            bmdMaterial.PostTexCoordGens = preset.PostTexCoordGens;
+            bmdMaterial.TexMatrix1 = preset.TexMatrix1;
+            bmdMaterial.PostTexMatrix = preset.PostTexMatrix;
+            bmdMaterial.TextureRefs = preset.TextureRefs;
+            // Todo: TexCoord1, PostTexCoord, PostTexMatrix?
+
+            bmdMaterial.TevOrders = preset.TevOrders;
+            bmdMaterial.ColorSels = preset.ColorSels;
+            bmdMaterial.AlphaSels = preset.AlphaSels;
+            bmdMaterial.TevColors = preset.TevColors;
+            bmdMaterial.KonstColors = preset.KonstColors;
+            bmdMaterial.TevStages = preset.TevStages;
+            bmdMaterial.SwapModes = preset.SwapModes;
+            bmdMaterial.SwapTables = preset.SwapTables;
+            bmdMaterial.FogInfo = preset.FogInfo;
+            bmdMaterial.AlphCompare = preset.AlphCompare;
+            bmdMaterial.BMode = preset.BMode;
+            bmdMaterial.ZMode = preset.ZMode;
+            bmdMaterial.ZCompLoc = preset.ZCompLoc;
+            bmdMaterial.Dither = preset.Dither;
+            bmdMaterial.NBTScale = preset.NBTScale;
         }
 
         private void InitLists()
@@ -767,6 +773,7 @@ namespace SuperBMD.BMD
             long start = writer.BaseStream.Position;
 
             writer.Write("MAT3".ToCharArray());
+
             writer.Write(0); // Placeholder for section offset
             writer.Write((short)m_RemapIndices.Count);
             writer.Write((short)-1);
@@ -779,12 +786,10 @@ namespace SuperBMD.BMD
             bool[] writtenCheck = new bool[m_Materials.Count];
             List<string> names = m_MaterialNames;
 
-            for (int i = 0; i < m_RemapIndices.Count; i++)
-            {
+            for (int i = 0; i < m_RemapIndices.Count; i++) {
                 if (writtenCheck[m_RemapIndices[i]])
                     continue;
-                else
-                {
+                else {
                     WriteMaterialInitData(writer, m_Materials[m_RemapIndices[i]]);
                     writtenCheck[m_RemapIndices[i]] = true;
                 }
@@ -797,8 +802,7 @@ namespace SuperBMD.BMD
             writer.Write((int)(curOffset - start));
             writer.Seek((int)curOffset, System.IO.SeekOrigin.Begin);
 
-            for (int i = 0; i < m_RemapIndices.Count; i++)
-            {
+            for (int i = 0; i < m_RemapIndices.Count; i++) {
                 writer.Write((short)m_RemapIndices[i]);
             }
 
@@ -902,8 +906,7 @@ namespace SuperBMD.BMD
 
             curOffset = writer.BaseStream.Position;
 
-            if (m_TexCoord2GenBlock != null)
-            {
+            if (m_TexCoord2GenBlock != null) {
                 // tex coord 2 data offset
                 writer.Seek((int)start + 60, System.IO.SeekOrigin.Begin);
                 writer.Write((int)(curOffset - start));
@@ -911,8 +914,7 @@ namespace SuperBMD.BMD
 
                 TexCoordGenIO.Write(writer, m_TexCoord2GenBlock);
             }
-            else
-            {
+            else {
                 writer.Seek((int)start + 60, System.IO.SeekOrigin.Begin);
                 writer.Write((int)0);
                 writer.Seek((int)curOffset, System.IO.SeekOrigin.Begin);
@@ -929,8 +931,7 @@ namespace SuperBMD.BMD
 
             curOffset = writer.BaseStream.Position;
 
-            if (m_TexMatrix2Block != null)
-            {
+            if (m_TexMatrix2Block != null) {
                 // tex matrix 1 data offset
                 writer.Seek((int)start + 68, System.IO.SeekOrigin.Begin);
                 writer.Write((int)(curOffset - start));
@@ -938,8 +939,7 @@ namespace SuperBMD.BMD
 
                 TexMatrixIO.Write(writer, m_TexMatrix2Block);
             }
-            else
-            {
+            else {
                 writer.Seek((int)start + 60, System.IO.SeekOrigin.Begin);
                 writer.Write((int)0);
                 writer.Seek((int)curOffset, System.IO.SeekOrigin.Begin);
@@ -1073,8 +1073,7 @@ namespace SuperBMD.BMD
 
             curOffset = writer.BaseStream.Position;
 
-            if (m_ditherBlock != null)
-            {
+            if (m_ditherBlock != null) {
                 // dither data offset
                 writer.Seek((int)start + 124, System.IO.SeekOrigin.Begin);
                 writer.Write((int)(curOffset - start));
@@ -1273,24 +1272,29 @@ namespace SuperBMD.BMD
                 for (int i = 0; i < 8; i++) {
                     if (mat.TextureRefs[i] != null) {
                         int j = 0;
-                        mat.TextureIndices[i] = -1;
+                        //mat.TextureIndices[i] = -1;
 
                         foreach (BinaryTextureImage tex in textures.Textures) {
+                            Console.WriteLine(String.Format("{0} - {1}", tex.Name, mat.TextureRefs[i]));
                             if (tex.Name == mat.TextureRefs[i]) {
                                 mat.TextureIndices[i] = j;
+                                break;
                             }
+                            j++;
                         }
                     }
                 }
             }
         }
 
-        public void LoadAdditionalTextures(TEX1 tex1, string modeldir) {
+        public void LoadAdditionalTextures(TEX1 tex1, string modelpath) {
+            string modeldir = Path.GetDirectoryName(modelpath);
             foreach (Material mat in m_Materials) {
                 foreach (string texname in mat.TextureRefs) {
                     if (texname != null) {
                         if (tex1[texname] == null) {
-                            tex1.AddTextureFromPath(Path.Combine(modeldir, texname + ".png"));
+                            tex1.AddTextureFromPath(Path.Combine(modeldir, texname + ".bmp"));
+                            //Console.WriteLine("Loaded additional texture {0}")
                         }
                     }
                 }

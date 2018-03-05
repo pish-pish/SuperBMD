@@ -7,20 +7,38 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SuperBMD;
 using SuperBMD.Materials;
+using SuperBMD.Geometry.Enums;
 
 namespace SuperBMD_UnitTest
 {
+
     class Program
     {
         static void Main(string[] args)
         {
-            //args = new string[] { "./orima1.dae", "./olimar.bmd", "--mat", "./test2.json" };
-            //args = new string[] { "C:/Users/User/Documents/3dsMax/export/testlevel.dae", "C:/Users/User/Documents/Sandbox/pack stuff/NeuPacker/arc/model.bmd", "--mat", "C:/Users/User/Documents/Sandbox/pack stuff/NeuPacker/MyMaterials/tutmat.json" };
-
+            //args = new string[] { "./orima1.bmd", "./olimar2.dae", "--mat", "./test2.json" };
+            //args = new string[] { "C:/Users/User/Documents/3dsMax/export/testlevel.dae",
+            //    "C:/Users/User/Documents/Sandbox/pack stuff/NeuPacker/arc/model.bmd",
+            //    "--mat",
+            //    "C:/Users/User/Documents/Sandbox/pack stuff/NeuPacker/MyMaterials/mine.txt" };
+            //args = new string[] { "C:\\Users\\User\\Documents\\Git\\SuperBMD-tristrip\\SuperBMD_UnitTest\\bin\\Debug\\Model testing\\ma_mdl2.bmd" };
+            //"C:/Users/User/Documents/Git/SuperBMD-tristrip/SuperBMD_UnitTest/bin/Debug/Model testing/ma_mdl1mod.bmd",
+            if (true) {
+                args = new string[] { "C:/Users/User/Documents/3dsMax/export/RinMario_Superbmd2.DAE",
+                    "F:/Wii games/SMSFolder/P-GMSE/files/data/mario.szs_ext/mario/bmd/ma_mdl1.bmd" ,
+                    "--mat",
+                    "C:/Users/User/Documents/Git/SuperBMD-tristrip/SuperBMD_UnitTest/bin/Debug/Model testing/rin/ma_mdl1_mat.json" };
+            }
+            //args = new string[] { "C:/Users/User/Documents/Git/SuperBMD-tristrip/SuperBMD_UnitTest/bin/Debug/Model testing/ma_mdl1.bmd",
+            //   "F:/Wii games/SMSFolder/P-GMSE/files/data/mario.szs_ext/mario/bmd/ma_mdl1.bmd" };
+            //args = new string[] { "F:/Wii games/SMSFolder/P-GMSE/files/data/mario.szs_ext/mario/bmd/ma_mdl1.bmd",
+            //   "C:/Users/User/Documents/Git/SuperBMD-tristrip/SuperBMD_UnitTest/bin/Debug/Model testing/ma_mdl1_mat.dae" };
 
             string in_file = "";
             string out_file = "";
             string mat_file = "";
+
+            TristripOption triopt = TristripOption.DoTriStripStatic;
 
             int processed_args = 0;
 
@@ -29,10 +47,25 @@ namespace SuperBMD_UnitTest
                     mat_file = args[i + 1];
                     i++;
                 }
+
+                else if (args[i] == "--tristrip") {
+                    string opt = args[i + 1];
+                    if (opt == "all") {
+                        triopt = TristripOption.DoTriStripAll;
+                    }
+                    else if (opt == "static") {
+                        triopt = TristripOption.DoTriStripStatic;
+                    }
+                    else if (opt == "none") {
+                        triopt = TristripOption.DoNotTriStrip;
+                    }
+                }
+
                 else if (args[i] == "help") {
                     DisplayHelp();
                     return;
                 }
+
                 else {
                     if (processed_args == 0) {
                         in_file = args[i];
@@ -47,7 +80,7 @@ namespace SuperBMD_UnitTest
 
             if (in_file != "")
             {
-                if (in_file.EndsWith(".bmd") || in_file.EndsWith(".bdl")) 
+                if ((in_file.EndsWith(".bmd") || in_file.EndsWith(".bdl")) && !out_file.EndsWith(".bmd")) 
                 {
                     Model mod = Model.Load(in_file);
 
@@ -86,8 +119,7 @@ namespace SuperBMD_UnitTest
                             }
                         }
                     }
-
-                    Model mod = Model.Load(in_file, mat_presets);
+                    Model mod = Model.Load(in_file, mat_presets, triopt);
 
                     if (out_file != "") {
                         mod.ExportBMD(out_file, true);
@@ -95,9 +127,8 @@ namespace SuperBMD_UnitTest
                     else {
                         mod.ExportBMD(in_file + ".bmd");
                     }
-
-                    
-                } 
+                }
+                Console.WriteLine("Finished");
             }
             else
                 DisplayHelp();

@@ -7,7 +7,7 @@ using GameFormatReader.Common;
 using Assimp;
 using System.IO;
 using SuperBMD.BMD;
-
+using SuperBMD.source.Geometry.Enums;
 namespace SuperBMD
 {
     public class Model
@@ -24,7 +24,7 @@ namespace SuperBMD
         private int packetCount;
         private int vertexCount;
 
-        public static Model Load(string filePath, List<Materials.Material> mat_presets = null)
+        public static Model Load(string filePath, List<Materials.Material> mat_presets = null, TristripOption triopt = TristripOption.DoNotTriStrip)
         {
             string extension = Path.GetExtension(filePath);
             Model output = null;
@@ -34,7 +34,7 @@ namespace SuperBMD
                 using (FileStream str = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
                     EndianBinaryReader reader = new EndianBinaryReader(str, Endian.Big);
-                    output = new Model(reader);
+                    output = new Model(reader, mat_presets);
                 }
             }
             else
@@ -43,16 +43,23 @@ namespace SuperBMD
 
                 // AssImp adds dummy nodes for pivots from FBX, so we'll force them off
                 cont.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
-                Assimp.Scene aiScene = cont.ImportFile(filePath, 
-                    Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices);
 
-                output = new Model(aiScene, filePath, mat_presets);
+                Assimp.PostProcessSteps postprocess = Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices;
+                
+                if (triopt == TristripOption.DoNotTriStrip) {
+                    // By not joining identical vertices, the Tri Strip algorithm we use cannot make tristrips, 
+                    // effectively disabling tri stripping
+                    postprocess = Assimp.PostProcessSteps.Triangulate; 
+                }
+                Assimp.Scene aiScene = cont.ImportFile(filePath, postprocess);
+
+                output = new Model(aiScene, filePath, mat_presets, triopt);
             }
 
             return output;
         }
 
-        public Model(EndianBinaryReader reader)
+        public Model(EndianBinaryReader reader, List<Materials.Material> mat_presets = null)
         {
             int j3d2Magic = reader.ReadInt32();
             int modelMagic = reader.ReadInt32();
@@ -77,7 +84,7 @@ namespace SuperBMD
             SkinningEnvelopes.SetInverseBindMatrices(Joints.FlatSkeleton);
             Shapes            = SHP1.Create(reader, (int)reader.BaseStream.Position);
             Shapes.SetVertexWeights(SkinningEnvelopes, PartialWeightData);
-            Materials         = new MAT3(reader, (int)reader.BaseStream.Position);
+            Materials         = new MAT3(reader, (int)reader.BaseStream.Position, mat_presets);
             SkipMDL3(reader);
             Textures          = new TEX1(reader, (int)reader.BaseStream.Position);
 
@@ -99,7 +106,7 @@ namespace SuperBMD
             }
         }
 
-        public Model(Scene scene, string modelDirectory, List<Materials.Material> mat_presets = null)
+        public Model(Scene scene, string modelDirectory, List<Materials.Material> mat_presets = null, TristripOption triopt = TristripOption.DoNotTriStrip)
         {
             VertexData = new VTX1(scene);
             Joints = new JNT1(scene, VertexData);
@@ -111,7 +118,7 @@ namespace SuperBMD
 
             PartialWeightData = new DRW1(scene, Joints.BoneNameIndices);
 
-            Shapes = SHP1.Create(scene, Joints.BoneNameIndices, VertexData.Attributes, SkinningEnvelopes, PartialWeightData);
+            Shapes = SHP1.Create(scene, Joints.BoneNameIndices, VertexData.Attributes, SkinningEnvelopes, PartialWeightData, triopt);
 
             Materials = new MAT3(scene, Textures, Shapes, mat_presets);
             Materials.LoadAdditionalTextures(Textures, modelDirectory);
@@ -173,7 +180,7 @@ namespace SuperBMD
             Materials.FillScene(outScene, Textures, outDir);
             Shapes.FillScene(outScene, VertexData.Attributes, Joints.FlatSkeleton, SkinningEnvelopes.InverseBindMatrices);
             Scenegraph.CorrectMaterialIndices(outScene, Materials);
-
+            Textures.DumpTextures(outDir);
             if (SkinningEnvelopes.Weights.Count == 0)
             {
                 Assimp.Node geomNode = new Node(Path.GetFileNameWithoutExtension(fileName), outScene.RootNode);
