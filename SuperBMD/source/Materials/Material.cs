@@ -18,6 +18,10 @@ namespace SuperBMD.Materials
         public byte NumTexGensCount;
         public byte NumTevStagesCount;
 
+        // This field is for convenience in json material extraction/replacement
+        // Keeps track of texture names that a material uses
+        public string[] TextureRefs;
+
         public IndirectTexturing IndTexEntry;
         public CullMode CullMode;
 
@@ -31,8 +35,7 @@ namespace SuperBMD.Materials
         public TexMatrix?[] PostTexMatrix;
         [JsonIgnore]
         public int[] TextureIndices;
-
-        public string[] TextureRefs; // This field is for convenience in json material extraction/replacement
+        
 
         public TevOrder?[] TevOrders;
         public KonstColorSel[] ColorSels;

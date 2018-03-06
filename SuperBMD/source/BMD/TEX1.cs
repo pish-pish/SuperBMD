@@ -197,7 +197,7 @@ namespace SuperBMD.BMD
                         return tex;
                 }
 
-                Console.WriteLine($"No texture with the name { s } was found.");
+                //Console.WriteLine($"Texture { s } not loaded (yet).");
                 return null;
             }
 

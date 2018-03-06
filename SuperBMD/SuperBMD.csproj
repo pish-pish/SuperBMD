@@ -87,6 +87,7 @@
     <Compile Include="source\BMD\JNT1.cs" />
     <Compile Include="source\BMD\MAT3.cs" />
     <Compile Include="source\ExportSettings.cs" />
+    <Compile Include="source\Geometry\Enums\TriStripOptions.cs" />
     <Compile Include="source\Geometry\TriStrip\CacheSimulator.cs" />
     <Compile Include="source\Geometry\TriStrip\Deque\Deque.cs" />
     <Compile Include="source\Geometry\TriStrip\Deque\GenericDeque.cs" />

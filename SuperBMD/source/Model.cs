@@ -7,7 +7,7 @@ using GameFormatReader.Common;
 using Assimp;
 using System.IO;
 using SuperBMD.BMD;
-using SuperBMD.source.Geometry.Enums;
+using SuperBMD.Geometry.Enums;
 namespace SuperBMD
 {
     public class Model
