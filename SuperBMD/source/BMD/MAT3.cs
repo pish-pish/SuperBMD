@@ -497,40 +497,39 @@ namespace SuperBMD.BMD
 
         private void SetPreset(Material bmdMaterial, Material preset) {
             
-            // put data from preset over current material
+            // put data from preset over current material if it exists
             bmdMaterial.Flag = preset.Flag;
             bmdMaterial.ColorChannelControlsCount = preset.ColorChannelControlsCount;
             bmdMaterial.NumTexGensCount = preset.NumTexGensCount;
             bmdMaterial.NumTevStagesCount = preset.NumTevStagesCount;
             bmdMaterial.CullMode = preset.CullMode;
 
-            bmdMaterial.MaterialColors = preset.MaterialColors;
-            bmdMaterial.ChannelControls = preset.ChannelControls;
-            bmdMaterial.AmbientColors = preset.AmbientColors;
-            bmdMaterial.LightingColors = preset.LightingColors;
+            if (preset.MaterialColors != null) bmdMaterial.MaterialColors = preset.MaterialColors;
+            if (preset.ChannelControls != null) bmdMaterial.ChannelControls = preset.ChannelControls;
+            if (preset.AmbientColors != null) bmdMaterial.AmbientColors = preset.AmbientColors;
+            if (preset.LightingColors != null) bmdMaterial.LightingColors = preset.LightingColors;
 
-            bmdMaterial.TexCoord1Gens = preset.TexCoord1Gens;
-            bmdMaterial.PostTexCoordGens = preset.PostTexCoordGens;
-            bmdMaterial.TexMatrix1 = preset.TexMatrix1;
-            bmdMaterial.PostTexMatrix = preset.PostTexMatrix;
+            if (preset.TexCoord1Gens != null) bmdMaterial.TexCoord1Gens = preset.TexCoord1Gens;
+            if (preset.PostTexCoordGens != null) bmdMaterial.PostTexCoordGens = preset.PostTexCoordGens;
+            if (preset.TexMatrix1 != null) bmdMaterial.TexMatrix1 = preset.TexMatrix1;
+            if (preset.PostTexMatrix != null) bmdMaterial.PostTexMatrix = preset.PostTexMatrix;
             bmdMaterial.TextureRefs = preset.TextureRefs;
-            // Todo: TexCoord1, PostTexCoord, PostTexMatrix?
 
-            bmdMaterial.TevOrders = preset.TevOrders;
-            bmdMaterial.ColorSels = preset.ColorSels;
-            bmdMaterial.AlphaSels = preset.AlphaSels;
-            bmdMaterial.TevColors = preset.TevColors;
-            bmdMaterial.KonstColors = preset.KonstColors;
-            bmdMaterial.TevStages = preset.TevStages;
-            bmdMaterial.SwapModes = preset.SwapModes;
-            bmdMaterial.SwapTables = preset.SwapTables;
-            bmdMaterial.FogInfo = preset.FogInfo;
-            bmdMaterial.AlphCompare = preset.AlphCompare;
-            bmdMaterial.BMode = preset.BMode;
-            bmdMaterial.ZMode = preset.ZMode;
+            if (preset.TevOrders != null) bmdMaterial.TevOrders = preset.TevOrders;
+            if (preset.ColorSels != null) bmdMaterial.ColorSels = preset.ColorSels;
+            if (preset.AlphaSels != null) bmdMaterial.AlphaSels = preset.AlphaSels;
+            if (preset.TevColors != null) bmdMaterial.TevColors = preset.TevColors;
+            if (preset.KonstColors != null) bmdMaterial.KonstColors = preset.KonstColors;
+            if (preset.TevStages != null) bmdMaterial.TevStages = preset.TevStages;
+            if (preset.SwapModes != null) bmdMaterial.SwapModes = preset.SwapModes;
+            if (preset.SwapTables != null) bmdMaterial.SwapTables = preset.SwapTables;
+            if (preset.FogInfo != null) bmdMaterial.FogInfo = preset.FogInfo;
+            if (preset.AlphCompare != null) bmdMaterial.AlphCompare = preset.AlphCompare;
+            if (preset.BMode != null) bmdMaterial.BMode = preset.BMode;
+            if (preset.ZMode != null) bmdMaterial.ZMode = preset.ZMode;
             bmdMaterial.ZCompLoc = preset.ZCompLoc;
             bmdMaterial.Dither = preset.Dither;
-            bmdMaterial.NBTScale = preset.NBTScale;
+            if (preset.NBTScale != null) bmdMaterial.NBTScale = preset.NBTScale;
         }
 
         private void InitLists()
