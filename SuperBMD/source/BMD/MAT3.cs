@@ -446,7 +446,7 @@ namespace SuperBMD.BMD
                 return null;
             } 
             Material default_mat = null;
-            Console.WriteLine(String.Format("Looking for match for {0}", name));
+            
             foreach (Material mat in mat_presets) {
                 Console.WriteLine(String.Format("{0}", mat.Name));
                 if (mat.Name == "__MatDefault") {
@@ -454,9 +454,12 @@ namespace SuperBMD.BMD
                 }
 
                 if (mat.Name == name) {
+                    //Console.WriteLine(String.Format("Applying material preset to {1}", default_mat.Name, name));
                     return mat;
                 }
             }
+            //if (default_mat != null)
+            //    Console.WriteLine(String.Format("Applying __MatDefault to {1}", default_mat.Name, name));
 
             return default_mat;
         }
