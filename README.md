@@ -13,7 +13,7 @@ To convert a model, drag it onto the executable or run the program via command l
 
 If model path is a BMD, it will be converted to DAE, its textures will be dumped as .BMP and its material data will be dumped as JSON in the same folder as the DAE and the textures.
 
-If model path is a model but not BMD, it will be converted to BMD. By default triangle strips are generated for static meshes but not rigged meshes. See below for more options on this. 
+If model path is a model but not BMD, it will be converted to BMD. By default triangle strips are generated for static meshes but not rigged meshes. See below for more options on this.
 
 # Full usage
 `SuperBMD.exe <input path> [output path] [--mat <material path>] [--tristrip (all/static/none)]`
@@ -44,4 +44,8 @@ If input path is not a BMD, it is converted into a BMD and written to output pat
 * Textures must be in either BMP, JPG, or PNG format. TGA is currently not supported.
 
 ### Materials
-* This fork of SuperBMD allows dumping and inserting materials as JSON. Todo: Explain more
+* This fork of SuperBMD allows dumping and inserting materials as JSON and it allows additional textures to be loaded without having to apply them in a 3D modelling program. Look at Full Usage above on how to extract and apply material files. While Drag&Drop works, writing bat files is recommended.
+* The json file will contain one or more materials from the BMD file. When applying materials, the material names are exactly the name of the materials of the model when exported from a 3D modelling program. You do not have to cover every material, SuperBMD will generate material data for the rest. You can also use a default preset for every material in the model by naming the material in the JSON ``__MatDefault``.
+* The ``TextureRefs`` section contains the names of the textures used by the material. Usually the first texture is the main texture, the rest are used for graphics effects. When using a ``__MatDefault`` material it can be useful to leave the first texture name as ``null`` so each material will retain the texture name it originally had.
+* Additional textures can be loaded by adding their names in the ``TextureRefs`` section of a material. The program will add ``.bmp`` to their name (so textures dumped with SuperBMD work) and look for the texture in the same directory as the input model.
+* You can modify materials if you know what you are doing. Look on the internet for info on TEV and check the source code of SuperBMD for possible values for some of the enums (When viewing the source code in VS or other good IDEs, check ``SuperBMD/source/Materials/Material.cs``). A recap of all enums and useful info about materials will be available here https://github.com/RenolY2/SuperBMD/wiki when it is added.
