@@ -1267,16 +1267,16 @@ namespace SuperBMD.BMD
         }
 
         public void MapTextureNamesToIndices(TEX1 textures) {
+            Console.WriteLine("Mapping names to indices");
             foreach (Material mat in m_Materials) {
                 for (int i = 0; i < 8; i++) {
                     if (mat.TextureRefs[i] != null) {
                         int j = 0;
-                        //mat.TextureIndices[i] = -1;
-
+                        
                         foreach (BinaryTextureImage tex in textures.Textures) {
-                            Console.WriteLine(String.Format("{0} - {1}", tex.Name, mat.TextureRefs[i]));
                             if (tex.Name == mat.TextureRefs[i]) {
                                 mat.TextureIndices[i] = j;
+                                Console.WriteLine(String.Format("Mapped {0} to index {1}", tex.Name, j));
                                 break;
                             }
                             j++;
@@ -1293,7 +1293,8 @@ namespace SuperBMD.BMD
                     if (texname != null) {
                         if (tex1[texname] == null) {
                             tex1.AddTextureFromPath(Path.Combine(modeldir, texname + ".bmp"));
-                            //Console.WriteLine("Loaded additional texture {0}")
+                            short texindex = (short)(tex1.Textures.Count - 1);
+                            m_TexRemapBlock.Add(texindex);
                         }
                     }
                 }
@@ -1301,9 +1302,12 @@ namespace SuperBMD.BMD
         }
 
         public void DumpJson(TextWriter file) {
-            //config.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             JsonSerializer serializer = new JsonSerializer();
             serializer.Formatting = Formatting.Indented;
+
+            serializer.Converters.Add(
+                (new Newtonsoft.Json.Converters.StringEnumConverter())
+                );
 
             using (JsonWriter writer = new JsonTextWriter(file)) {
                 serializer.Serialize(writer, m_Materials);

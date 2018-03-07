@@ -11,29 +11,10 @@ using SuperBMD.Geometry.Enums;
 
 namespace SuperBMD_UnitTest
 {
-
     class Program
     {
         static void Main(string[] args)
         {
-            //args = new string[] { "./orima1.bmd", "./olimar2.dae", "--mat", "./test2.json" };
-            //args = new string[] { "C:/Users/User/Documents/3dsMax/export/testlevel.dae",
-            //    "C:/Users/User/Documents/Sandbox/pack stuff/NeuPacker/arc/model.bmd",
-            //    "--mat",
-            //    "C:/Users/User/Documents/Sandbox/pack stuff/NeuPacker/MyMaterials/mine.txt" };
-            //args = new string[] { "C:\\Users\\User\\Documents\\Git\\SuperBMD-tristrip\\SuperBMD_UnitTest\\bin\\Debug\\Model testing\\ma_mdl2.bmd" };
-            //"C:/Users/User/Documents/Git/SuperBMD-tristrip/SuperBMD_UnitTest/bin/Debug/Model testing/ma_mdl1mod.bmd",
-            if (true) {
-                args = new string[] { "C:/Users/User/Documents/3dsMax/export/RinMario_Superbmd2.DAE",
-                    "F:/Wii games/SMSFolder/P-GMSE/files/data/mario.szs_ext/mario/bmd/ma_mdl1.bmd" ,
-                    "--mat",
-                    "C:/Users/User/Documents/Git/SuperBMD-tristrip/SuperBMD_UnitTest/bin/Debug/Model testing/rin/ma_mdl1_mat.json" };
-            }
-            //args = new string[] { "C:/Users/User/Documents/Git/SuperBMD-tristrip/SuperBMD_UnitTest/bin/Debug/Model testing/ma_mdl1.bmd",
-            //   "F:/Wii games/SMSFolder/P-GMSE/files/data/mario.szs_ext/mario/bmd/ma_mdl1.bmd" };
-            //args = new string[] { "F:/Wii games/SMSFolder/P-GMSE/files/data/mario.szs_ext/mario/bmd/ma_mdl1.bmd",
-            //   "C:/Users/User/Documents/Git/SuperBMD-tristrip/SuperBMD_UnitTest/bin/Debug/Model testing/ma_mdl1_mat.dae" };
-
             string in_file = "";
             string out_file = "";
             string mat_file = "";
@@ -105,13 +86,32 @@ namespace SuperBMD_UnitTest
                             mod.Materials.DumpJson(file);
                         }
                     }
+
+                    /*if (mat_file != "") {
+                        string outDir = Path.GetDirectoryName(mat_file);
+                        string texFile = Path.GetFileNameWithoutExtension(in_file) + "_tex.json";
+                        using (TextWriter file = File.CreateText(texFile)) {
+                            mod.Textures.DumpTextureHeaders(file);
+                        }
+                    }*/
                 }
 
                 else {
                     List<Material> mat_presets = null;
 
+                    if (mat_file == "") {
+                        string fileNameNoExt = Path.GetFileNameWithoutExtension(in_file);
+                        if (File.Exists(fileNameNoExt + "_mat.json")) {
+                            mat_file = fileNameNoExt + "_mat.json";
+                        }
+                    }
+
                     if (mat_file != "") {
                         JsonSerializer serializer = new JsonSerializer();
+
+                        serializer.Converters.Add(
+                            (new Newtonsoft.Json.Converters.StringEnumConverter())
+                        );
 
                         using (TextReader file = File.OpenText(mat_file)) {
                             using (JsonTextReader reader = new JsonTextReader(file)) {
