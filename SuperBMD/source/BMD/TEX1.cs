@@ -7,6 +7,8 @@ using SuperBMD.Materials;
 using GameFormatReader.Common;
 using SuperBMD.Util;
 using Assimp;
+using Newtonsoft.Json;
+using System.IO;
 
 namespace SuperBMD.BMD
 {
@@ -63,7 +65,7 @@ namespace SuperBMD.BMD
             BinaryTextureImage img = new BinaryTextureImage();
 
             // Only the path and the wrap mode are relevant, the rest doesn't matter for img.Load
-            TextureSlot tex = new TextureSlot(path, 0, 0, 0, 0, (float)0.0, 0, TextureWrapMode.Wrap, TextureWrapMode.Wrap, 0);
+            TextureSlot tex = new TextureSlot(path, 0, 0, 0, 0, (float)0.0, 0, TextureWrapMode.Clamp, TextureWrapMode.Clamp, 0);
 
             img.Load(tex, modelDirectory);
             
@@ -78,6 +80,19 @@ namespace SuperBMD.BMD
             foreach (BinaryTextureImage tex in Textures)
             {
                 tex.SaveImageToDisk(directory);
+            }
+        }
+
+        public void DumpTextureHeaders(TextWriter file) {
+            JsonSerializer serializer = new JsonSerializer();
+            serializer.Formatting = Formatting.Indented;
+
+            serializer.Converters.Add(
+                (new Newtonsoft.Json.Converters.StringEnumConverter())
+                );
+
+            using (JsonWriter writer = new JsonTextWriter(file)) {
+                serializer.Serialize(writer, Textures);
             }
         }
 

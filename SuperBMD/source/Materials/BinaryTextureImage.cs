@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using GameFormatReader.Common;
 using SuperBMD.Util;
 using Chadsoft.CTools.Image;
+using Newtonsoft.Json;
 
 namespace SuperBMD.Materials
 {
@@ -117,24 +118,37 @@ namespace SuperBMD.Materials
         #endregion
 
         public string Name { get; private set; }
+        [JsonIgnore]
         public TextureFormats Format { get; private set; }
         public byte AlphaSetting { get; private set; } // 0 for no alpha, 0x02 and other values seem to indicate yes alpha.
+        [JsonIgnore]
         public ushort Width { get; private set; }
+        [JsonIgnore]
         public ushort Height { get; private set; }
         public WrapModes WrapS { get; private set; }
         public WrapModes WrapT { get; private set; }
+        [JsonIgnore]
         public PaletteFormats PaletteFormat { get; private set; }
+        [JsonIgnore]
         public ushort PaletteCount { get; private set; }
+        [JsonIgnore]
         public int EmbeddedPaletteOffset { get; private set; } // This is a guess. It seems to be 0 in most things, but it fits with min/mag filters.
         public FilterMode MinFilter { get; private set; }
         public FilterMode MagFilter { get; private set; }
         public sbyte MinLOD { get; private set; } // Fixed point number, 1/8 = conversion (ToDo: is this multiply by 8 or divide...)
         public sbyte MagLOD { get; private set; } // Fixed point number, 1/8 = conversion (ToDo: is this multiply by 8 or divide...)
+        [JsonIgnore]
         public byte MipMapCount { get; private set; }
         public short LodBias { get; private set; } // Fixed point number, 1/100 = conversion
 
+        [JsonIgnore]
         private Palette m_imagePalette;
+        [JsonIgnore]
         private byte[] m_rgbaImageData;
+
+        public byte unknown1 = 1;
+        public short unknown2 = 0;
+        public byte unknown3 = 0;
 
         public BinaryTextureImage()
         {
@@ -161,16 +175,16 @@ namespace SuperBMD.Materials
             Height = stream.ReadUInt16();
             WrapS = (WrapModes)stream.ReadByte();
             WrapT = (WrapModes)stream.ReadByte();
-            byte unknown1 = stream.ReadByte();
+            unknown1 = stream.ReadByte();
             PaletteFormat = (PaletteFormats)stream.ReadByte();
             PaletteCount = stream.ReadUInt16();
             int paletteDataOffset = stream.ReadInt32();
             EmbeddedPaletteOffset = stream.ReadInt32();
             MinFilter = (FilterMode)stream.ReadByte();
             MagFilter = (FilterMode)stream.ReadByte();
-            short unknown2 = stream.ReadInt16();
+            unknown2 = stream.ReadInt16();
             MipMapCount = stream.ReadByte();
-            byte unknown3 = stream.ReadByte();
+            unknown3 = stream.ReadByte();
             LodBias = stream.ReadInt16();
 
             int imageDataOffset = stream.ReadInt32();
@@ -310,7 +324,7 @@ namespace SuperBMD.Materials
             writer.Write((byte)WrapT);
 
             // This is an unknown
-            writer.Write((byte)0);
+            writer.Write((byte)unknown1);
 
             writer.Write((byte)PaletteFormat);
             writer.Write((short)PaletteCount);
@@ -324,12 +338,12 @@ namespace SuperBMD.Materials
             writer.Write((byte)MagFilter);
 
             // This is an unknown
-            writer.Write((short)0);
+            writer.Write((short)unknown2);
 
             writer.Write((byte)MipMapCount);
 
             // This is an unknown
-            writer.Write((byte)0);
+            writer.Write((byte)unknown3);
 
             writer.Write((short)LodBias);
 
