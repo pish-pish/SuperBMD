@@ -18,7 +18,7 @@ If model path is a model but not BMD, it will be converted to BMD. By default tr
 # Full usage
 `SuperBMD.exe <input path> [output path] [--mat <material path>] [--tristrip (all/static/none)]`
 
-The last three arguments are optional. If output path is left out it is created from the input path by replacing the extension either with .bmd or .dae, depending on input.
+The last three arguments are optional. If output path is left out it is created from the input path by replacing the extension either with `.bmd` or `.dae`, depending on input. If material path is left out, it's created from the input path by replacing the extension with `_mat.json`
 
 If input path is a BMD/BDL and output path is a BMD, the model will be loaded, materials are applied from <material path> if supplied and then written to output path. 
   
