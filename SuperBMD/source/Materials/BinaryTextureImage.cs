@@ -11,6 +11,7 @@ using GameFormatReader.Common;
 using SuperBMD.Util;
 using Chadsoft.CTools.Image;
 using Newtonsoft.Json;
+using DmitryBrant.ImageFormats;
 
 namespace SuperBMD.Materials
 {
@@ -146,7 +147,7 @@ namespace SuperBMD.Materials
         [JsonIgnore]
         private byte[] m_rgbaImageData;
 
-        public byte unknown1 = 1;
+        public byte unknown1 = 0;
         public short unknown2 = 0;
         public byte unknown3 = 0;
 
@@ -217,7 +218,18 @@ namespace SuperBMD.Materials
 
             if (File.Exists(texture.FilePath))
             {
-                texData = new Bitmap(texture.FilePath);
+                try {
+                    texData = new Bitmap(texture.FilePath);
+                }
+                catch (ArgumentException e) {
+                    try {
+                        texData = TgaReader.Load(texture.FilePath);
+                    }
+                    catch (Exception e2) {
+                        Console.WriteLine(String.Format("Failed to load texture from {0} \n Texture should be BMP, JPG, PNG or TGA", texture.FilePath));
+                        throw e2;
+                    }
+                }
                 Name = Path.GetFileNameWithoutExtension(texture.FilePath);
             }
             else
@@ -234,7 +246,19 @@ namespace SuperBMD.Materials
                 }
                 else
                 {
-                    texData = new Bitmap(texPath);
+                    try {
+                        texData = new Bitmap(texPath);
+                    }
+                    catch (Exception e) {
+                        try {
+                            texData = TgaReader.Load(texture.FilePath);
+                        }
+                        catch (Exception e2) {
+                            Console.WriteLine(String.Format("Failed to load texture from {0} \n Texture should be BMP, JPG, PNG or TGA"));
+                            throw e2;
+                        } 
+                    }
+
                     Name = Path.GetFileNameWithoutExtension(texPath);
                 }
             }
@@ -252,13 +276,13 @@ namespace SuperBMD.Materials
 
         public string SaveImageToDisk(string outputFile)
         {
-            string fileName = Path.Combine(outputFile, $"{ Name }.bmp");
+            string fileName = Path.Combine(outputFile, $"{ Name }.png");
 
             using (Bitmap bmp = CreateBitmap())
             {
                 // Bitmaps will throw an exception if the output folder doesn't exist so...
                 Directory.CreateDirectory(Path.GetDirectoryName(fileName));
-                bmp.Save(fileName);
+                bmp.Save(fileName, ImageFormat.Png);
             }
 
             return fileName;
