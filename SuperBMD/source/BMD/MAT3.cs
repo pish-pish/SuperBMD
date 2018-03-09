@@ -454,7 +454,7 @@ namespace SuperBMD.BMD
             Material default_mat = null;
             
             foreach (Material mat in mat_presets) {
-                Console.WriteLine(String.Format("{0}", mat.Name));
+                //Console.WriteLine(String.Format("{0}", mat.Name));
                 if (mat.Name == "__MatDefault") {
                     default_mat = mat;
                 }
@@ -1276,7 +1276,7 @@ namespace SuperBMD.BMD
         }
 
         public void MapTextureNamesToIndices(TEX1 textures) {
-            Console.WriteLine("Mapping names to indices");
+            //Console.WriteLine("Mapping names to indices");
             foreach (Material mat in m_Materials) {
                 for (int i = 0; i < 8; i++) {
                     if (mat.TextureRefs[i] != null) {
@@ -1285,7 +1285,7 @@ namespace SuperBMD.BMD
                         foreach (BinaryTextureImage tex in textures.Textures) {
                             if (tex.Name == mat.TextureRefs[i]) {
                                 mat.TextureIndices[i] = j;
-                                Console.WriteLine(String.Format("Mapped {0} to index {1}", tex.Name, j));
+                                //Console.WriteLine(String.Format("Mapped {0} to index {1}", tex.Name, j));
                                 break;
                             }
                             j++;

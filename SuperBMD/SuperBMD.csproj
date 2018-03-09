@@ -193,6 +193,7 @@
     <Compile Include="source\Util\Color32.cs" />
     <Compile Include="source\Util\J3DUtility.cs" />
     <Compile Include="source\Util\StreamUtility.cs" />
+    <Compile Include="source\Util\Texture\TGA.cs" />
     <Compile Include="source\Util\VectorUtility.cs" />
     <Compile Include="source\Util\WrapModeUtility.cs" />
   </ItemGroup>
@@ -201,7 +202,9 @@
     <None Include="OpenTK.dll.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="source\Materials\Texture\" />
+  </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">
       <Visible>False</Visible>
