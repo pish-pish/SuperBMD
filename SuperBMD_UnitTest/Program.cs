@@ -69,6 +69,12 @@ namespace SuperBMD_UnitTest
 
                     if (out_file != "") {
                         outFilepath = out_file;
+                        string outDir = Path.GetDirectoryName(out_file);
+                        string fileNameNoExt = Path.GetFileNameWithoutExtension(outFilepath);
+
+                        if (mat_file == "") {
+                            mat_file = Path.Combine(outDir, fileNameNoExt + "_mat.json");
+                        }
                     }
                     else {
                         string inDir = Path.GetDirectoryName(in_file);
