@@ -326,8 +326,11 @@ namespace SuperBMD.BMD
                 int texGenIndex = reader.ReadInt16();
                 if (texGenIndex == -1)
                     continue;
-                //else
-                    //mat.TexCoord1Gens[i] = m_TexCoord1GenBlock[texGenIndex];
+                else if (texGenIndex < mat.NumTexGensCount)
+                    mat.TexCoord1Gens[i] = m_TexCoord1GenBlock[texGenIndex];
+                else
+                    Console.WriteLine(String.Format("Warning for material {0}, TexCoord1GenBlock index out of range: {1}",
+                                                    mat.Name, texGenIndex));
             }
 
             for (int i = 0; i < 8; i++)
@@ -353,8 +356,11 @@ namespace SuperBMD.BMD
                 int texMatIndex = reader.ReadInt16();
                 if (texMatIndex == -1)
                     continue;
-                //else
-                    //mat.PostTexMatrix[i] = m_TexMatrix2Block[texMatIndex];
+                else if (texMatIndex < m_TexMatrix2Block.Count)
+                    mat.PostTexMatrix[i] = m_TexMatrix2Block[texMatIndex];
+                else
+                    Console.WriteLine(String.Format("Warning for material {0}, TexMatrix2Block index out of range: {1}",
+                                                    mat.Name, texMatIndex));
             }
 
             for (int i = 0; i < 8; i++)
@@ -1295,9 +1301,23 @@ namespace SuperBMD.BMD
                 foreach (string texname in mat.TextureRefs) {
                     if (texname != null) {
                         if (tex1[texname] == null) {
-                            tex1.AddTextureFromPath(Path.Combine(modeldir, texname + ".bmp"));
-                            short texindex = (short)(tex1.Textures.Count - 1);
-                            m_TexRemapBlock.Add(texindex);
+                            string path = "";
+                            foreach (string extension in new string[] { ".png", ".jpg", ".tga", ".bmp" }) {
+                                string tmppath = Path.Combine(modeldir, texname + extension);
+                                if (File.Exists(tmppath)) {
+                                    path = tmppath;
+                                    break; 
+                                }
+                            }
+                            if (path != "") {
+                                tex1.AddTextureFromPath(path);
+                                short texindex = (short)(tex1.Textures.Count - 1);
+                                m_TexRemapBlock.Add(texindex);
+                            }
+                            else {
+                                Console.WriteLine(String.Format("Could not find texture {0} in file path {1}",
+                                                   texname, modeldir));
+                            }
                         }
                     }
                 }
