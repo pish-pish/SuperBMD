@@ -42,7 +42,7 @@ namespace SuperBMD_UnitTest
                     }
                 }
 
-                else if (args[i] == "help") {
+                else if (args[i] == "--help") {
                     DisplayHelp();
                     return;
                 }
@@ -87,6 +87,7 @@ namespace SuperBMD_UnitTest
                     }
 
                     mod.ExportAssImp(in_file, outFilepath, "dae", new ExportSettings());
+
                     if (mat_file != "") {
                         using (TextWriter file = File.CreateText(mat_file)) {
                             mod.Materials.DumpJson(file);
@@ -106,9 +107,11 @@ namespace SuperBMD_UnitTest
                     List<Material> mat_presets = null;
 
                     if (mat_file == "") {
+                        string inDir = Path.GetDirectoryName(in_file);
                         string fileNameNoExt = Path.GetFileNameWithoutExtension(in_file);
-                        if (File.Exists(fileNameNoExt + "_mat.json")) {
-                            mat_file = fileNameNoExt + "_mat.json";
+                        string possible_matfile = Path.Combine(inDir, fileNameNoExt + "_mat.json");
+                        if (File.Exists(possible_matfile)) {
+                            mat_file = possible_matfile;
                         }
                     }
 
