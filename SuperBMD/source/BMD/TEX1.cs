@@ -74,7 +74,7 @@ namespace SuperBMD.BMD
 
         public void DumpTextures(string directory)
         {
-            if (!System.IO.Directory.Exists(directory))
+            if (!System.IO.Directory.Exists(directory) && directory != "")
                 System.IO.Directory.CreateDirectory(directory);
 
             foreach (BinaryTextureImage tex in Textures)
