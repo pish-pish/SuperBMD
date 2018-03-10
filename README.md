@@ -96,7 +96,7 @@ it is added.
 This project uses a number of external libraries or parts of them in the code which will be listed here 
 together with their license if necessary:
 
-* BrawlLib: https://github.com/libertyernie/brawltools
+* BrawlLib: Tristripping algorithm by ernie, blackjax & tfautre:  https://github.com/libertyernie/brawltools
 <br>
 
 * TGA reader by Dmitry Brant: http://dmitrybrant.com
