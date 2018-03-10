@@ -281,7 +281,9 @@ namespace SuperBMD.Materials
             using (Bitmap bmp = CreateBitmap())
             {
                 // Bitmaps will throw an exception if the output folder doesn't exist so...
-                Directory.CreateDirectory(Path.GetDirectoryName(fileName));
+                string dir = Path.GetDirectoryName(fileName);
+                if (dir != "") 
+                    Directory.CreateDirectory(dir);
                 bmp.Save(fileName, ImageFormat.Png);
             }
 
