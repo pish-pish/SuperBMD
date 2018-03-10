@@ -3,7 +3,9 @@ A library to import and export various 3D model formats into the Binary Model (B
 
 This API uses the Open Asset Import Library (AssImp). A list of supported model formats can be found [here](http://assimp.org/main_features_formats.html).
 
-This is a fork of SuperBMD that implements Triangle Strips (a more space-efficient way to represent geometry) and extracting and applying material data as JSON. Please report any issues you find here: https://github.com/RenolY2/SuperBMD/issues
+This is a fork of SuperBMD that supports generating triangle strips (a more space-efficient way to represent faces in a model) 
+and extracting and applying BMD material data as JSON, maintained by Yoshi2 (RenolY2 on github). 
+Please report any issues you find here: https://github.com/RenolY2/SuperBMD/issues
 
 # Usage
 
@@ -60,7 +62,8 @@ This is recommended for models intended for maps.
 
 ### Textures
 * SuperBMD supports models that have no textures. These models will appear white when imported into a game.
-* It is recommended that the model's textures be in the same directory as the model being converted. <b>If SuperBMD cannot find the model's textures, it will use a black and white checkerboard image instead.</b>
+* It is recommended that the model's textures be in the same directory as the model being converted. <b>
+If SuperBMD cannot find the model's textures, it will use a black and white checkerboard image instead.</b>
 * Textures must be in either BMP, JPG, or PNG format. TGA is currently not supported.
 
 ### Materials
