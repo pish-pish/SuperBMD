@@ -149,8 +149,8 @@ namespace SuperBMD_UnitTest
             Console.WriteLine("SuperBMD: A tool to import and export various 3D model formats into the Binary Model (BMD) format.");
             Console.WriteLine("Written by Sage_of_Mirrors/Gamma (@SageOfMirrors).");
             Console.WriteLine("Made possible with help from arookas, LordNed, xDaniel, and many others.");
-            Console.WriteLine("Visit https://github.com/Sage-of-Mirrors/SuperBMD/wiki for more information.");
-            Console.WriteLine("This is an inofficial version with a Triangle Strip algorithm added from BrawlLib. Report any issues to Yoshi2#6013 (RenolY2 on github).");
+            Console.WriteLine("This is a fork maintained by Yoshi2 (RenolY2 on Github) with many additional features. Check the Readme.");
+            Console.WriteLine("The project page of this fork is https://github.com/RenolY2/SuperBMD");
         }
     }
 }
