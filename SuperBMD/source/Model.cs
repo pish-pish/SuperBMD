@@ -142,6 +142,10 @@ namespace SuperBMD
                 fileName = Path.Combine(outDir, fileNameNoExt + "_2.bmd");
             }
 
+            if (Joints.BoneNameIndices.Count > 1)
+                Console.WriteLine("Swapping axis of normal");
+                VertexData.NormalsSwapYZ();
+
             using (FileStream stream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
             {
                 EndianBinaryWriter writer = new EndianBinaryWriter(stream, Endian.Big);
@@ -164,6 +168,9 @@ namespace SuperBMD
                 writer.Seek(8, SeekOrigin.Begin);
                 writer.Write((int)writer.BaseStream.Length);
             }
+
+            if (Joints.BoneNameIndices.Count > 1)
+                VertexData.NormalsSwapYZ();
         }
 
         public void ExportAssImp(string fileName, string outFilepath, string modelType, ExportSettings settings, bool keepmatnames = false)
@@ -181,6 +188,7 @@ namespace SuperBMD
             Shapes.FillScene(outScene, VertexData.Attributes, Joints.FlatSkeleton, SkinningEnvelopes.InverseBindMatrices);
             Scenegraph.CorrectMaterialIndices(outScene, Materials);
             Textures.DumpTextures(outDir);
+
             if (SkinningEnvelopes.Weights.Count == 0)
             {
                 Assimp.Node geomNode = new Node(Path.GetFileNameWithoutExtension(fileName), outScene.RootNode);
@@ -194,7 +202,10 @@ namespace SuperBMD
             }
 
             AssimpContext cont = new AssimpContext();
+
             cont.ExportFile(outScene, fileName, "collada", PostProcessSteps.ValidateDataStructure | PostProcessSteps.JoinIdenticalVertices);
+            //cont.ExportFile(outScene, fileName, "collada");
+
 
             if (SkinningEnvelopes.Weights.Count == 0)
                 return; // There's no skinning information, so we can stop here
@@ -368,7 +379,7 @@ namespace SuperBMD
             foreach (Bone bone in mesh.Bones)
             {
                 Matrix4x4 ibm = bone.OffsetMatrix;
-                ibm.Transpose();
+                //ibm.Transpose();
 
                 writer.WriteLine($"       {ibm.A1.ToString("F")} {ibm.A2.ToString("F")} {ibm.A3.ToString("F")} {ibm.A4.ToString("F")}");
                 writer.WriteLine($"       {ibm.B1.ToString("F")} {ibm.B2.ToString("F")} {ibm.B3.ToString("F")} {ibm.B4.ToString("F")}");

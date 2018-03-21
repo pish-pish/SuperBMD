@@ -216,8 +216,10 @@ namespace SuperBMD.BMD
                         for (int zcomp = 0; zcomp < sectionSize; zcomp++) {
                             byte boolIn = reader.ReadByte();
 
-                            if (boolIn > 1)
+                            if (boolIn > 1) {
+                                Console.WriteLine($"Halted boot reading with zcomp={zcomp} sectionSize={sectionSize} boolIn={boolIn}");
                                 break;
+                            }
 
                             m_zCompLocBlock.Add(Convert.ToBoolean(boolIn));
                         }
@@ -273,7 +275,7 @@ namespace SuperBMD.BMD
         {
             Material mat = new Material();
             mat.Name = m_MaterialNames[matindex];
-
+            mat.IndTexEntry = m_IndirectTexBlock[matindex];
             mat.Flag = reader.ReadByte();
             mat.CullMode = m_CullModeBlock[reader.ReadByte()];
 
@@ -326,11 +328,11 @@ namespace SuperBMD.BMD
                 int texGenIndex = reader.ReadInt16();
                 if (texGenIndex == -1)
                     continue;
-                else if (texGenIndex < mat.NumTexGensCount)
+                else if (texGenIndex < m_TexCoord1GenBlock.Count)
                     mat.TexCoord1Gens[i] = m_TexCoord1GenBlock[texGenIndex];
                 else
-                    Console.WriteLine(String.Format("Warning for material {0}, TexCoord1GenBlock index out of range: {1}",
-                                                    mat.Name, texGenIndex));
+                    Console.WriteLine(String.Format("Warning for material {0} i={2}, TexCoord1GenBlock index out of range: {1}",
+                                                    mat.Name, texGenIndex, i));
             }
 
             for (int i = 0; i < 8; i++)
@@ -372,7 +374,6 @@ namespace SuperBMD.BMD
                 else {
                     mat.TextureIndices[i] = m_TexRemapBlock[texIndex];
                 }
-                
             }
 
             for (int i = 0; i < 4; i++)

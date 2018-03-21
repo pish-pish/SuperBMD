@@ -15,9 +15,21 @@ namespace SuperBMD_UnitTest
     {
         static void Main(string[] args)
         {
+            //args = new string[] { "C:\\Users\\User\\Documents\\Git\\SuperBMD-tristrip\\SuperBMD_UnitTest\\bin\\Release\\rintest\\shine.bmd" };
+
+            /*args = new string[] { "C:\\Users\\User\\Documents\\Git\\SuperBMD-tristrip\\SuperBMD_UnitTest\\bin\\Release\\SuperBMDReleaseTest\\model dissecting/MyShine.DAE",
+                                "F:\\Wii games\\SMSFolder\\P-GMSE\\files\\data\\scene\\monte5.szs_ext\\scene\\mapobj\\shine.bmd",
+                "--mat", "C:\\Users\\User\\Documents\\Git\\SuperBMD-tristrip\\SuperBMD_UnitTest\\bin\\Release\\SuperBMDReleaseTest\\model dissecting/shine_myshine.json", "--tristrip", "none" };
+                */
+
+            /*args = new string[] { "C:\\Users\\User\\Documents\\3dsMax\\export\\testlevel.dae",
+                    "C:\\Users\\User\\Documents\\Sandbox\\pack stuff\\NeuPacker\\arc\\model.bmd",
+                    "--mat", "C:\\Users\\User\\Documents\\Sandbox\\pack stuff\\NeuPacker\\MyMaterials\\mine.txt" };*/
+            //args = new string[] { "C:\\Users\\User\\Documents\\Git\\SuperBMD-tristrip\\SuperBMD_UnitTest\\bin\\Release\\SuperBMDReleaseTest\\mariooriginal\\ma_mdl1.bmd" };
             string in_file = "";
             string out_file = "";
             string mat_file = "";
+            string texheader_file = "";
 
             TristripOption triopt = TristripOption.DoTriStripStatic;
 
@@ -26,6 +38,11 @@ namespace SuperBMD_UnitTest
             for (int i = 0; i < args.Length; i++) {
                 if (args[i] == "--mat") {
                     mat_file = args[i + 1];
+                    i++;
+                }
+
+                else if (args[i] == "--texheader") {
+                    texheader_file = args[i + 1];
                     i++;
                 }
 
@@ -63,6 +80,7 @@ namespace SuperBMD_UnitTest
             {
                 if ((in_file.EndsWith(".bmd") || in_file.EndsWith(".bdl")) && !out_file.EndsWith(".bmd")) 
                 {
+                    // BMD -> DAE conversion
                     Model mod = Model.Load(in_file);
 
                     string outFilepath;
@@ -84,6 +102,10 @@ namespace SuperBMD_UnitTest
                         if (mat_file == "") {
                             mat_file = Path.Combine(inDir, fileNameNoExt + "_mat.json");
                         }
+
+                        if (texheader_file == "") {
+                            texheader_file = Path.Combine(inDir, fileNameNoExt + "_texheader.json");
+                        }
                     }
 
                     mod.ExportAssImp(in_file, outFilepath, "dae", new ExportSettings());
@@ -94,18 +116,20 @@ namespace SuperBMD_UnitTest
                         }
                     }
 
-                    /*if (mat_file != "") {
-                        string outDir = Path.GetDirectoryName(mat_file);
-                        string texFile = Path.GetFileNameWithoutExtension(in_file) + "_tex.json";
-                        using (TextWriter file = File.CreateText(texFile)) {
+                    if (texheader_file != "") {
+                        using (TextWriter file = File.CreateText(texheader_file)) {
                             mod.Textures.DumpTextureHeaders(file);
                         }
-                    }*/
+                    }
                 }
 
                 else {
+                    // Any model -> BMD or BMD -> BMD
                     List<Material> mat_presets = null;
+                    List<BinaryTextureImage> texture_headers = null;
 
+                    // create material file path if it isn't set and it exists in
+                    // the same directory as the input model file
                     if (mat_file == "") {
                         string inDir = Path.GetDirectoryName(in_file);
                         string fileNameNoExt = Path.GetFileNameWithoutExtension(in_file);
@@ -115,6 +139,7 @@ namespace SuperBMD_UnitTest
                         }
                     }
 
+                    // Load material file
                     if (mat_file != "") {
                         JsonSerializer serializer = new JsonSerializer();
 
@@ -128,7 +153,56 @@ namespace SuperBMD_UnitTest
                             }
                         }
                     }
+
+                    // create texture header file path if it isn't set and it exists in the same
+                    // directory as the input model file
+                    if (texheader_file == "") {
+                        string inDir = Path.GetDirectoryName(in_file);
+                        string fileNameNoExt = Path.GetFileNameWithoutExtension(in_file);
+                        string possible_texfile = Path.Combine(inDir, fileNameNoExt + "_texheader.json");
+                        if (File.Exists(possible_texfile)) {
+                            texheader_file = possible_texfile;
+                        }
+                    }
+                    
                     Model mod = Model.Load(in_file, mat_presets, triopt);
+
+                    // Load texture headers
+                    if (texheader_file != "") {
+                        Console.WriteLine("Reading TexHeader");
+                        JsonSerializer serializer = new JsonSerializer();
+
+                        serializer.Converters.Add(
+                            (new Newtonsoft.Json.Converters.StringEnumConverter())
+                        );
+
+                        using (TextReader file = File.OpenText(texheader_file)) {
+                            using (JsonTextReader reader = new JsonTextReader(file)) {
+                                texture_headers = serializer.Deserialize<List<BinaryTextureImage>>(reader);
+                            }
+                        }
+
+                        foreach (BinaryTextureImage tex in mod.Textures.Textures) {
+                            BinaryTextureImage found_tex = null;
+
+                            foreach (BinaryTextureImage other in texture_headers) {
+                                if (other != null) {
+                                    if (other.Name == tex.Name) {
+                                        found_tex = other;
+                                        break;
+                                    }
+                                    else if (other.Name == "__TexDefault" && found_tex == null) {
+                                        found_tex = other;
+                                    }
+                                }
+                            }
+                            Console.WriteLine("Hmm");
+                            if (found_tex != null) {
+                                Console.WriteLine(String.Format("Applying texture header preset for {0}: {1}", tex.Name, found_tex.Format));
+                                tex.ReplaceHeaderInfo(found_tex);
+                            }
+                        }
+                    }
 
                     if (out_file != "") {
                         mod.ExportBMD(out_file, true);

@@ -837,5 +837,25 @@ namespace SuperBMD.BMD
                 StreamUtility.PadStreamWithString(writer, 32);
             }
         }
+        public void NormalsSwapYZ() {
+            for (int i = 0; i < Attributes.Normals.Count; i++) {
+                Vector3 normal = Attributes.Normals[i];
+
+                float tmp = normal.Y;
+                //normal.Y = normal.Z;
+                //normal.Z = tmp;
+                
+                // X Y -1 not good?
+                // Y Z -1 not good?
+                // Y must be -1
+
+                //normal.X *= -1;
+                //normal.Y *= -1;
+                //normal.Z *= -1;
+
+
+                Attributes.Normals[i] = normal;
+            }
+        }
     }
 }

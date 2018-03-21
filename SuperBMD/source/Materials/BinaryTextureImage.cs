@@ -118,29 +118,28 @@ namespace SuperBMD.Materials
         }
         #endregion
 
-        public string Name { get; private set; }
-        [JsonIgnore]
-        public TextureFormats Format { get; private set; }
-        public byte AlphaSetting { get; private set; } // 0 for no alpha, 0x02 and other values seem to indicate yes alpha.
+        public string Name { get; set; }
+        public TextureFormats Format { get; set; }
+        public byte AlphaSetting { get; set; } // 0 for no alpha, 0x02 and other values seem to indicate yes alpha.
         [JsonIgnore]
         public ushort Width { get; private set; }
         [JsonIgnore]
         public ushort Height { get; private set; }
-        public WrapModes WrapS { get; private set; }
-        public WrapModes WrapT { get; private set; }
+        public WrapModes WrapS { get; set; }
+        public WrapModes WrapT { get; set; }
         [JsonIgnore]
         public PaletteFormats PaletteFormat { get; private set; }
         [JsonIgnore]
         public ushort PaletteCount { get; private set; }
         [JsonIgnore]
         public int EmbeddedPaletteOffset { get; private set; } // This is a guess. It seems to be 0 in most things, but it fits with min/mag filters.
-        public FilterMode MinFilter { get; private set; }
-        public FilterMode MagFilter { get; private set; }
-        public sbyte MinLOD { get; private set; } // Fixed point number, 1/8 = conversion (ToDo: is this multiply by 8 or divide...)
-        public sbyte MagLOD { get; private set; } // Fixed point number, 1/8 = conversion (ToDo: is this multiply by 8 or divide...)
+        public FilterMode MinFilter { get; set; }
+        public FilterMode MagFilter { get; set; }
+        public sbyte MinLOD { get; set; } // Fixed point number, 1/8 = conversion (ToDo: is this multiply by 8 or divide...)
+        public sbyte MagLOD { get; set; } // Fixed point number, 1/8 = conversion (ToDo: is this multiply by 8 or divide...)
         [JsonIgnore]
         public byte MipMapCount { get; private set; }
-        public short LodBias { get; private set; } // Fixed point number, 1/100 = conversion
+        public short LodBias { get; set; } // Fixed point number, 1/100 = conversion
 
         [JsonIgnore]
         private Palette m_imagePalette;
@@ -200,12 +199,29 @@ namespace SuperBMD.Materials
             m_rgbaImageData = DecodeData(stream, Width, Height, Format, m_imagePalette, PaletteFormat);
         }
 
+        public void ReplaceHeaderInfo(BinaryTextureImage other) {
+            Format = other.Format;
+            AlphaSetting = other.AlphaSetting;
+            WrapS = other.WrapS;
+            WrapT = other.WrapT;
+            MinFilter = other.MinFilter;
+            MagFilter = other.MagFilter;
+            MinLOD = other.MinLOD;
+            MagLOD = other.MagLOD;
+            LodBias = other.LodBias;
+            unknown1 = other.unknown1;
+            unknown2 = other.unknown2;
+            unknown3 = other.unknown3;
+        }
+
         public void Load(Assimp.TextureSlot texture, string modelDirectory)
         {
             Format = TextureFormats.CMPR;
             AlphaSetting = 0;
             WrapS = texture.WrapModeU.ToGXWrapMode();
             WrapT = texture.WrapModeV.ToGXWrapMode();
+            //WrapS = WrapModes.ClampToEdge;
+            //WrapT = WrapModes.ClampToEdge;
             PaletteFormat = PaletteFormats.IA8;
             PaletteCount = 0;
             EmbeddedPaletteOffset = 0;
