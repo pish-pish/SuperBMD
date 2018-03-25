@@ -17,6 +17,8 @@ namespace SuperBMD.BMD
         public Dictionary<string, int> BoneNameIndices { get; private set; }
         public Rigging.Bone SkeletonRoot { get; private set; }
 
+        private bool flipAxis = false;
+
         public JNT1(EndianBinaryReader reader, int offset)
         {
             BoneNameIndices = new Dictionary<string, int>();
@@ -72,8 +74,10 @@ namespace SuperBMD.BMD
             }*/
         }
 
-        public JNT1(Assimp.Scene scene, VTX1 vertexData)
+        public JNT1(Assimp.Scene scene, VTX1 vertexData, bool doFlipAxis = true)
         {
+            flipAxis = doFlipAxis;
+
             BoneNameIndices = new Dictionary<string, int>();
             FlatSkeleton = new List<Rigging.Bone>();
             Assimp.Node root = null;
@@ -91,6 +95,9 @@ namespace SuperBMD.BMD
             {
                 SkeletonRoot = new Rigging.Bone("root");
                 SkeletonRoot.Bounds.GetBoundsValues(vertexData.Attributes.Positions);
+                if (flipAxis) {
+                    SkeletonRoot.flipAxis();
+                }
                 FlatSkeleton.Add(SkeletonRoot);
                 BoneNameIndices.Add("root", 0);
             }
@@ -99,8 +106,13 @@ namespace SuperBMD.BMD
             {
                 SkeletonRoot = AssimpNodesToBonesRecursive(root, null, FlatSkeleton);
 
-                foreach (Rigging.Bone bone in FlatSkeleton)
+                foreach (Rigging.Bone bone in FlatSkeleton) {
+                    if (flipAxis) {
+                        bone.flipAxis();
+                    }
+
                     BoneNameIndices.Add(bone.Name, FlatSkeleton.IndexOf(bone));
+                }
             }
         }
 

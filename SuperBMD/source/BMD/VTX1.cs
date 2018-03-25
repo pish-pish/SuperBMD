@@ -16,6 +16,8 @@ namespace SuperBMD.BMD
         public VertexData Attributes { get; private set; }
         public SortedDictionary<GXVertexAttribute, Tuple<GXDataType, byte>> StorageFormats { get; private set; }
 
+        private bool flipAxis = false;
+
         public VTX1(EndianBinaryReader reader, int offset)
         {
             Attributes = new VertexData();
@@ -56,16 +58,19 @@ namespace SuperBMD.BMD
             reader.BaseStream.Seek(offset + vtx1Size, System.IO.SeekOrigin.Begin);
         }
 
-        public VTX1(Assimp.Scene scene)
+        public VTX1(Assimp.Scene scene, bool doflipAxis = false)
         {
             Attributes = new VertexData();
             StorageFormats = new SortedDictionary<GXVertexAttribute, Tuple<GXDataType, byte>>();
+
+            flipAxis = doflipAxis;
 
             int i = -1;
 
             foreach (Assimp.Mesh mesh in scene.Meshes)
             {
                 i++;
+
 
                 if (mesh.HasVertices)
                 {
@@ -117,6 +122,10 @@ namespace SuperBMD.BMD
                     //else
                     //    Console.WriteLine($"Mesh \"{ mesh.Name }\" has no texture coordinates on channel { texCoords }.");
                 }
+            }
+
+            if (flipAxis) {
+                //Attributes.flipAxis();
             }
         }
 
@@ -524,12 +533,14 @@ namespace SuperBMD.BMD
             return size / (compCnt * compStride);
         }
 
-        private void SetAssimpPositionAttribute(Assimp.Mesh mesh)
-        {
+        private void SetAssimpPositionAttribute(Assimp.Mesh mesh) {
             List<Vector3> tempList = new List<Vector3>();
 
-            for (int vec = 0; vec < mesh.VertexCount; vec++)
-                tempList.Add(mesh.Vertices[vec].ToOpenTKVector3());
+            for (int vec = 0; vec < mesh.VertexCount; vec++) { 
+                Vector3 tmpvec = mesh.Vertices[vec].ToOpenTKVector3();
+
+                tempList.Add(tmpvec);
+            }
 
             if (!Attributes.CheckAttribute(GXVertexAttribute.Position))
                 Attributes.SetAttributeData(GXVertexAttribute.Position, tempList);
@@ -551,8 +562,17 @@ namespace SuperBMD.BMD
         {
             List<Vector3> tempList = new List<Vector3>();
 
-            for (int vec = 0; vec < mesh.Normals.Count; vec++)
+            for (int vec = 0; vec < mesh.Normals.Count; vec++) {
+                Vector3 tmpvec = mesh.Normals[vec].ToOpenTKVector3();
+
+                if (flipAxis) {
+                    float tmp = tmpvec.Y;
+                    tmpvec.Y = tmpvec.Z;
+                    tmpvec.Z = tmp;
+                }
+
                 tempList.Add(mesh.Normals[vec].ToOpenTKVector3());
+            }
 
             if (!Attributes.CheckAttribute(GXVertexAttribute.Normal))
                 Attributes.SetAttributeData(GXVertexAttribute.Normal, tempList);

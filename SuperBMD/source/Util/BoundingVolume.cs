@@ -11,8 +11,8 @@ namespace SuperBMD.Util
     public class BoundingVolume
     {
         public float SphereRadius { get; private set; }
-        public Vector3 MinBounds { get; private set; }
-        public Vector3 MaxBounds { get; private set; }
+        public Vector3 MinBounds; //{ get; set; }
+        public Vector3 MaxBounds; //{ get; set; }
 
         public Vector3 Center { get; private set; }
 
@@ -20,6 +20,16 @@ namespace SuperBMD.Util
         {
             MinBounds = new Vector3();
             MaxBounds = new Vector3();
+        }
+
+        public void flipAxis() {
+            float tmp = MinBounds.Y;
+            MinBounds.Y = MinBounds.Z;
+            MinBounds.Z = tmp;
+
+            tmp = MaxBounds.Y;
+            MaxBounds.Y = MaxBounds.Z;
+            MaxBounds.Z = tmp;
         }
 
         public BoundingVolume(EndianBinaryReader reader)

@@ -27,6 +27,10 @@ namespace SuperBMD.Geometry
         private Vector4[] m_PositionMatrices;
         private Vector4[] m_NormalMatrices;
 
+        public void flipAxis() {
+            Bounds.flipAxis();
+        }
+
         public Shape()
         {
             MatrixType = 3;

@@ -24,7 +24,10 @@ namespace SuperBMD
         private int packetCount;
         private int vertexCount;
 
-        public static Model Load(string filePath, List<Materials.Material> mat_presets = null, TristripOption triopt = TristripOption.DoNotTriStrip)
+        public static Model Load(
+            string filePath, List<Materials.Material> mat_presets = null, 
+            TristripOption triopt = TristripOption.DoNotTriStrip,
+            bool flipAxis = false)
         {
             string extension = Path.GetExtension(filePath);
             Model output = null;
@@ -53,7 +56,7 @@ namespace SuperBMD
                 }
                 Assimp.Scene aiScene = cont.ImportFile(filePath, postprocess);
 
-                output = new Model(aiScene, filePath, mat_presets, triopt);
+                output = new Model(aiScene, filePath, mat_presets, triopt, flipAxis);
             }
 
             return output;
@@ -106,10 +109,42 @@ namespace SuperBMD
             }
         }
 
-        public Model(Scene scene, string modelDirectory, List<Materials.Material> mat_presets = null, TristripOption triopt = TristripOption.DoNotTriStrip)
+        public Model(
+            Scene scene, string modelDirectory, 
+            List<Materials.Material> mat_presets = null, TristripOption triopt = TristripOption.DoNotTriStrip,
+            bool flipAxis = false)
         {
-            VertexData = new VTX1(scene);
-            Joints = new JNT1(scene, VertexData);
+            flipAxis = false;
+            if (flipAxis) {
+                int i = 0;
+                foreach (Mesh mesh in scene.Meshes) {
+                    Console.WriteLine(mesh.Name);
+                    
+                    for (i = 0; i < mesh.VertexCount; i++) {
+                        Vector3D vertex = mesh.Vertices[i];
+                    }
+
+                }
+
+                Assimp.Node root = null;
+
+                for (i = 0; i < scene.RootNode.ChildCount; i++) {
+                    if (scene.RootNode.Children[i].Name.ToLowerInvariant() == "skeleton_root") {
+                        root = scene.RootNode.Children[i].Children[0];
+                        break;
+                    }
+                }
+
+                if (root != null) {
+                    Matrix4x4 rotate = Matrix4x4.FromRotationX((float)(-(1 / 2.0) * Math.PI));
+                    root.Transform = root.Transform * rotate;
+                }
+
+            }
+
+            flipAxis = false;
+            VertexData = new VTX1(scene, flipAxis);
+            Joints = new JNT1(scene, VertexData, flipAxis);
             Scenegraph = new INF1(scene, Joints);
             Textures = new TEX1(scene, Path.GetDirectoryName(modelDirectory));
 
@@ -119,7 +154,9 @@ namespace SuperBMD
             PartialWeightData = new DRW1(scene, Joints.BoneNameIndices);
 
             Shapes = SHP1.Create(scene, Joints.BoneNameIndices, VertexData.Attributes, SkinningEnvelopes, PartialWeightData, triopt);
-
+            if (flipAxis) {
+                Shapes.flipAxis();
+            }
             Materials = new MAT3(scene, Textures, Shapes, mat_presets);
             Materials.LoadAdditionalTextures(Textures, modelDirectory);
             Materials.MapTextureNamesToIndices(Textures);
@@ -141,10 +178,6 @@ namespace SuperBMD
             {
                 fileName = Path.Combine(outDir, fileNameNoExt + "_2.bmd");
             }
-
-            if (Joints.BoneNameIndices.Count > 1)
-                Console.WriteLine("Swapping axis of normal");
-                VertexData.NormalsSwapYZ();
 
             using (FileStream stream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
             {
@@ -168,9 +201,6 @@ namespace SuperBMD
                 writer.Seek(8, SeekOrigin.Begin);
                 writer.Write((int)writer.BaseStream.Length);
             }
-
-            if (Joints.BoneNameIndices.Count > 1)
-                VertexData.NormalsSwapYZ();
         }
 
         public void ExportAssImp(string fileName, string outFilepath, string modelType, ExportSettings settings, bool keepmatnames = false)

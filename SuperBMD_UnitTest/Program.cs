@@ -123,8 +123,8 @@ namespace SuperBMD_UnitTest
                     }
                 }
 
+                // Any model -> BMD or BMD -> BMD
                 else {
-                    // Any model -> BMD or BMD -> BMD
                     List<Material> mat_presets = null;
                     List<BinaryTextureImage> texture_headers = null;
 
@@ -165,7 +165,7 @@ namespace SuperBMD_UnitTest
                         }
                     }
                     
-                    Model mod = Model.Load(in_file, mat_presets, triopt);
+                    Model mod = Model.Load(in_file, mat_presets, triopt, true);
 
                     // Load texture headers
                     if (texheader_file != "") {

@@ -23,6 +23,11 @@ namespace SuperBMD.BMD
             Shapes = new List<Shape>();
             RemapTable = new List<int>();
         }
+        public void flipAxis() {
+            foreach (Shape shape in Shapes) {
+                shape.flipAxis();
+            }
+        }
 
         private SHP1(EndianBinaryReader reader, int offset)
         {

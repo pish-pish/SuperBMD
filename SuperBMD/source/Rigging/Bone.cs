@@ -32,6 +32,21 @@ namespace SuperBMD.Rigging
             m_Scale = Vector3.One;
         }
 
+        private Vector3 flipAxisVec3(Vector3 vec) {
+            float tmp = vec.Y;
+            vec.Y = vec.Z;
+            vec.Z = tmp;
+            return vec;
+        }
+
+        public void flipAxis() {
+            Bounds.MinBounds = flipAxisVec3(Bounds.MinBounds);
+            Bounds.MaxBounds = flipAxisVec3(Bounds.MaxBounds);
+            m_Scale = flipAxisVec3(m_Scale);
+            m_Translation = flipAxisVec3(m_Translation);
+        }
+
+
         public Bone(EndianBinaryReader reader, string name)
         {
             Children = new List<Bone>();
