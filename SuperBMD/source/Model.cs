@@ -114,18 +114,18 @@ namespace SuperBMD
             List<Materials.Material> mat_presets = null, TristripOption triopt = TristripOption.DoNotTriStrip,
             bool flipAxis = false)
         {
-            flipAxis = false;
             if (flipAxis) {
+                Console.WriteLine("Flipping things");
                 int i = 0;
-                foreach (Mesh mesh in scene.Meshes) {
-                    Console.WriteLine(mesh.Name);
-                    
-                    for (i = 0; i < mesh.VertexCount; i++) {
-                        Vector3D vertex = mesh.Vertices[i];
-                    }
-
-                }
-
+                Matrix4x4 rotate = Matrix4x4.FromRotationX((float)(-(1 / 2.0) * Math.PI));
+                //rotate = Matrix4x4.FromRotationZ((float)(-(1 / 2.0) * Math.PI));
+                Matrix4x4 rotateinv = rotate;
+                Matrix3x3 rotvec = Matrix3x3.FromRotationZ((float)((1 / 2.0) * Math.PI)) * Matrix3x3.FromRotationX((float)((1 / 2.0) * Math.PI));
+                rotateinv.Inverse();
+                //rotate = Matrix4x4.FromRotationY((float)(-(1 / 2.0) * Math.PI));
+                //rotate = Matrix4x4.FromRotationZ((float)(-(1 / 2.0) * Math.PI));
+                Matrix4x4 rotateC = Matrix4x4.FromRotationX((float)(-(1 / 2.0) * Math.PI));
+                Matrix4x4 trans;
                 Assimp.Node root = null;
 
                 for (i = 0; i < scene.RootNode.ChildCount; i++) {
@@ -136,8 +136,58 @@ namespace SuperBMD
                 }
 
                 if (root != null) {
-                    Matrix4x4 rotate = Matrix4x4.FromRotationX((float)(-(1 / 2.0) * Math.PI));
+                    foreach (Mesh mesh in scene.Meshes) {
+                        Console.WriteLine(mesh.Name);
+                        Console.WriteLine(String.Format("Does it have bones? {0}", mesh.HasBones));
+
+                        int j = 0;
+                        foreach (Assimp.Bone bone in mesh.Bones) {
+                            bone.OffsetMatrix = rotateinv*bone.OffsetMatrix;
+
+                            //Matrix4x4 bindMat = bone.OffsetMatrix;
+                            //bindMat.Inverse();
+                            //trans = 
+                            /*bone.OffsetMatrix = root.Transform * bone.OffsetMatrix;
+                            Matrix4x4 newtransform = root.Transform * rotate;
+                            newtransform.Inverse();
+                            bone.OffsetMatrix = newtransform * bone.OffsetMatrix;*/
+
+                        }
+
+                        for (i = 0; i < mesh.VertexCount; i++) {
+                            Vector3D vertex = mesh.Vertices[i];
+                            vertex.Set(vertex.X, vertex.Z, -vertex.Y);
+                            mesh.Vertices[i] = vertex;
+                        }
+                        for (i = 0; i < mesh.Normals.Count; i++) {
+                            Vector3D norm = mesh.Normals[i];
+                            //norm.Set(norm.X, norm.Z, -norm.Y);
+                            Vector3D newnorm = rotvec*norm;
+                            norm.Set(newnorm.X, newnorm.Y, newnorm.Z);
+                            mesh.Normals[i] = norm;
+                        }
+                    }
+                }
+
+                
+
+                if (root != null) {
+                    
+                    List<Assimp.Node> allnodes = new List<Assimp.Node>();
+                    List<Assimp.Node> processnodes = new List<Assimp.Node>();
+                    processnodes.Add(root);
                     root.Transform = root.Transform * rotate;
+                    /*while (processnodes.Count > 0) {
+                        Assimp.Node current = processnodes[0];
+                        processnodes.RemoveAt(0);
+
+                        current.Transform = current.Transform * rotate;
+
+                        foreach (Assimp.Node child in current.Children) {
+                            processnodes.Add(child);
+                        }
+                    }*/
+
                 }
 
             }
@@ -150,6 +200,7 @@ namespace SuperBMD
 
             SkinningEnvelopes = new EVP1();
             SkinningEnvelopes.SetInverseBindMatrices(scene, Joints.FlatSkeleton);
+            //SkinningEnvelopes.AddInverseBindMatrices(Joints.FlatSkeleton);
 
             PartialWeightData = new DRW1(scene, Joints.BoneNameIndices);
 
