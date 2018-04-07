@@ -230,7 +230,9 @@ namespace SuperBMD.Geometry
                             vertWeight.AddWeight(weight.Weight, boneNames[bone.Name]);
                     }
                 }
+                vertWeight.reduceWeights();
                 weights[vertexid] = vertWeight;
+                Debug.Assert(vertWeight.WeightCount <= 3);
             }
 
             //Primitive prim = new Primitive(Enums.GXPrimitiveType.Triangles);
@@ -275,7 +277,7 @@ namespace SuperBMD.Geometry
                 Enums.GXPrimitiveType primtype = (Enums.GXPrimitiveType)primbrawl.Type;
 
                 if (primtype == Enums.GXPrimitiveType.TriangleStrip) {
-                    //Console.WriteLine("Doing Tristrip");
+                    Console.WriteLine("Doing Tristrip");
                     foreach (int vertIndex in primbrawl.Indices) {
                         currvert++;
                         Weight vertWeight = weights[vertIndex]; 
@@ -485,19 +487,10 @@ namespace SuperBMD.Geometry
                         Weight vert1Weight = weights[vert1Index];//new Weight();
                         Weight vert2Weight = weights[vert2Index];//new Weight();
                         Weight vert3Weight = weights[vert3Index];//new Weight();
-
-                        // Get the weights for this tri's vertices
-                        /*foreach (Assimp.Bone bone in mesh.Bones) {
-                            foreach (VertexWeight weight in bone.VertexWeights) {
-                                if (weight.VertexID == vert1Index)
-                                    vert1Weight.AddWeight(weight.Weight, boneNames[bone.Name]);
-                                if (weight.VertexID == vert2Index)
-                                    vert2Weight.AddWeight(weight.Weight, boneNames[bone.Name]);
-                                if (weight.VertexID == vert3Index)
-                                    vert3Weight.AddWeight(weight.Weight, boneNames[bone.Name]);
-                            }
-                        }*/
-
+                        Debug.Assert(vert1Weight.WeightCount <= 3);
+                        Debug.Assert(vert2Weight.WeightCount <= 3);
+                        Debug.Assert(vert3Weight.WeightCount <= 3);
+                        int oldcount = numMatrices;
                         if (!packetWeights.Contains(vert1Weight))
                             numMatrices += vert1Weight.WeightCount;
                         if (!packetWeights.Contains(vert2Weight))
@@ -507,6 +500,8 @@ namespace SuperBMD.Geometry
 
                         // There are too many matrices, we need to create a new packet
                         if (numMatrices > 10) {
+                            Console.WriteLine(String.Format("Making new packet because previous one would have {0}", numMatrices));
+                            Console.WriteLine(oldcount);
                             pack.Primitives.Add(prim);
                             Packets.Add(pack);
 
@@ -665,19 +660,21 @@ namespace SuperBMD.Geometry
                 else if (prim.PrimitiveType == Enums.GXPrimitiveType.Triangles) {
                     Debug.Assert(prim.Vertices.Count % 3 == 0);
                 }*/
+                Console.WriteLine(String.Format("We had this many matrices: {0}", numMatrices));
                 pack.Primitives.Add(prim);
                 Packets.Add(pack);
             }
             int mostmatrices = 0;
             if (true) {
+                List<Weight> packWeights = new List<Weight>();
                 foreach (Packet packet in Packets) {
-                    List<Weight> packetWeights = new List<Weight>();
+                    
                     int matrices = 0;
 
                     foreach (Primitive prim in packet.Primitives) {
                         foreach (Vertex vert in prim.Vertices) {
-                            if (!packetWeights.Contains(vert.VertexWeight)) {
-                                packetWeights.Add(vert.VertexWeight);
+                            if (!packWeights.Contains(vert.VertexWeight)) {
+                                packWeights.Add(vert.VertexWeight);
                                 matrices += vert.VertexWeight.WeightCount;
                             }
                         }
@@ -692,6 +689,8 @@ namespace SuperBMD.Geometry
                     }
                     if (matrices > mostmatrices) mostmatrices = matrices;
                     //Debug.Assert(matrices <= 10);
+                    Console.WriteLine(matrices);
+                    packWeights.Clear();
                 }
             }
             Console.WriteLine(String.Format("Most matrices: {0}", mostmatrices));

@@ -81,6 +81,7 @@ namespace SuperBMD.BMD
 
                 foreach (Weight weight in weights.Values)
                 {
+                    weight.reduceWeights();
                     if (weight.WeightCount == 1)
                     {
                         if (!fullyWeighted.Contains(weight))

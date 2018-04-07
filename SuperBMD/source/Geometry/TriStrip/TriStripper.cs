@@ -371,7 +371,7 @@ namespace BrawlLib.Modeling.Triangle_Converter
 
                 //if (m_CurrentWeights.Count == PrimitiveGroup._nodeCountMax)
                 //    return false;
-                if (matcount + weight.WeightCount > 19) {
+                if (matcount + weight.WeightCount >= 10) {
                     return false;
                 }
 
