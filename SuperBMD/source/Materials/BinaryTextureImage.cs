@@ -285,9 +285,58 @@ namespace SuperBMD.Materials
             m_rgbaImageData = new byte[Width * Height * 4];
             BitmapData dat = texData.LockBits(new Rectangle(0, 0, Width, Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
             Marshal.Copy(dat.Scan0, m_rgbaImageData, 0, m_rgbaImageData.Length);
+
+
             texData.UnlockBits(dat);
 
             texData.Dispose();
+        }
+
+        // We analyze the image data and check 
+        public void DetectAndSetFittingFormat()
+        {
+            bool is_gray = true;
+            bool complex_alpha = false;
+            bool has_alpha = false;
+
+            List<byte> alphavals = new List<byte>();
+
+            for (int i = 0; i < m_rgbaImageData.Length / 4; i++)
+            {
+                byte r = m_rgbaImageData[i * 4 + 0];
+                byte g = m_rgbaImageData[i * 4 + 1];
+                byte b = m_rgbaImageData[i * 4 + 2];
+                byte a = m_rgbaImageData[i * 4 + 3];
+
+                if (is_gray && (r != g || g != b || b != r)) {
+                    is_gray = false;
+                }
+
+                if (a != 255) {
+                    has_alpha = true;
+                    if (a != 0) {
+                        complex_alpha = true;
+                    }
+                }
+
+            }
+
+            if (is_gray && has_alpha) {
+                Format = TextureFormats.IA8;
+            }
+            else if (is_gray && !has_alpha) {
+                Format = TextureFormats.I8;
+            }
+            else if (complex_alpha) {
+                Format = TextureFormats.RGB5A3;
+            }
+            else {
+                Format = TextureFormats.CMPR;
+            }
+            if (has_alpha) {
+                AlphaSetting = 0x2;
+            }
+
         }
 
         public string SaveImageToDisk(string outputFile)
