@@ -8,6 +8,8 @@ using Assimp;
 using System.IO;
 using SuperBMD.BMD;
 using SuperBMD.Geometry.Enums;
+using System.Collections;
+
 namespace SuperBMD
 {
     public class Model
@@ -120,7 +122,18 @@ namespace SuperBMD
                 Matrix4x4 rotate = Matrix4x4.FromRotationX((float)(-(1 / 2.0) * Math.PI));
                 //rotate = Matrix4x4.FromRotationZ((float)(-(1 / 2.0) * Math.PI));
                 Matrix4x4 rotateinv = rotate;
-                Matrix3x3 rotvec = Matrix3x3.FromRotationZ((float)((1 / 2.0) * Math.PI)) * Matrix3x3.FromRotationX((float)((1 / 2.0) * Math.PI));
+                
+
+                Matrix3x3 rotateXminus90 = Matrix3x3.FromRotationX((float)(-(1 / 2.0) * Math.PI));
+                Matrix3x3 rotateXplus90 = Matrix3x3.FromRotationX((float)((1 / 2.0) * Math.PI));
+                Matrix3x3 rotateYminus90 = Matrix3x3.FromRotationY((float)(-(1 / 2.0) * Math.PI));
+                Matrix3x3 rotateYplus90 = Matrix3x3.FromRotationY((float)((1 / 2.0) * Math.PI));
+                Matrix3x3 rotateZminus90 = Matrix3x3.FromRotationZ((float)(-(1 / 2.0) * Math.PI));
+                Matrix3x3 rotateZplus90 = Matrix3x3.FromRotationZ((float)((1 / 2.0) * Math.PI));
+
+                //Matrix3x3 rotvec = rotateZplus90 * rotateXplus90;
+                //Matrix3x3 rotvec = rotateYplus90*rotateYplus90 * rotateZplus90 * rotateZplus90* rotateXplus90* rotateXplus90;
+
                 rotateinv.Inverse();
                 //rotate = Matrix4x4.FromRotationY((float)(-(1 / 2.0) * Math.PI));
                 //rotate = Matrix4x4.FromRotationZ((float)(-(1 / 2.0) * Math.PI));
@@ -141,8 +154,39 @@ namespace SuperBMD
                         Console.WriteLine(String.Format("Does it have bones? {0}", mesh.HasBones));
 
                         int j = 0;
+                        Matrix3x3[] weightedmats = new Matrix3x3[mesh.Normals.Count];
+
+
+
+                        List<VertexWeight>[] weightgrid = new List<VertexWeight>[mesh.VertexCount];
+
                         foreach (Assimp.Bone bone in mesh.Bones) {
                             bone.OffsetMatrix = rotateinv*bone.OffsetMatrix;
+                            Matrix3x3 invbind = bone.OffsetMatrix;
+                            //bind.Inverse();
+                            //List<int> vertices = new List<VertexWeight>();
+
+                            foreach (Assimp.VertexWeight weight in bone.VertexWeights) {
+                                //Vector3D norm = mesh.Normals[weight.VertexID];
+
+
+
+                                /*Matrix3x3 weightedcurrentmat = new Matrix3x3(
+                                        weight.Weight * invbind.A1, weight.Weight * invbind.A2, weight.Weight * invbind.A1,
+                                        weight.Weight * invbind.B1, weight.Weight * invbind.B2, weight.Weight * invbind.B3,
+                                        weight.Weight * invbind.C1, weight.Weight * invbind.C2, weight.Weight * invbind.C3);
+
+                                if (weightedmats[weight.VertexID] == null) {
+                                    weightedmats[weight.VertexID] = weightedcurrentmat;
+                                }
+                                else {
+                                    Matrix3x3 existingmat = weightedmats[weight.VertexID];
+                                    weightedmats[weight.VertexID] = new Matrix3x3(
+                                        existingmat.A1 + invbind.A1, existingmat.A2 + invbind.A2, existingmat.A3 + invbind.A3,
+                                        existingmat.B1 + invbind.B1, existingmat.B2 + invbind.B2, existingmat.B3 + invbind.B3,
+                                        existingmat.C1 + invbind.C1, existingmat.C2 + invbind.C2, existingmat.C3 + invbind.C3);
+                                }*/
+                            }
 
                             //Matrix4x4 bindMat = bone.OffsetMatrix;
                             //bindMat.Inverse();
@@ -162,8 +206,14 @@ namespace SuperBMD
                         for (i = 0; i < mesh.Normals.Count; i++) {
                             Vector3D norm = mesh.Normals[i];
                             //norm.Set(norm.X, norm.Z, -norm.Y);
-                            Vector3D newnorm = rotvec*norm;
-                            norm.Set(newnorm.X, newnorm.Y, newnorm.Z);
+                            //Vector3D newnorm = rotvec*norm;
+                            //Matrix3x3 mat = weightedmats[i];
+                            //Vector3D newnorm = mat * norm; 
+                            norm.Set(-norm.Y, -norm.Z, norm.X); //<-- pretty good tbh
+                            //norm.Set(-norm.Y, -norm.Z, -norm.X); //<- not bad either??
+                            //norm.Set(norm.X, -norm.Z, -norm.Y); //<- ok
+
+                            //norm.Set((float)1.0, (float)0.0, (float)0.0);
                             mesh.Normals[i] = norm;
                         }
                     }
