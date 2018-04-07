@@ -434,7 +434,7 @@ namespace SuperBMD.BMD
             for (int i = 0; i < 16; i++)
             {
                 int tevSwapModeTableIndex = reader.ReadInt16();
-                if ((tevSwapModeTableIndex < 0) || (tevSwapModeTableIndex > m_SwapTableBlock.Count))
+                if ((tevSwapModeTableIndex < 0) || (tevSwapModeTableIndex >= m_SwapTableBlock.Count))
                     continue;
                 else
                     mat.SwapTables[i] = m_SwapTableBlock[tevSwapModeTableIndex];
