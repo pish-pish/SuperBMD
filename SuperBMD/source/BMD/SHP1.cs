@@ -136,7 +136,7 @@ namespace SuperBMD.BMD
         }
 
         private SHP1(   Assimp.Scene scene, VertexData vertData, Dictionary<string, int> boneNames, 
-                        EVP1 envelopes, DRW1 partialWeight, TristripOption triopt = TristripOption.DoNotTriStrip)
+                        EVP1 envelopes, DRW1 partialWeight, TristripOption triopt = TristripOption.DoTriStripAll)
         {
             Shapes = new List<Shape>();
             RemapTable = new List<int>();
