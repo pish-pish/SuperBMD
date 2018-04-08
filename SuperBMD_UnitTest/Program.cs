@@ -31,6 +31,8 @@ namespace SuperBMD_UnitTest
             string mat_file = "";
             string texheader_file = "";
 
+            bool flipyz = false;
+
             TristripOption triopt = TristripOption.DoTriStripStatic;
 
             int processed_args = 0;
@@ -57,6 +59,10 @@ namespace SuperBMD_UnitTest
                     else if (opt == "none") {
                         triopt = TristripOption.DoNotTriStrip;
                     }
+                }
+
+                else if (args[i] == "--flipyz") {
+                    flipyz = true;
                 }
 
                 else if (args[i] == "--help") {
@@ -165,7 +171,7 @@ namespace SuperBMD_UnitTest
                         }
                     }
                     
-                    Model mod = Model.Load(in_file, mat_presets, triopt, true);
+                    Model mod = Model.Load(in_file, mat_presets, triopt, flipyz);
 
                     // Load texture headers
                     if (texheader_file != "") {

@@ -117,6 +117,7 @@ namespace SuperBMD
             bool flipAxis = false)
         {
             if (flipAxis) {
+                
                 Console.WriteLine("Flipping things");
                 int i = 0;
                 Matrix4x4 rotate = Matrix4x4.FromRotationX((float)(-(1 / 2.0) * Math.PI));
@@ -149,6 +150,7 @@ namespace SuperBMD
                 }
 
                 if (root != null) {
+                    // Rotate rigged mesh
                     foreach (Mesh mesh in scene.Meshes) {
                         Console.WriteLine(mesh.Name);
                         Console.WriteLine(String.Format("Does it have bones? {0}", mesh.HasBones));
@@ -218,11 +220,33 @@ namespace SuperBMD
                         }
                     }
                 }
+                else {
+                    // Rotate static mesh
+                    foreach (Mesh mesh in scene.Meshes) {
+                        for (i = 0; i < mesh.VertexCount; i++) {
+                            Vector3D vertex = mesh.Vertices[i];
+                            vertex.Set(vertex.X, vertex.Z, -vertex.Y);
+                            mesh.Vertices[i] = vertex;
+                        }
+                        for (i = 0; i < mesh.Normals.Count; i++) {
+                            Vector3D norm = mesh.Normals[i];
+                            //norm.Set(norm.X, norm.Z, -norm.Y);
+                            //Vector3D newnorm = rotvec*norm;
+                            //Matrix3x3 mat = weightedmats[i];
+                            //Vector3D newnorm = mat * norm; 
+                            norm.Set(-norm.Y, -norm.Z, norm.X); //<-- pretty good tbh
+                            //norm.Set(-norm.Y, -norm.Z, -norm.X); //<- not bad either??
+                            //norm.Set(norm.X, -norm.Z, -norm.Y); //<- ok
+
+                            //norm.Set((float)1.0, (float)0.0, (float)0.0);
+                            mesh.Normals[i] = norm;
+                        }
+                    }
+                }
 
                 
 
                 if (root != null) {
-                    
                     List<Assimp.Node> allnodes = new List<Assimp.Node>();
                     List<Assimp.Node> processnodes = new List<Assimp.Node>();
                     processnodes.Add(root);
@@ -239,12 +263,10 @@ namespace SuperBMD
                     }*/
 
                 }
-
             }
-
-            flipAxis = false;
-            VertexData = new VTX1(scene, flipAxis);
-            Joints = new JNT1(scene, VertexData, flipAxis);
+            
+            VertexData = new VTX1(scene);
+            Joints = new JNT1(scene, VertexData);
             Scenegraph = new INF1(scene, Joints);
             Textures = new TEX1(scene, Path.GetDirectoryName(modelDirectory));
 
@@ -255,9 +277,6 @@ namespace SuperBMD
             PartialWeightData = new DRW1(scene, Joints.BoneNameIndices);
 
             Shapes = SHP1.Create(scene, Joints.BoneNameIndices, VertexData.Attributes, SkinningEnvelopes, PartialWeightData, triopt);
-            if (flipAxis) {
-                Shapes.flipAxis();
-            }
             Materials = new MAT3(scene, Textures, Shapes, mat_presets);
             Materials.LoadAdditionalTextures(Textures, modelDirectory);
             Materials.MapTextureNamesToIndices(Textures);

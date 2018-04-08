@@ -16,8 +16,6 @@ namespace SuperBMD.BMD
         public VertexData Attributes { get; private set; }
         public SortedDictionary<GXVertexAttribute, Tuple<GXDataType, byte>> StorageFormats { get; private set; }
 
-        private bool flipAxis = false;
-
         public VTX1(EndianBinaryReader reader, int offset)
         {
             Attributes = new VertexData();
@@ -58,12 +56,10 @@ namespace SuperBMD.BMD
             reader.BaseStream.Seek(offset + vtx1Size, System.IO.SeekOrigin.Begin);
         }
 
-        public VTX1(Assimp.Scene scene, bool doflipAxis = false)
+        public VTX1(Assimp.Scene scene)
         {
             Attributes = new VertexData();
             StorageFormats = new SortedDictionary<GXVertexAttribute, Tuple<GXDataType, byte>>();
-
-            flipAxis = doflipAxis;
 
             int i = -1;
 
@@ -122,10 +118,6 @@ namespace SuperBMD.BMD
                     //else
                     //    Console.WriteLine($"Mesh \"{ mesh.Name }\" has no texture coordinates on channel { texCoords }.");
                 }
-            }
-
-            if (flipAxis) {
-                //Attributes.flipAxis();
             }
         }
 
@@ -564,12 +556,6 @@ namespace SuperBMD.BMD
 
             for (int vec = 0; vec < mesh.Normals.Count; vec++) {
                 Vector3 tmpvec = mesh.Normals[vec].ToOpenTKVector3();
-
-                if (flipAxis) {
-                    float tmp = tmpvec.Y;
-                    tmpvec.Y = tmpvec.Z;
-                    tmpvec.Z = tmp;
-                }
 
                 tempList.Add(mesh.Normals[vec].ToOpenTKVector3());
             }
