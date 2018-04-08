@@ -290,6 +290,9 @@ namespace SuperBMD.Materials
             texData.UnlockBits(dat);
 
             texData.Dispose();
+            DetectAndSetFittingFormat();
+
+            Console.WriteLine(String.Format("Format of Texture {0} set to {1}", Name, Format));
         }
 
         // We analyze the image data and check 
@@ -336,6 +339,8 @@ namespace SuperBMD.Materials
             if (has_alpha) {
                 AlphaSetting = 0x2;
             }
+
+            
 
         }
 
