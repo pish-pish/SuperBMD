@@ -227,7 +227,7 @@ namespace SuperBMD.Materials
             EmbeddedPaletteOffset = 0;
             MinFilter = FilterMode.Linear;
             MagFilter = FilterMode.Linear;
-            MipMapCount = 0;
+            MipMapCount = 1;
             LodBias = 0;
 
             Bitmap texData = null;
@@ -336,12 +336,9 @@ namespace SuperBMD.Materials
             else {
                 Format = TextureFormats.CMPR;
             }
-            if (has_alpha) {
-                AlphaSetting = 0x2;
+            if (has_alpha && Format != TextureFormats.CMPR) {
+                AlphaSetting = 0x1;
             }
-
-            
-
         }
 
         public string SaveImageToDisk(string outputFile)
