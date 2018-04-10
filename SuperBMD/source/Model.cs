@@ -234,9 +234,9 @@ namespace SuperBMD
                             //Vector3D newnorm = rotvec*norm;
                             //Matrix3x3 mat = weightedmats[i];
                             //Vector3D newnorm = mat * norm; 
-                            norm.Set(-norm.Y, -norm.Z, norm.X); //<-- pretty good tbh
+                            //norm.Set(-norm.Y, -norm.Z, norm.X); //<-- pretty good tbh
                             //norm.Set(-norm.Y, -norm.Z, -norm.X); //<- not bad either??
-                            //norm.Set(norm.X, -norm.Z, -norm.Y); //<- ok
+                            norm.Set(norm.X, norm.Z, -norm.Y); //<- ok
 
                             //norm.Set((float)1.0, (float)0.0, (float)0.0);
                             mesh.Normals[i] = norm;
@@ -339,7 +339,7 @@ namespace SuperBMD
             Scenegraph.CorrectMaterialIndices(outScene, Materials);
             Textures.DumpTextures(outDir);
 
-            if (SkinningEnvelopes.Weights.Count == 0)
+            if (true)//(SkinningEnvelopes.Weights.Count == 0)
             {
                 Assimp.Node geomNode = new Node(Path.GetFileNameWithoutExtension(fileName), outScene.RootNode);
 
@@ -357,9 +357,10 @@ namespace SuperBMD
             //cont.ExportFile(outScene, fileName, "collada");
 
 
-            if (SkinningEnvelopes.Weights.Count == 0)
-                return; // There's no skinning information, so we can stop here
+            //if (SkinningEnvelopes.Weights.Count == 0)
+            //    return; // There's no skinning information, so we can stop here
 
+            return; // adding skinning info is buggy so we won't do it 
             // Now we need to add some skinning info, since AssImp doesn't do it for some bizarre reason
 
             StreamWriter test = new StreamWriter(fileName + ".tmp");
