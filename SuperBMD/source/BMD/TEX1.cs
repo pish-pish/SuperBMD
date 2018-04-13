@@ -53,6 +53,20 @@ namespace SuperBMD.BMD
 
                 if (mat.HasTextureDiffuse)
                 {
+                    string texname = System.IO.Path.GetFileNameWithoutExtension(mat.TextureDiffuse.FilePath);
+                    bool already_exists = false;
+
+                    foreach (BinaryTextureImage image in Textures) {
+                        if (image.Name == texname) {
+                            already_exists = true;
+                            break;
+                        }
+                    }
+
+                    if (already_exists) {
+                        continue;
+                    }
+
                     BinaryTextureImage img = new BinaryTextureImage();
                     img.Load(mat.TextureDiffuse, modelDirectory);
                     Textures.Add(img);
