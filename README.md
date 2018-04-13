@@ -22,12 +22,12 @@ If model path is a model but not BMD, it will be converted to BMD. By default tr
 are generated for static meshes but not rigged meshes. See below for more options on this.
 
 # Full usage
-`SuperBMD.exe <input path> [output path] [--mat <material path>] [--tristrip (all/static/none)]`
+`SuperBMD.exe <input path> [output path] [--mat <material path>] [--tristrip (all/static/none)] [--flipyz]`
 
-The last three arguments are optional. If output path is left out it is created from the input 
+Arguments in square brackets are optional. If output path is left out it is created from the input 
 path by replacing the extension either with `.bmd` or `.dae`, depending on input. If material 
 path is left out, it's created from the input path (when converting to BMD) or output path 
-(when converting BMD to DAE) by replacing the extension with `_mat.json`
+(when converting BMD to DAE) by replacing the extension with `_mat.json`. If flipyz is omitted, the axis are not swapped.
 
 If input path is a BMD/BDL and output path is a BMD, the model will be loaded, materials are 
 applied from <material path> if supplied and then written to output path. 
@@ -47,7 +47,8 @@ strips make the file size of the model smaller but can introduce issues in some 
 ### Modeling
 * When exporting a model for conversion to BMD, rotate the model about the X axis by -90 degrees. 
 Most modeling programs define the Z axis as the up axis, but Nintendo games use the Y axis instead. 
-Rotating the model ensures that the model is not sideways when imported into a game.
+Rotating the model ensures that the model is not sideways when imported into a game. Alternatively, 
+set the --flipyz option when calling SuperBMD.exe which will rotate the model appropriately without you having to do it.
 
 ### Skinning
 * SuperBMD supports both skinned and unskinned models.
@@ -64,7 +65,12 @@ This is recommended for models intended for maps.
 * SuperBMD supports models that have no textures. These models will appear white when imported into a game.
 * It is recommended that the model's textures be in the same directory as the model being converted. <b>
 If SuperBMD cannot find the model's textures, it will use a black and white checkerboard image instead.</b>
-* Textures must be in either BMP, JPG, or PNG format. TGA is currently not supported.
+* Textures must be in BMP, JPG, PNG or TGA format.
+
+### Converting BMD to DAE 
+When you drop a BMD on SuperBMD.exe, it will be converted into DAE. When you import the DAE into 3DS Max,
+in the Import options that appear you need to go into Advanced Options->Units, uncheck "Automatic" and set 
+File units converted to Meters. Otherwise the imported dae will be very big.
 
 ### Materials
 * This fork of SuperBMD allows dumping and inserting materials as JSON and it allows additional 
