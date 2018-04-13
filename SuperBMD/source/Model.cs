@@ -207,15 +207,7 @@ namespace SuperBMD
                         }
                         for (i = 0; i < mesh.Normals.Count; i++) {
                             Vector3D norm = mesh.Normals[i];
-                            //norm.Set(norm.X, norm.Z, -norm.Y);
-                            //Vector3D newnorm = rotvec*norm;
-                            //Matrix3x3 mat = weightedmats[i];
-                            //Vector3D newnorm = mat * norm; 
-                            norm.Set(-norm.Y, -norm.Z, norm.X); //<-- pretty good tbh
-                            //norm.Set(-norm.Y, -norm.Z, -norm.X); //<- not bad either??
-                            //norm.Set(norm.X, -norm.Z, -norm.Y); //<- ok
-
-                            //norm.Set((float)1.0, (float)0.0, (float)0.0);
+                            norm.Set(norm.X, norm.Z, -norm.Y);
                             mesh.Normals[i] = norm;
                         }
                     }
@@ -230,15 +222,7 @@ namespace SuperBMD
                         }
                         for (i = 0; i < mesh.Normals.Count; i++) {
                             Vector3D norm = mesh.Normals[i];
-                            //norm.Set(norm.X, norm.Z, -norm.Y);
-                            //Vector3D newnorm = rotvec*norm;
-                            //Matrix3x3 mat = weightedmats[i];
-                            //Vector3D newnorm = mat * norm; 
-                            //norm.Set(-norm.Y, -norm.Z, norm.X); //<-- pretty good tbh
-                            //norm.Set(-norm.Y, -norm.Z, -norm.X); //<- not bad either??
-                            norm.Set(norm.X, norm.Z, -norm.Y); //<- ok
-
-                            //norm.Set((float)1.0, (float)0.0, (float)0.0);
+                            norm.Set(norm.X, norm.Z, -norm.Y);
                             mesh.Normals[i] = norm;
                         }
                     }
