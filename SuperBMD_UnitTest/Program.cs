@@ -22,16 +22,14 @@ namespace SuperBMD_UnitTest
                 "--mat", "C:\\Users\\User\\Documents\\Git\\SuperBMD-tristrip\\SuperBMD_UnitTest\\bin\\Release\\SuperBMDReleaseTest\\model dissecting/shine_myshine.json", "--tristrip", "none" };
                 */
 
-            /*args = new string[] { "C:\\Users\\User\\Documents\\3dsMax\\export\\testlevel.dae",
-                    "C:\\Users\\User\\Documents\\Sandbox\\pack stuff\\NeuPacker\\arc\\model.bmd",
-                    "--mat", "C:\\Users\\User\\Documents\\Sandbox\\pack stuff\\NeuPacker\\MyMaterials\\mine.txt" };*/
-            //args = new string[] { "C:\\Users\\User\\Documents\\Git\\SuperBMD-tristrip\\SuperBMD_UnitTest\\bin\\Release\\SuperBMDReleaseTest\\mariooriginal\\ma_mdl1.bmd" };
+            //args = new string[] { "C:\\Users\\User\\Documents\\3dsMax\\export\\RinMario_SuperbmdSimple2.DAE", "--flipyz" };
             string in_file = "";
             string out_file = "";
             string mat_file = "";
             string texheader_file = "";
 
             bool flipyz = false;
+            bool fixNormals = true; // For fixing shading on rigged models
 
             TristripOption triopt = TristripOption.DoTriStripStatic;
 
@@ -63,6 +61,10 @@ namespace SuperBMD_UnitTest
 
                 else if (args[i] == "--flipyz") {
                     flipyz = true;
+                }
+
+                else if (args[i] == "--dontFix") {
+                    fixNormals = false;
                 }
 
                 else if (args[i] == "--help") {
@@ -171,7 +173,7 @@ namespace SuperBMD_UnitTest
                         }
                     }
                     
-                    Model mod = Model.Load(in_file, mat_presets, triopt, flipyz);
+                    Model mod = Model.Load(in_file, mat_presets, triopt, flipyz, fixNormals);
 
                     // Load texture headers
                     if (texheader_file != "") {
