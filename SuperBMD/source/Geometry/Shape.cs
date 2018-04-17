@@ -277,7 +277,7 @@ namespace SuperBMD.Geometry
                 Enums.GXPrimitiveType primtype = (Enums.GXPrimitiveType)primbrawl.Type;
 
                 if (primtype == Enums.GXPrimitiveType.TriangleStrip) {
-                    Console.WriteLine("Doing Tristrip");
+                    //Console.WriteLine("Doing Tristrip");
                     foreach (int vertIndex in primbrawl.Indices) {
                         currvert++;
                         Weight vertWeight = weights[vertIndex]; 
@@ -291,7 +291,7 @@ namespace SuperBMD.Geometry
 
                         // There are too many matrices, we need to create a new packet
                         if (numMatrices > 10 && false) {
-                            Console.WriteLine(String.Format("Breaking up because over the limit: {0}", numMatrices));
+                            //Console.WriteLine(String.Format("Breaking up because over the limit: {0}", numMatrices));
                             // If we break up and the resulting TriStrip becomes invalid,
                             // then we need to handel those cases.
                             if ((prim.PrimitiveType == Enums.GXPrimitiveType.TriangleStrip) && ((maxvert - currvert) < 2)) {
@@ -500,8 +500,8 @@ namespace SuperBMD.Geometry
 
                         // There are too many matrices, we need to create a new packet
                         if (numMatrices > 10) {
-                            Console.WriteLine(String.Format("Making new packet because previous one would have {0}", numMatrices));
-                            Console.WriteLine(oldcount);
+                            //Console.WriteLine(String.Format("Making new packet because previous one would have {0}", numMatrices));
+                            //Console.WriteLine(oldcount);
                             pack.Primitives.Add(prim);
                             Packets.Add(pack);
 
@@ -660,7 +660,7 @@ namespace SuperBMD.Geometry
                 else if (prim.PrimitiveType == Enums.GXPrimitiveType.Triangles) {
                     Debug.Assert(prim.Vertices.Count % 3 == 0);
                 }*/
-                Console.WriteLine(String.Format("We had this many matrices: {0}", numMatrices));
+                //Console.WriteLine(String.Format("We had this many matrices: {0}", numMatrices));
                 pack.Primitives.Add(prim);
                 Packets.Add(pack);
             }
@@ -689,11 +689,11 @@ namespace SuperBMD.Geometry
                     }
                     if (matrices > mostmatrices) mostmatrices = matrices;
                     //Debug.Assert(matrices <= 10);
-                    Console.WriteLine(matrices);
+                    //Console.WriteLine(matrices);
                     packWeights.Clear();
                 }
             }
-            Console.WriteLine(String.Format("Most matrices: {0}", mostmatrices));
+            //Console.WriteLine(String.Format("Most matrices: {0}", mostmatrices));
         }
 
         public void Write(EndianBinaryWriter writer)
