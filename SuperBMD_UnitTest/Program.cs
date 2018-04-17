@@ -172,8 +172,12 @@ namespace SuperBMD_UnitTest
                             texheader_file = possible_texfile;
                         }
                     }
-                    
-                    Model mod = Model.Load(in_file, mat_presets, triopt, flipyz, fixNormals);
+                    string additionalTexPath = null; 
+                    if (mat_file != "") {
+                        additionalTexPath = Path.GetDirectoryName(mat_file);
+                    }
+
+                    Model mod = Model.Load(in_file, mat_presets, triopt, flipyz, fixNormals, additionalTexPath);
 
                     // Load texture headers
                     if (texheader_file != "") {

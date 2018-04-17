@@ -29,7 +29,7 @@ namespace SuperBMD
         public static Model Load(
             string filePath, List<Materials.Material> mat_presets = null, 
             TristripOption triopt = TristripOption.DoNotTriStrip,
-            bool flipAxis = false, bool fixNormals = false)
+            bool flipAxis = false, bool fixNormals = false, string additionalTexPath = null)
         {
             string extension = Path.GetExtension(filePath);
             Model output = null;
@@ -58,7 +58,7 @@ namespace SuperBMD
                 }
                 Assimp.Scene aiScene = cont.ImportFile(filePath, postprocess);
 
-                output = new Model(aiScene, filePath, mat_presets, triopt, flipAxis, fixNormals);
+                output = new Model(aiScene, filePath, mat_presets, triopt, flipAxis, fixNormals, additionalTexPath);
             }
 
             return output;
@@ -114,7 +114,7 @@ namespace SuperBMD
         public Model(
             Scene scene, string modelDirectory, 
             List<Materials.Material> mat_presets = null, TristripOption triopt = TristripOption.DoNotTriStrip,
-            bool flipAxis = false, bool fixNormals = false)
+            bool flipAxis = false, bool fixNormals = false, string additionalTexPath = null)
         {
             Assimp.Node root = null;
             for (int i = 0; i < scene.RootNode.ChildCount; i++) {
@@ -323,7 +323,14 @@ namespace SuperBMD
 
             Shapes = SHP1.Create(scene, Joints.BoneNameIndices, VertexData.Attributes, SkinningEnvelopes, PartialWeightData, triopt);
             Materials = new MAT3(scene, Textures, Shapes, mat_presets);
-            Materials.LoadAdditionalTextures(Textures, modelDirectory);
+
+            if (additionalTexPath == null) {
+                Materials.LoadAdditionalTextures(Textures, Path.GetDirectoryName(modelDirectory));
+            }
+            else {
+                Materials.LoadAdditionalTextures(Textures, additionalTexPath);
+            }
+
             Materials.MapTextureNamesToIndices(Textures);
 
             foreach (Geometry.Shape shape in Shapes.Shapes)
