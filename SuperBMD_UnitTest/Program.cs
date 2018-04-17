@@ -157,7 +157,14 @@ namespace SuperBMD_UnitTest
 
                         using (TextReader file = File.OpenText(mat_file)) {
                             using (JsonTextReader reader = new JsonTextReader(file)) {
-                                mat_presets = serializer.Deserialize<List<Material>>(reader);
+                                try {
+                                    mat_presets = serializer.Deserialize<List<Material>>(reader);
+                                }
+                                catch (Newtonsoft.Json.JsonReaderException e) {
+                                    Console.WriteLine(String.Format("Error encountered while reading {0}", mat_file));
+                                    Console.WriteLine(String.Format("JsonReaderException: {0}", e.Message));
+                                    return;
+                                }
                             }
                         }
                     }
