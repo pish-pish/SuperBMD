@@ -523,7 +523,7 @@ namespace SuperBMD.BMD
             if (preset.PostTexCoordGens != null) bmdMaterial.PostTexCoordGens = preset.PostTexCoordGens;
             if (preset.TexMatrix1 != null) bmdMaterial.TexMatrix1 = preset.TexMatrix1;
             if (preset.PostTexMatrix != null) bmdMaterial.PostTexMatrix = preset.PostTexMatrix;
-            bmdMaterial.TextureRefs = preset.TextureRefs;
+            bmdMaterial.Textures = preset.Textures;
 
             if (preset.TevOrders != null) bmdMaterial.TevOrders = preset.TevOrders;
             if (preset.ColorSels != null) bmdMaterial.ColorSels = preset.ColorSels;
@@ -1270,7 +1270,7 @@ namespace SuperBMD.BMD
                     if (mat.TextureIndices[i] != -1) {
                         int index = mat.TextureIndices[i];
                         string texname = textures.Textures[index].Name;
-                        mat.TextureRefs[i] = texname;
+                        mat.Textures[i] = texname;
                     }
                 }
             }
@@ -1280,11 +1280,11 @@ namespace SuperBMD.BMD
             //Console.WriteLine("Mapping names to indices");
             foreach (Material mat in m_Materials) {
                 for (int i = 0; i < 8; i++) {
-                    if (mat.TextureRefs[i] != null) {
+                    if (mat.Textures[i] != null) {
                         int j = 0;
                         
                         foreach (BinaryTextureImage tex in textures.Textures) {
-                            if (tex.Name == mat.TextureRefs[i]) {
+                            if (tex.Name == mat.Textures[i]) {
                                 mat.TextureIndices[i] = j;
                                 //Console.WriteLine(String.Format("Mapped {0} to index {1}", tex.Name, j));
                                 break;
@@ -1296,15 +1296,15 @@ namespace SuperBMD.BMD
             }
         }
 
-        public void LoadAdditionalTextures(TEX1 tex1, string modelpath) {
-            string modeldir = Path.GetDirectoryName(modelpath);
+        public void LoadAdditionalTextures(TEX1 tex1, string texpath) {
+            //string modeldir = Path.GetDirectoryName(modelpath);
             foreach (Material mat in m_Materials) {
-                foreach (string texname in mat.TextureRefs) {
+                foreach (string texname in mat.Textures) {
                     if (texname != null) {
                         if (tex1[texname] == null) {
                             string path = "";
                             foreach (string extension in new string[] { ".png", ".jpg", ".tga", ".bmp" }) {
-                                string tmppath = Path.Combine(modeldir, texname + extension);
+                                string tmppath = Path.Combine(texpath, texname + extension);
                                 if (File.Exists(tmppath)) {
                                     path = tmppath;
                                     break; 
@@ -1317,7 +1317,7 @@ namespace SuperBMD.BMD
                             }
                             else {
                                 Console.WriteLine(String.Format("Could not find texture {0} in file path {1}",
-                                                   texname, modeldir));
+                                                   texname, texpath));
                             }
                         }
                     }

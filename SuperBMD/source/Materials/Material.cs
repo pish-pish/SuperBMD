@@ -20,7 +20,7 @@ namespace SuperBMD.Materials
 
         // This field is for convenience in json material extraction/replacement
         // Keeps track of texture names that a material uses
-        public string[] TextureRefs;
+        public string[] Textures;
 
         public IndirectTexturing IndTexEntry;
         public CullMode CullMode;
@@ -73,7 +73,7 @@ namespace SuperBMD.Materials
             PostTexMatrix = new TexMatrix?[20];
 
             TextureIndices = new int[8] { -1, -1, -1, -1, -1, -1, -1, -1 };
-            TextureRefs = new string[8] { null, null, null, null, null, null, null, null };
+            Textures = new string[8] { null, null, null, null, null, null, null, null };
 
             KonstColors = new Color?[4];
             KonstColors[0] = new Color(1, 1, 1, 1);
