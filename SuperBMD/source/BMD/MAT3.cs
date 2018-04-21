@@ -217,7 +217,6 @@ namespace SuperBMD.BMD
                             byte boolIn = reader.ReadByte();
 
                             if (boolIn > 1) {
-                                Console.WriteLine($"Halted boot reading with zcomp={zcomp} sectionSize={sectionSize} boolIn={boolIn}");
                                 break;
                             }
 
