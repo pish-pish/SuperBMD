@@ -137,6 +137,7 @@ namespace SuperBMD.BMD
                         m_AmbientColorBlock = ColorIO.Load(reader, sectionOffset, sectionSize);
                         break;
                     case Mat3OffsetIndex.LightData:
+                        m_LightingColorBlock = ColorIO.Load(reader, sectionOffset, sectionSize);
                         break;
                     case Mat3OffsetIndex.TexGenCount:
                         NumTexGensBlock = new List<byte>();
