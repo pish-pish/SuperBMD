@@ -15,14 +15,6 @@ namespace SuperBMD_UnitTest
     {
         static void Main(string[] args)
         {
-            //args = new string[] { "C:\\Users\\User\\Documents\\Git\\SuperBMD-tristrip\\SuperBMD_UnitTest\\bin\\Release\\rintest\\shine.bmd" };
-
-            /*args = new string[] { "C:\\Users\\User\\Documents\\Git\\SuperBMD-tristrip\\SuperBMD_UnitTest\\bin\\Release\\SuperBMDReleaseTest\\model dissecting/MyShine.DAE",
-                                "F:\\Wii games\\SMSFolder\\P-GMSE\\files\\data\\scene\\monte5.szs_ext\\scene\\mapobj\\shine.bmd",
-                "--mat", "C:\\Users\\User\\Documents\\Git\\SuperBMD-tristrip\\SuperBMD_UnitTest\\bin\\Release\\SuperBMDReleaseTest\\model dissecting/shine_myshine.json", "--tristrip", "none" };
-                */
-
-            //args = new string[] { "C:\\Users\\User\\Documents\\3dsMax\\export\\RinMario_SuperbmdSimple2.DAE", "--flipyz" };
             string in_file = "";
             string out_file = "";
             string mat_file = "";
@@ -164,6 +156,11 @@ namespace SuperBMD_UnitTest
                                 catch (Newtonsoft.Json.JsonReaderException e) {
                                     Console.WriteLine(String.Format("Error encountered while reading {0}", mat_file));
                                     Console.WriteLine(String.Format("JsonReaderException: {0}", e.Message));
+                                    return;
+                                }
+                                catch (Newtonsoft.Json.JsonSerializationException e) {
+                                    Console.WriteLine(String.Format("Error encountered while reading {0}", mat_file));
+                                    Console.WriteLine(String.Format("JsonSerializationException: {0}", e.Message));
                                     return;
                                 }
                             }
