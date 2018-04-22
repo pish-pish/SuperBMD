@@ -36,27 +36,18 @@ namespace BrawlLib.Modeling.Triangle_Converter
 
     public class TriangleEdge
     {
-        public TriangleEdge(uint A, uint B) {
-            if (true) {
-                m_A = A;
-                m_B = B;
-            }
-            //else {
-            //    m_A = B; m_B = A;
-            //}
-            
-        }
+        public TriangleEdge(uint A, uint B) { m_A = A; m_B = B; }
 
         public uint A { get { return m_A; } }
         public uint B { get { return m_B; } }
 
         public static bool operator ==(TriangleEdge left, TriangleEdge right)
         {
-            return ((left.A == right.A) && (left.B == right.B)) || ((left.A == right.B) && (left.B == right.A));
+            return ((left.A == right.A) && (left.B == right.B));
         }
         public static bool operator !=(TriangleEdge left, TriangleEdge right)
         {
-            return (left == right) == false; //((left.A != right.A) || (left.B != right.B));
+            return ((left.A != right.A) || (left.B != right.B));
         }
 
         public override bool Equals(object obj)
@@ -90,11 +81,9 @@ namespace BrawlLib.Modeling.Triangle_Converter
         public static bool operator ==(TriEdge left, TriEdge right)
         {
             return ((left.A == right.A) && (left.B == right.B));
-            //return (((left.A == right.A) && (left.B == right.B)) || ((left.A == right.B) && (left.B == right.A)));
         }
         public static bool operator !=(TriEdge left, TriEdge right)
         {
-            //return (left == right) == false; //
             return ((left.A != right.A) || (left.B != right.B));
         }
         public override bool Equals(object obj)
