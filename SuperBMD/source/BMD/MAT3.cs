@@ -1153,7 +1153,8 @@ namespace SuperBMD.BMD
 
             for (int i = 0; i < 8; i++)
             {
-                if (m_LightingColorBlock.Count != 0)
+                //if (m_LightingColorBlock.Count != 0)
+                if (mat.LightingColors[i] != null)
                     writer.Write((short)m_LightingColorBlock.IndexOf(mat.LightingColors[i].Value));
                 else
                     writer.Write((short)-1);
