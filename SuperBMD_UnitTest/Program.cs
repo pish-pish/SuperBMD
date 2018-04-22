@@ -57,6 +57,7 @@ namespace SuperBMD_UnitTest
                     else if (opt == "none") {
                         triopt = TristripOption.DoNotTriStrip;
                     }
+                    i++;
                 }
 
                 else if (args[i] == "--flipyz") {
