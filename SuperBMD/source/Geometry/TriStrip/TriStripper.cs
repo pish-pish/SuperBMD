@@ -44,7 +44,7 @@ namespace BrawlLib.Modeling.Triangle_Converter
         private bool m_FirstRun;
         private ushort[] m_Nodes;
         private int[] m_ImpTable;
-        private List<Weight> m_CurrentWeights;
+        private List<Weight> m_CurrentWeights = new List<Weight>();
         private Weight[] m_Weights;
 
         public TriStripper(uint[] TriIndices, Weight[] weights = null) //, ushort[] NodeIds, int[] ImpTable)
@@ -252,7 +252,8 @@ namespace BrawlLib.Modeling.Triangle_Converter
         {
             TriOrder StartOrder = Order;
 
-            m_CurrentWeights = new List<Weight>();
+            //m_CurrentWeights = new List<Weight>();
+            m_CurrentWeights.Clear();
             _checkNodes = true;
 
             //Begin a new strip
@@ -295,7 +296,8 @@ namespace BrawlLib.Modeling.Triangle_Converter
         }
         private	Strip BackExtendToStrip(uint Start, TriOrder Order, bool ClockWise)
         {
-            m_CurrentWeights = new List<Weight>();
+            //m_CurrentWeights = new List<Weight>();
+            m_CurrentWeights.Clear();
             _checkNodes = true;
 
             //Begin a new strip
