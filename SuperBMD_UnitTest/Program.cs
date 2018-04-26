@@ -52,7 +52,7 @@ namespace SuperBMD_UnitTest
                     i++;
                 }
 
-                else if (args[i] == "--flipyz") {
+                else if (args[i] == "--rotate") {
                     flipyz = true;
                 }
 
@@ -131,14 +131,14 @@ namespace SuperBMD_UnitTest
 
                     // create material file path if it isn't set and it exists in
                     // the same directory as the input model file
-                    if (mat_file == "") {
+                    /*if (mat_file == "") {
                         string inDir = Path.GetDirectoryName(in_file);
                         string fileNameNoExt = Path.GetFileNameWithoutExtension(in_file);
                         string possible_matfile = Path.Combine(inDir, fileNameNoExt + "_mat.json");
                         if (File.Exists(possible_matfile)) {
                             mat_file = possible_matfile;
                         }
-                    }
+                    }*/
 
                     // Load material file
                     if (mat_file != "") {
@@ -169,14 +169,14 @@ namespace SuperBMD_UnitTest
 
                     // create texture header file path if it isn't set and it exists in the same
                     // directory as the input model file
-                    if (texheader_file == "") {
+                    /*if (texheader_file == "") {
                         string inDir = Path.GetDirectoryName(in_file);
                         string fileNameNoExt = Path.GetFileNameWithoutExtension(in_file);
                         string possible_texfile = Path.Combine(inDir, fileNameNoExt + "_texheader.json");
                         if (File.Exists(possible_texfile)) {
                             texheader_file = possible_texfile;
                         }
-                    }
+                    }*/
                     string additionalTexPath = null; 
                     if (mat_file != "") {
                         additionalTexPath = Path.GetDirectoryName(mat_file);
