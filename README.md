@@ -36,9 +36,12 @@ the same directory as the DAE.
 Any model -> BMD:
 * If material path is set, loads material data from that path (See "Materials" further down in this document)
 * If texheader path is set, loads texture header info from that path (See "Texture header info" further down in this document)
-* ``--tristrip none`` generates no triangle strips. ``--tristrip static`` generates triangle strips only for static models (no rig). ``--tristrip all`` generates triangle strips for all models (static and rigged), currently triangle strips on rigged models are buggy though. If omitted, the default mode is generating triangle strips only for static models.
+* ``--tristrip none`` generates no triangle strips. ``--tristrip static`` generates triangle strips only for static models (no rig). 
+``--tristrip all`` generates triangle strips for all models (static and rigged), currently triangle strips on rigged models are buggy though. 
+If omitted, the default mode is generating triangle strips only for static models.
 * ``--rotate`` rotates the model so that Y is up instead of Z. Default is no rotation.
-* ``--dontFix`` disables (trying to) fix normals on rigged models. This is only relevant for using materials that add shading to the model and has no effect on whether a face is considered to be front or back-facing for culling purposes.
+* ``--dontFix`` disables (trying to) fix normals on rigged models. This is only relevant for using materials that add shading to the model and has no 
+effect on whether a face is considered to be front or back-facing for culling purposes.
 
 BMD -> DAE:
 * If material path is set, write material data to that path. Otherwise, write it in the same place as the created DAE.
@@ -107,7 +110,10 @@ This release has some bat scripts that apply some included materials.
 * shiny: Based on the toon shading material, this gives the model an interesting shine. Known to work with SMS.
 * simpleshading: Creates shadows based on the direction a triangle is facing. Known to work with Pikmin 2, but looks dark in SMS.
 
-These material presets are not always the best and you are encouraged to find other presets by experimenting with material data from models and making new scripts. You can combine options if wanted. For example, you can add the --rotate option from superbmd_rotatemodel.bat to the other bat scripts if you want shaded and rotated models.
+These material presets are not always the best and you are encouraged to find other 
+presets by experimenting with material data from models and making new scripts. 
+You can combine options if wanted. For example, you can add the --rotate option 
+from superbmd_rotatemodel.bat to the other bat scripts if you want shaded and rotated models.
 
 ### Texture header info
 When dumping BMDs to DAE you will find a texheader json file. It contains some data from the BTI headers of 
@@ -116,7 +122,8 @@ the way UV maps will wrap when going beyond the edges) attributes. They are appl
 using --texheader to specify the path to such a file. Header data is applied to textures with a matching name. A default
 header can be specified by setting the name to ``__TexDefault``.
 
-Supported texture formats: I4, I8, IA4, IA8, RGB565, RGB5A3, RGBA32 and CMPR (in other words, all that GC hardware supports except for the color-indexed formats). Supported wrap modes: ClampToEdge, Repeat and MirroredRepeat 
+Supported texture formats: I4, I8, IA4, IA8, RGB565, RGB5A3, RGBA32 and CMPR (in other words, all that GC hardware supports except 
+for the color-indexed formats). Supported wrap modes: ClampToEdge, Repeat and MirroredRepeat 
 
 ## Attribution
 This project uses a number of external libraries or parts of them in the code which will be listed here 
