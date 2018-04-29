@@ -213,7 +213,7 @@ namespace SuperBMD_UnitTest
                                     }
                                 }
                             }
-                            Console.WriteLine("Hmm");
+
                             if (found_tex != null) {
                                 Console.WriteLine(String.Format("Applying texture header preset for {0}: {1}", tex.Name, found_tex.Format));
                                 tex.ReplaceHeaderInfo(found_tex);
