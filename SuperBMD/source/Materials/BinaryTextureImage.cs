@@ -336,7 +336,7 @@ namespace SuperBMD.Materials
             else {
                 Format = TextureFormats.CMPR;
             }
-            if (has_alpha && Format != TextureFormats.CMPR) {
+            if (has_alpha) { //&& Format != TextureFormats.CMPR) {
                 AlphaSetting = 0x1;
             }
         }
