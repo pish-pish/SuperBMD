@@ -6,4 +6,4 @@ if not "%_input%" == ".bmd" (
         "%~dp0SuperBMD.exe" %1 --mat "%~dp0material_presets/toonshading.json"
     )
 )
-pause
+if errorlevel 1 pause

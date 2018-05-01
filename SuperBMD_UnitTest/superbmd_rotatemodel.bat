@@ -6,4 +6,4 @@ if not "%_input%" == ".bmd" (
         "%~dp0SuperBMD.exe" %1 --rotate
     )
 )
-if ERRORLEVEL pause
+if errorlevel 1 pause
