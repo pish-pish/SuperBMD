@@ -134,6 +134,7 @@ together with their license if necessary:
 
 * TGA reader by Dmitry Brant: http://dmitrybrant.com
 <br>
+
 * CTools by Chadderz, see https://github.com/RenolY2/SuperBMD/blob/master/SuperBMD/source/Materials/ImageDataFormat.cs
 <br>
 
