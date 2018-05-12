@@ -323,12 +323,9 @@ namespace SuperBMD.Materials
                 }
 
             }
-
-            if (is_gray && has_alpha) {
+            
+            if (is_gray) {
                 Format = TextureFormats.IA8;
-            }
-            else if (is_gray && !has_alpha) {
-                Format = TextureFormats.I8;
             }
             else if (complex_alpha) {
                 Format = TextureFormats.RGB5A3;
@@ -336,7 +333,7 @@ namespace SuperBMD.Materials
             else {
                 Format = TextureFormats.CMPR;
             }
-            if (has_alpha) { //&& Format != TextureFormats.CMPR) {
+            if (has_alpha) {
                 AlphaSetting = 0x1;
             }
         }
