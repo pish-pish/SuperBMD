@@ -124,6 +124,7 @@ header can be specified by setting the name to ``__TexDefault``.
 
 Supported texture formats: I4, I8, IA4, IA8, RGB565, RGB5A3, RGBA32 and CMPR (in other words, all that GC hardware supports except 
 for the color-indexed formats). Supported wrap modes: ClampToEdge, Repeat and MirroredRepeat 
+When using I4 or I8, note that intensity equals alpha.
 
 ## Attribution
 This project uses a number of external libraries or parts of them in the code which will be listed here 
