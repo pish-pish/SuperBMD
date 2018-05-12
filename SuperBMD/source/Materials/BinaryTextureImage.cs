@@ -232,50 +232,55 @@ namespace SuperBMD.Materials
 
             Bitmap texData = null;
 
-            if (File.Exists(texture.FilePath))
+            string texFilePath = texture.FilePath;
+            if (!Path.IsPathRooted(texFilePath)) {
+                texFilePath = Path.Combine(modelDirectory, texFilePath);
+            }
+
+            if (File.Exists(texFilePath))
             {
                 try {
-                    texData = new Bitmap(texture.FilePath);
+                    texData = new Bitmap(texFilePath);
                 }
                 catch (ArgumentException e) {
                     try {
-                        texData = TgaReader.Load(texture.FilePath);
+                        texData = TgaReader.Load(texFilePath);
                     }
                     catch (Exception e2) {
-                        Console.WriteLine(String.Format("Failed to load texture from {0} \n Texture should be BMP, JPG, PNG or TGA", texture.FilePath));
+                        Console.WriteLine(String.Format("Failed to load texture from {0} \n Texture should be BMP, JPG, PNG or TGA", texFilePath));
                         throw e2;
                     }
                 }
-                Name = Path.GetFileNameWithoutExtension(texture.FilePath);
+                Name = Path.GetFileNameWithoutExtension(texFilePath);
             }
             else
             {
-                Console.WriteLine($"Texture was not found at path \"{ texture.FilePath }\". Searching the model's directory...");
+                Console.WriteLine($"Texture was not found at path \"{ texFilePath }\". Searching the model's directory...");
                 string fileName = Path.GetFileName(texture.FilePath);
-                string texPath = Path.Combine(modelDirectory, fileName);
+                texFilePath = Path.Combine(modelDirectory, fileName);
 
-                if (!File.Exists(texPath))
+                if (!File.Exists(texFilePath))
                 {
                     Console.WriteLine($"Cannot find texture { fileName }. Using a checkboard texture instead...");
                     texData = new Bitmap(SuperBMD.Properties.Resources.default_checker);
-                    Name = Path.GetFileNameWithoutExtension(texPath);
+                    Name = Path.GetFileNameWithoutExtension(texFilePath);
                 }
                 else
                 {
                     try {
-                        texData = new Bitmap(texPath);
+                        texData = new Bitmap(texFilePath);
                     }
                     catch (Exception e) {
                         try {
-                            texData = TgaReader.Load(texture.FilePath);
+                            texData = TgaReader.Load(texFilePath);
                         }
                         catch (Exception e2) {
-                            Console.WriteLine(String.Format("Failed to load texture from {0} \n Texture should be BMP, JPG, PNG or TGA"));
+                            Console.WriteLine(String.Format("Failed to load texture from {0} \n Texture should be BMP, JPG, PNG or TGA", texFilePath));
                             throw e2;
                         } 
                     }
 
-                    Name = Path.GetFileNameWithoutExtension(texPath);
+                    Name = Path.GetFileNameWithoutExtension(texFilePath);
                 }
             }
 
