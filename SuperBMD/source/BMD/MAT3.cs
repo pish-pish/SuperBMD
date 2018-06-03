@@ -453,8 +453,17 @@ namespace SuperBMD.BMD
                 return null;
             } 
             Material default_mat = null;
-            
+
+            int i = 0;
+
             foreach (Material mat in mat_presets) {
+                if (mat == null) {
+                    Console.WriteLine(String.Format("Warning: Material entry with index {0} is malformed and has been skipped", i));
+                    continue;
+                }
+
+                i++;
+                
                 //Console.WriteLine(String.Format("{0}", mat.Name));
                 if (mat.Name == "__MatDefault") {
                     default_mat = mat;
