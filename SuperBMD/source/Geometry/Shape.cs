@@ -81,6 +81,13 @@ namespace SuperBMD.Geometry
             int i = 0;
             foreach (Face face in mesh.Faces) {
                 for (int j = 0; j < 3; j++) {
+                    if (face.Indices.Count < 3) {
+                        throw new System.Exception(
+                            String.Format(
+                                "Edge No. {0} in mesh {1} has less than 3 vertices (loose vertex or edge). " +
+                                "You need to remove it.", i, mesh.Name)
+                            );
+                    }
                     triindices[i * 3 + j] = (uint)face.Indices[2-j];
                 }
 

@@ -119,6 +119,9 @@ namespace SuperBMD
             Assimp.Node root = null;
             for (int i = 0; i < scene.RootNode.ChildCount; i++) {
                 if (scene.RootNode.Children[i].Name.ToLowerInvariant() == "skeleton_root") {
+                    if (scene.RootNode.Children[i].ChildCount == 0) {
+                        throw new System.Exception("skeleton_root has no children! If you are making a rigged model, make sure skeleton_root contains the root of your skeleton.");
+                    }
                     root = scene.RootNode.Children[i].Children[0];
                     break;
                 }
