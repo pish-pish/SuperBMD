@@ -142,7 +142,7 @@ namespace SuperBMD
 
             if (flipAxis) {
                 
-                Console.WriteLine("Flipping things");
+                Console.WriteLine("Rotating the model...");
                 int i = 0;
                 Matrix4x4 rotate = Matrix4x4.FromRotationX((float)(-(1 / 2.0) * Math.PI));
                 //rotate = Matrix4x4.FromRotationZ((float)(-(1 / 2.0) * Math.PI));
@@ -159,9 +159,6 @@ namespace SuperBMD
                 //rotate = Matrix4x4.FromRotationZ((float)(-(1 / 2.0) * Math.PI));
                 Matrix4x4 rotateC = Matrix4x4.FromRotationX((float)(-(1 / 2.0) * Math.PI));
                 Matrix4x4 trans;
-                
-
-                
 
                 if (root != null) {
                     // Rotate rigged mesh
@@ -298,7 +295,7 @@ namespace SuperBMD
 
                     for (int i = 0; i < mesh.Normals.Count; i++) {
                         if (weightedmats[i] == null) {
-
+                            continue; // means that index hasn't been weighted to so we can't do anything?
                         }
 
                         weightedmats[i].Sort((x, y) => y.Item1.CompareTo(x.Item1));
@@ -313,6 +310,31 @@ namespace SuperBMD
                 }
             }
 
+            // We check if the model mixes weighted and unweighted vertices.
+            // If that is the case, we throw an exception here. If we don't,
+            // an exception will be thrown later on that is less helpful to the user.
+            if (true) {
+                bool usesWeights = false;
+                foreach (Mesh mesh in scene.Meshes) {
+                    bool[] weightedmats = new bool[mesh.VertexCount];
+
+                    foreach (Assimp.Bone bone in mesh.Bones) {
+                        foreach (Assimp.VertexWeight weight in bone.VertexWeights) {
+                            weightedmats[weight.VertexID] = true;
+                        }
+                    }
+
+                    for (uint i = 0; i < mesh.VertexCount; i++) {
+                        if (weightedmats[i] == true) {
+                            usesWeights = true;
+
+                        }
+                        else if (usesWeights) {
+                            throw new System.Exception("Model has a mixture of weighted and unweighted vertices! Please weight all vertices to at least one bone.");
+                        }
+                    }
+                }
+            }
             VertexData = new VTX1(scene);
             Joints = new JNT1(scene, VertexData);
             Scenegraph = new INF1(scene, Joints);
