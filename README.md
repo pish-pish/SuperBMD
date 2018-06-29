@@ -94,7 +94,7 @@ material it can be useful to leave the first texture name as ``null`` so each ma
 texture name it originally had.
 
 * Additional textures can be loaded by adding their names in the ``Textures`` section of a material. 
-The program will search for these textures in the folder of the input file by appending an extension to 
+The program will search for these textures in the folder of the material file by appending an extension to 
 the name in this order: ``.png``, ``.jpg``, ``.tga``, ``.bmp``. (Example: If there are two textures 
 ``Texture.png`` and ``Texture.bmp``, the PNG texture will be loaded rather than the BMP texture)
 
