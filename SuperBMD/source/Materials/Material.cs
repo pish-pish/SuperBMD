@@ -82,7 +82,7 @@ namespace SuperBMD.Materials
             AlphaSels = new KonstAlphaSel[16];
 
             TevOrders = new TevOrder?[16];
-            TevOrders[0] = new TevOrder(TexCoordId.TexCoord0, TexMapId.TexMap0, GXColorChannelId.Color0);
+            //TevOrders[0] = new TevOrder(TexCoordId.TexCoord0, TexMapId.TexMap0, GXColorChannelId.Color0);
 
             TevColors = new Color?[16];
             TevColors[0] = new Color(1, 1, 1, 1);
@@ -102,7 +102,7 @@ namespace SuperBMD.Materials
             FogInfo = new Fog(0, false, 0, 0, 0, 0, 0, new Color(0, 0, 0, 0), new float[10]);
         }
 
-        public void SetUpTev(bool hasTexture, bool hasVtxColor, int texIndex, string texName)
+        public void SetUpTev(bool hasTexture, bool hasVtxColor, int texIndex, string texName, Assimp.Material meshMat)
         {
             Flag = 1;
             // Set up channel control 0 to use vertex colors, if they're present
@@ -166,10 +166,19 @@ namespace SuperBMD.Materials
             // No texture!
             else
             {
-                // No vertex colors either, so make sure there's a material color (white) to use instead
+                AddTevOrder(TexCoordId.Null, TexMapId.Null, GXColorChannelId.Color0);
+
+                // No vertex colors either, so make sure there's a material color to use instead
                 if (!hasVtxColor)
                 {
-                    MaterialColors[0] = new Color(1, 1, 1, 1);
+                    if (meshMat.HasColorDiffuse) { // Use model's diffuse color
+                        Assimp.Color4D color = meshMat.ColorDiffuse;
+                        MaterialColors[0] = new Color(color.R, color.G, color.B, color.A);
+                    }
+                    else { // Otherwise default to white
+                        MaterialColors[0] = new Color(1, 1, 1, 1);
+                    }
+                    
                     AddChannelControl(J3DColorChannelId.Color0, false, ColorSrc.Register, LightId.None, DiffuseFn.None, J3DAttenuationFn.None_0, ColorSrc.Register);
                     AddChannelControl(J3DColorChannelId.Alpha0, false, ColorSrc.Register, LightId.None, DiffuseFn.None, J3DAttenuationFn.None_0, ColorSrc.Register);
                 }

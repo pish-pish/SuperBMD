@@ -498,7 +498,7 @@ namespace SuperBMD.BMD
                     texIndex = textures.Textures.IndexOf(textures[texName]);
                 }
 
-                bmdMaterial.SetUpTev(meshMat.HasTextureDiffuse, hasVtxColor0, texIndex, texName);
+                bmdMaterial.SetUpTev(meshMat.HasTextureDiffuse, hasVtxColor0, texIndex, texName, meshMat);
                 Material preset = FindMatPreset(meshMat.Name, mat_presets);
 
                 if (preset != null) {
