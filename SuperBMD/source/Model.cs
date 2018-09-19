@@ -411,7 +411,7 @@ namespace SuperBMD
             outScene.RootNode = new Node("RootNode");
 
             Scenegraph.FillScene(outScene, Joints.FlatSkeleton, settings.UseSkeletonRoot);
-            Materials.FillScene(outScene, Textures, outDir);
+            Materials.FillScene(outScene, Textures, outDir, keepmatnames=true);
             Shapes.FillScene(outScene, VertexData.Attributes, Joints.FlatSkeleton, SkinningEnvelopes.InverseBindMatrices);
             Scenegraph.CorrectMaterialIndices(outScene, Materials);
             Textures.DumpTextures(outDir);
