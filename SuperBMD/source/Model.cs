@@ -8,6 +8,7 @@ using Assimp;
 using System.IO;
 using SuperBMD.BMD;
 using SuperBMD.Geometry.Enums;
+using static SuperBMD.Util.VectorUtility;
 using System.Collections;
 
 namespace SuperBMD
@@ -298,11 +299,18 @@ namespace SuperBMD
                             continue; // means that index hasn't been weighted to so we can't do anything?
                         }
 
-                        weightedmats[i].Sort((x, y) => y.Item1.CompareTo(x.Item1));
+                        //weightedmats[i].Sort((x, y) => y.Item1.CompareTo(x.Item1));
 
                         Vector3D norm = mesh.Normals[i];
 
-                        Matrix3x3 invbind = weightedmats[i][0].Item2;
+                        Matrix3x3 invbind = ScalarMultiply3x3(weightedmats[i][0].Item1, weightedmats[i][0].Item2);
+                        for (int j = 1; j < weightedmats[i].Count; j++) {
+                            invbind = AddMatrix3x3(
+                                invbind,
+                                ScalarMultiply3x3(weightedmats[i][j].Item1, weightedmats[i][j].Item2)
+                                );
+                        }
+
                         norm = invbind * norm;
 
                         mesh.Normals[i] = norm;

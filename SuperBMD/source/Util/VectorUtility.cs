@@ -56,5 +56,27 @@ namespace SuperBMD.Util
             outMat.Transpose();
             return outMat;
         }
+
+
+        public static Matrix3x3 ScalarMultiply3x3(float scal, Matrix3x3 mat) {
+            return new Matrix3x3(
+                scal * mat.A1, scal * mat.A2, scal * mat.A3,
+                scal * mat.B1, scal * mat.B2, scal * mat.B3,
+                scal * mat.C1, scal * mat.C2, scal * mat.C3);
+        }
+
+        public static Matrix3x3 ScalarMultiply3x3(Matrix3x3 mat, float scal) {
+            return new Matrix3x3(
+                scal * mat.A1, scal * mat.A2, scal * mat.A3,
+                scal * mat.B1, scal * mat.B2, scal * mat.B3,
+                scal * mat.C1, scal * mat.C2, scal * mat.C3);
+        }
+
+        public static Matrix3x3 AddMatrix3x3(Matrix3x3 mat1, Matrix3x3 mat2) {
+            return new Matrix3x3(
+                mat1.A1 + mat2.A1, mat1.A2 + mat2.A2, mat1.A3 + mat2.A3,
+                mat1.B1 + mat2.B1, mat1.B2 + mat2.B2, mat1.B3 + mat2.B3,
+                mat1.C1 + mat2.C1, mat1.C2 + mat2.C2, mat1.C3 + mat2.C3);
+        }
     }
 }
