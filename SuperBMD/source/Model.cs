@@ -408,7 +408,7 @@ namespace SuperBMD
             }
         }
 
-        public void ExportAssImp(string fileName, string outFilepath, string modelType, ExportSettings settings, bool keepmatnames = false)
+        public void ExportAssImp(string fileName, string outFilepath, string modelType, ExportSettings settings, bool keepmatnames = true)
         {
             string outDir = Path.GetDirectoryName(outFilepath);
             //string fileNameNoExt = Path.GetFileNameWithoutExtension(fileName);
@@ -419,12 +419,12 @@ namespace SuperBMD
             outScene.RootNode = new Node("RootNode");
 
             Scenegraph.FillScene(outScene, Joints.FlatSkeleton, settings.UseSkeletonRoot);
-            Materials.FillScene(outScene, Textures, outDir, keepmatnames=true);
+            Materials.FillScene(outScene, Textures, outDir, keepmatnames);
             Shapes.FillScene(outScene, VertexData.Attributes, Joints.FlatSkeleton, SkinningEnvelopes.InverseBindMatrices);
             Scenegraph.CorrectMaterialIndices(outScene, Materials);
             Textures.DumpTextures(outDir);
 
-            if (true)//(SkinningEnvelopes.Weights.Count == 0)
+            if (SkinningEnvelopes.Weights.Count == 0)
             {
                 Assimp.Node geomNode = new Node(Path.GetFileNameWithoutExtension(fileName), outScene.RootNode);
 
@@ -442,15 +442,15 @@ namespace SuperBMD
             //cont.ExportFile(outScene, fileName, "collada");
 
 
-            //if (SkinningEnvelopes.Weights.Count == 0)
-            //    return; // There's no skinning information, so we can stop here
+            if (SkinningEnvelopes.Weights.Count == 0)
+                return; // There's no skinning information, so we can stop here
 
-            return; // adding skinning info is buggy so we won't do it 
+            //return; // adding skinning info is buggy so we won't do it 
             // Now we need to add some skinning info, since AssImp doesn't do it for some bizarre reason
 
             StreamWriter test = new StreamWriter(fileName + ".tmp");
             StreamReader dae = File.OpenText(fileName);
-            
+            string[] characters_to_replace = new string[] { " ", "(", ")" };
             while (!dae.EndOfStream)
             {
                 string line = dae.ReadLine();
@@ -486,7 +486,10 @@ namespace SuperBMD
                         if (keepmatnames == true) {
                             // attempt to keep the original material names
                             // this is experimental because AssImp sanitizes the names
-                            matname = outScene.Materials[mesh.MaterialIndex].Name.Replace("#", "_").Replace(" ", "_");
+                            matname = outScene.Materials[mesh.MaterialIndex].Name.Replace("#", "_");
+                            foreach (string letter in characters_to_replace) {
+                                matname = matname.Replace(letter, "_");
+                            }
                         }
 
                         test.WriteLine($"      <node id=\"{ mesh.Name }\" name=\"{ mesh.Name }\" type=\"NODE\">");

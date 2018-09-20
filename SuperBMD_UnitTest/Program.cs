@@ -8,6 +8,8 @@ using Newtonsoft.Json;
 using SuperBMD;
 using SuperBMD.Materials;
 using SuperBMD.Geometry.Enums;
+using System.Globalization;
+using System.Threading;
 
 namespace SuperBMD_UnitTest
 {
@@ -15,6 +17,8 @@ namespace SuperBMD_UnitTest
     {
         static void Main(string[] args)
         {
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
+
             string in_file = "";
             string out_file = "";
             string mat_file = "";
