@@ -139,7 +139,7 @@ namespace SuperBMD.Materials
                 // Generate texture stuff
                 AddTexGen(TexGenType.Matrix2x4, TexGenSrc.Tex0, Enums.TexMatrix.Identity);
                 AddTexMatrix(TexGenType.Matrix3x4, 0, OpenTK.Vector3.Zero, OpenTK.Vector2.One, 0, OpenTK.Vector2.Zero, OpenTK.Matrix4.Identity);
-                AddTevOrder(TexCoordId.TexCoord0, TexMapId.TexMap0, GXColorChannelId.ColorNull);
+                AddTevOrder(TexCoordId.TexCoord0, TexMapId.TexMap0, GXColorChannelId.Color0A0);
                 AddTexIndex(texIndex);
 
                 // Texture + Vertex Color
@@ -166,7 +166,7 @@ namespace SuperBMD.Materials
             // No texture!
             else
             {
-                AddTevOrder(TexCoordId.Null, TexMapId.Null, GXColorChannelId.Color0);
+                AddTevOrder(TexCoordId.Null, TexMapId.Null, GXColorChannelId.Color0A0);
 
                 // No vertex colors either, so make sure there's a material color to use instead
                 if (!hasVtxColor)
