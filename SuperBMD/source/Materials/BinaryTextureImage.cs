@@ -91,6 +91,11 @@ namespace SuperBMD.Materials
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        public enum Aniso { ANISO_1 = 0, ANISO_2, ANISO_4 }
+
+        /// <summary>
         /// The Palette simply stores the color data as loaded from the file.
         /// It does not convert the files based on the Palette type to RGBA8.
         /// </summary>
@@ -131,12 +136,16 @@ namespace SuperBMD.Materials
         public PaletteFormats PaletteFormat { get; private set; }
         [JsonIgnore]
         public ushort PaletteCount { get; private set; }
-        [JsonIgnore]
-        public int EmbeddedPaletteOffset { get; private set; } // This is a guess. It seems to be 0 in most things, but it fits with min/mag filters.
+        //[JsonIgnore]
+        //public int EmbeddedPaletteOffset { get; private set; } // This is a guess. It seems to be 0 in most things, but it fits with min/mag filters.
+        public byte MipMap { get; set; }
+        public byte EdgeLOD { get; set; }
+        public byte BiasClamp { get; set; }
+        public byte MaxAniso { get; set; }
         public FilterMode MinFilter { get; set; }
         public FilterMode MagFilter { get; set; }
         public sbyte MinLOD { get; set; } // Fixed point number, 1/8 = conversion (ToDo: is this multiply by 8 or divide...)
-        public sbyte MagLOD { get; set; } // Fixed point number, 1/8 = conversion (ToDo: is this multiply by 8 or divide...)
+        public sbyte MaxLOD { get; set; } // Fixed point number, 1/8 = conversion (ToDo: is this multiply by 8 or divide...)
         [JsonIgnore]
         public byte MipMapCount { get; private set; }
         public short LodBias { get; set; } // Fixed point number, 1/100 = conversion
@@ -146,9 +155,9 @@ namespace SuperBMD.Materials
         [JsonIgnore]
         private byte[] m_rgbaImageData;
 
-        public byte unknown1 = 0;
-        public short unknown2 = 0;
-        public byte unknown3 = 0;
+        public byte AttachPalette = 0;
+        //public short unknown2 = 0;
+        //public byte LonelyPaddingByte = 0;
 
         public BinaryTextureImage()
         {
@@ -175,16 +184,22 @@ namespace SuperBMD.Materials
             Height = stream.ReadUInt16();
             WrapS = (WrapModes)stream.ReadByte();
             WrapT = (WrapModes)stream.ReadByte();
-            unknown1 = stream.ReadByte();
+            AttachPalette = stream.ReadByte();
             PaletteFormat = (PaletteFormats)stream.ReadByte();
             PaletteCount = stream.ReadUInt16();
             int paletteDataOffset = stream.ReadInt32();
-            EmbeddedPaletteOffset = stream.ReadInt32();
+            //EmbeddedPaletteOffset = stream.ReadInt32();
+            MipMap = stream.ReadByte();
+            EdgeLOD = stream.ReadByte();
+            BiasClamp = stream.ReadByte();
+            MaxAniso = stream.ReadByte();
             MinFilter = (FilterMode)stream.ReadByte();
             MagFilter = (FilterMode)stream.ReadByte();
-            unknown2 = stream.ReadInt16();
+            MinLOD = stream.ReadSByte();
+            MaxLOD = stream.ReadSByte();
+            //unknown2 = stream.ReadInt16();
             MipMapCount = stream.ReadByte();
-            unknown3 = stream.ReadByte();
+            stream.SkipByte(); //LonelyPaddingByte = stream.ReadByte();
             LodBias = stream.ReadInt16();
 
             int imageDataOffset = stream.ReadInt32();
@@ -207,11 +222,11 @@ namespace SuperBMD.Materials
             MinFilter = other.MinFilter;
             MagFilter = other.MagFilter;
             MinLOD = other.MinLOD;
-            MagLOD = other.MagLOD;
+            MaxLOD = other.MaxLOD;
             LodBias = other.LodBias;
-            unknown1 = other.unknown1;
-            unknown2 = other.unknown2;
-            unknown3 = other.unknown3;
+            AttachPalette = other.AttachPalette;
+            //unknown2 = other.unknown2;
+            //LonelyPaddingByte = other.LonelyPaddingByte;
         }
 
         public void Load(Assimp.TextureSlot texture, string modelDirectory)
@@ -224,7 +239,11 @@ namespace SuperBMD.Materials
             //WrapT = WrapModes.ClampToEdge;
             PaletteFormat = PaletteFormats.IA8;
             PaletteCount = 0;
-            EmbeddedPaletteOffset = 0;
+            //EmbeddedPaletteOffset = 0;
+            MipMap = 0x00;
+            EdgeLOD = 0x00;
+            BiasClamp = 0x00;
+            MaxAniso = 0x00;
             MinFilter = FilterMode.Linear;
             MagFilter = FilterMode.Linear;
             MipMapCount = 1;
@@ -394,7 +413,11 @@ namespace SuperBMD.Materials
                 WrapT = WrapModes.ClampToEdge;
                 PaletteFormat = PaletteFormats.IA8;
                 PaletteCount = 0;
-                EmbeddedPaletteOffset = 0;
+                //EmbeddedPaletteOffset = 0;
+                MipMap = 0x00;
+                EdgeLOD = 0x00;
+                BiasClamp = 0x00;
+                MaxAniso = 0x00;
                 MinFilter = FilterMode.Linear;
                 MagFilter = FilterMode.Linear;
                 MipMapCount = 0;
@@ -419,7 +442,7 @@ namespace SuperBMD.Materials
             writer.Write((byte)WrapT);
 
             // This is an unknown
-            writer.Write((byte)unknown1);
+            writer.Write((byte)AttachPalette);
 
             writer.Write((byte)PaletteFormat);
             writer.Write((short)PaletteCount);
@@ -427,18 +450,24 @@ namespace SuperBMD.Materials
             // This is a placeholder for PaletteDataOffset
             writer.Write((int)0);
 
-            writer.Write(EmbeddedPaletteOffset);
+            //writer.Write(EmbeddedPaletteOffset);
+            writer.Write(MipMap);
+            writer.Write(EdgeLOD);
+            writer.Write(BiasClamp);
+            writer.Write(MaxAniso);
 
             writer.Write((byte)MinFilter);
             writer.Write((byte)MagFilter);
 
             // This is an unknown
-            writer.Write((short)unknown2);
+            //writer.Write((short)unknown2);
+            writer.Write(MinLOD);
+            writer.Write(MaxLOD);
 
             writer.Write((byte)MipMapCount);
 
             // This is an unknown
-            writer.Write((byte)unknown3);
+            writer.Write((byte)0xFF); // writer.Write((byte)LonelyPaddingByte);
 
             writer.Write((short)LodBias);
 
