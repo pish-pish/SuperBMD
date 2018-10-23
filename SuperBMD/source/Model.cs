@@ -27,6 +27,8 @@ namespace SuperBMD
         private int packetCount;
         private int vertexCount;
 
+        private string[] characters_to_replace = new string[] { " ", "(", ")" };
+
         public static Model Load(
             string filePath, List<Materials.Material> mat_presets = null, 
             TristripOption triopt = TristripOption.DoNotTriStrip,
@@ -424,6 +426,10 @@ namespace SuperBMD
             Scenegraph.CorrectMaterialIndices(outScene, Materials);
             Textures.DumpTextures(outDir);
 
+            foreach (Mesh mesh in outScene.Meshes) {
+                Console.WriteLine(String.Format("Texcoord count: {0}", mesh.TextureCoordinateChannelCount));
+            }
+
             if (SkinningEnvelopes.Weights.Count == 0)
             {
                 Assimp.Node geomNode = new Node(Path.GetFileNameWithoutExtension(fileName), outScene.RootNode);
@@ -445,14 +451,12 @@ namespace SuperBMD
             if (SkinningEnvelopes.Weights.Count == 0)
                 return; // There's no skinning information, so we can stop here
 
-            //return; // adding skinning info is buggy so we won't do it 
             // Now we need to add some skinning info, since AssImp doesn't do it for some bizarre reason
 
             StreamWriter test = new StreamWriter(fileName + ".tmp");
             StreamReader dae = File.OpenText(fileName);
-            string[] characters_to_replace = new string[] { " ", "(", ")" };
-            while (!dae.EndOfStream)
-            {
+
+            while (!dae.EndOfStream) {
                 string line = dae.ReadLine();
 
                 if (line == "  <library_visual_scenes>")
@@ -480,16 +484,13 @@ namespace SuperBMD
                 }
                 else if (line.Contains("</visual_scene>"))
                 {
-                    foreach (Mesh mesh in outScene.Meshes)
-                    {
+                    foreach (Mesh mesh in outScene.Meshes) {
                         string matname = "mat";
                         if (keepmatnames == true) {
-                            // attempt to keep the original material names
-                            // this is experimental because AssImp sanitizes the names
-                            matname = outScene.Materials[mesh.MaterialIndex].Name.Replace("#", "_");
-                            foreach (string letter in characters_to_replace) {
-                                matname = matname.Replace(letter, "_");
-                            }
+                            matname = AssimpMatnameSanitize(mesh.MaterialIndex, outScene.Materials[mesh.MaterialIndex].Name);
+                        }
+                        else {
+                            matname = AssimpMatnameSanitize(mesh.MaterialIndex, matname);
                         }
 
                         test.WriteLine($"      <node id=\"{ mesh.Name }\" name=\"{ mesh.Name }\" type=\"NODE\">");
@@ -498,7 +499,7 @@ namespace SuperBMD
                         test.WriteLine("        <skeleton>#skeleton_root</skeleton>");
                         test.WriteLine("        <bind_material>");
                         test.WriteLine("         <technique_common>");
-                        test.WriteLine($"          <instance_material symbol=\"theresonlyone\" target=\"#m{ mesh.MaterialIndex }{matname}\" />");
+                        test.WriteLine($"          <instance_material symbol=\"theresonlyone\" target=\"#{matname}\" />");
                         test.WriteLine("         </technique_common>");
                         test.WriteLine("        </bind_material>");
                         test.WriteLine("       </instance_controller>");
@@ -724,6 +725,15 @@ namespace SuperBMD
             writer.WriteLine("\n       </v>");
 
             writer.WriteLine($"      </vertex_weights>");
+        }
+
+        // Attempt to replicate Assimp's behaviour for sanitizing material names
+        private string AssimpMatnameSanitize(int meshindex, string matname) {
+            matname = matname.Replace("#", "_");
+            foreach (string letter in characters_to_replace) {
+                matname = matname.Replace(letter, "_");
+            }
+            return $"m{meshindex}{matname}"; 
         }
     }
 }
