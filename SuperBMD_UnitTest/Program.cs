@@ -15,6 +15,8 @@ namespace SuperBMD_UnitTest
 {
     class Program
     {
+        static string SuperBMDVersion = "1.3.6";
+
         static void Main(string[] args)
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
@@ -32,48 +34,66 @@ namespace SuperBMD_UnitTest
             int processed_args = 0;
 
             for (int i = 0; i < args.Length; i++) {
-                if (args[i] == "--mat") {
+                if (args[i] == "--mat")
+                {
                     mat_file = args[i + 1];
                     i++;
                 }
 
-                else if (args[i] == "--texheader") {
+                else if (args[i] == "--texheader")
+                {
                     texheader_file = args[i + 1];
                     i++;
                 }
 
-                else if (args[i] == "--tristrip") {
+                else if (args[i] == "--tristrip")
+                {
                     string opt = args[i + 1];
-                    if (opt == "all") {
+                    if (opt == "all")
+                    {
                         triopt = TristripOption.DoTriStripAll;
                     }
-                    else if (opt == "static") {
+                    else if (opt == "static")
+                    {
                         triopt = TristripOption.DoTriStripStatic;
                     }
-                    else if (opt == "none") {
+                    else if (opt == "none")
+                    {
                         triopt = TristripOption.DoNotTriStrip;
                     }
                     i++;
                 }
 
-                else if (args[i] == "--rotate") {
+                else if (args[i] == "--rotate")
+                {
                     flipyz = true;
                 }
 
-                else if (args[i] == "--dontFix") {
+                else if (args[i] == "--dontFix")
+                {
                     fixNormals = false;
                 }
 
-                else if (args[i] == "--help") {
+                else if (args[i] == "--help")
+                {
                     DisplayHelp();
                     return;
                 }
 
-                else {
-                    if (processed_args == 0) {
+                else if (args[i] == "--version")
+                {
+                    Console.WriteLine("VERSION: "+ GetVersion(args[i + 1]));
+                    return;
+                }
+
+                else
+                {
+                    if (processed_args == 0)
+                    {
                         in_file = args[i];
                     }
-                    else if (processed_args == 1) {
+                    else if (processed_args == 1)
+                    {
                         out_file = args[i];
                     }
 
@@ -246,6 +266,10 @@ namespace SuperBMD_UnitTest
             Console.WriteLine("Made possible with help from arookas, LordNed, xDaniel, and many others.");
             Console.WriteLine("This is a fork maintained by Yoshi2 (RenolY2 on Github) with many additional features. Check the Readme.");
             Console.WriteLine("The project page of this fork is https://github.com/RenolY2/SuperBMD");
+        }
+
+        private static bool GetVersion(string version) {
+            return version == SuperBMDVersion ? true : false;
         }
     }
 }
