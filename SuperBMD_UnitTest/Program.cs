@@ -28,6 +28,7 @@ namespace SuperBMD_UnitTest
 
             bool flipyz = false;
             bool fixNormals = true; // For fixing shading on rigged models
+            bool makebdl = false;
 
             TristripOption triopt = TristripOption.DoTriStripStatic;
 
@@ -72,6 +73,11 @@ namespace SuperBMD_UnitTest
                 else if (args[i] == "--dontFix")
                 {
                     fixNormals = false;
+                }
+
+                else if (args[i] == "--bdl")
+                {
+                    makebdl = true;
                 }
 
                 else if (args[i] == "--help")
@@ -257,7 +263,10 @@ namespace SuperBMD_UnitTest
                         mod.ExportBMD(out_file, true);
                     }
                     else {
-                        mod.ExportBMD(in_file + ".bmd");
+                        if (makebdl)
+                            mod.ExportBMD(in_file + ".bdl");
+                        else
+                            mod.ExportBMD(in_file + ".bmd");
                     }
                 }
                 Console.WriteLine("Finished");

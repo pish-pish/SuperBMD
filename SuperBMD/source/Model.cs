@@ -376,15 +376,32 @@ namespace SuperBMD
 
         public void ExportBMD(string fileName, bool overwrite = false)
         {
+            bool isbdl = fileName[fileName.Length-1] == 'l' ? true : false;
+
             string outDir = Path.GetDirectoryName(fileName);
             string fileNameNoExt = Path.GetFileNameWithoutExtension(fileName);
             fileNameNoExt = fileNameNoExt.Split('.')[0];
-            fileName = Path.Combine(outDir, fileNameNoExt + ".bmd");
-
-            if (File.Exists(fileName) && overwrite == false)
+            if (isbdl)
             {
-                fileName = Path.Combine(outDir, fileNameNoExt + "_2.bmd");
+                fileName = Path.Combine(outDir, fileNameNoExt + ".bdl");
+
+                if (File.Exists(fileName) && overwrite == false)
+                {
+                    fileName = Path.Combine(outDir, fileNameNoExt + "_2.bdl");
+                }
             }
+            else
+            {
+                fileName = Path.Combine(outDir, fileNameNoExt + ".bmd");
+
+                if (File.Exists(fileName) && overwrite == false)
+                {
+                    fileName = Path.Combine(outDir, fileNameNoExt + "_2.bmd");
+                }
+            }
+            
+
+            
 
             using (FileStream stream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
             {
