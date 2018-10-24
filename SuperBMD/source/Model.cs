@@ -22,6 +22,7 @@ namespace SuperBMD
         public JNT1 Joints            { get; private set; }
         public SHP1 Shapes            { get; private set; }
         public MAT3 Materials         { get; private set; }
+        public MDL3 MatDisplayList    { get; private set; }
         public TEX1 Textures          { get; private set; }
 
         private int packetCount;

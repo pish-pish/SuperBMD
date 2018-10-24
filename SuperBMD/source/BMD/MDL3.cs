@@ -8,7 +8,7 @@ using SuperBMD.Materials.Mdl;
 using SuperBMD.Util;
 using GameFormatReader.Common;
 
-namespace SuperBMDL.BMD
+namespace SuperBMD.BMD
 {
     public class MDL3
     {
