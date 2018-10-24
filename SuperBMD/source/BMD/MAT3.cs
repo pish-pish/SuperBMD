@@ -16,7 +16,7 @@ namespace SuperBMD.BMD
 {
     public class MAT3
     {
-        private List<Material> m_Materials;
+        public List<Material> m_Materials;
         public List<int> m_RemapIndices;
         private List<string> m_MaterialNames;
 

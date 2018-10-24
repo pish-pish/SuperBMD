@@ -33,7 +33,7 @@ namespace SuperBMD
         public static Model Load(
             string filePath, List<Materials.Material> mat_presets = null, 
             TristripOption triopt = TristripOption.DoNotTriStrip,
-            bool flipAxis = false, bool fixNormals = false, string additionalTexPath = null)
+            bool flipAxis = false, bool fixNormals = false, string additionalTexPath = null, bool usebdl = false)
         {
             string extension = Path.GetExtension(filePath);
             Model output = null;
@@ -62,7 +62,7 @@ namespace SuperBMD
                 }
                 Assimp.Scene aiScene = cont.ImportFile(filePath, postprocess);
 
-                output = new Model(aiScene, filePath, mat_presets, triopt, flipAxis, fixNormals, additionalTexPath);
+                output = new Model(aiScene, filePath, mat_presets, triopt, flipAxis, fixNormals, additionalTexPath, usebdl);
             }
 
             return output;
@@ -115,10 +115,7 @@ namespace SuperBMD
             }
         }
 
-        public Model(
-            Scene scene, string modelDirectory, 
-            List<Materials.Material> mat_presets = null, TristripOption triopt = TristripOption.DoNotTriStrip,
-            bool flipAxis = false, bool fixNormals = false, string additionalTexPath = null)
+        public Model(Scene scene, string modelDirectory, List<Materials.Material> mat_presets = null, TristripOption triopt = TristripOption.DoNotTriStrip, bool flipAxis = false, bool fixNormals = false, string additionalTexPath = null, bool isbdl = false)
         {
             Assimp.Node root = null;
             for (int i = 0; i < scene.RootNode.ChildCount; i++) {
@@ -360,14 +357,23 @@ namespace SuperBMD
             Shapes = SHP1.Create(scene, Joints.BoneNameIndices, VertexData.Attributes, SkinningEnvelopes, PartialWeightData, triopt);
             Materials = new MAT3(scene, Textures, Shapes, mat_presets);
 
-            if (additionalTexPath == null) {
+            if (additionalTexPath == null)
+            {
                 Materials.LoadAdditionalTextures(Textures, Path.GetDirectoryName(modelDirectory));
             }
-            else {
+            else
+            {
                 Materials.LoadAdditionalTextures(Textures, additionalTexPath);
             }
 
             Materials.MapTextureNamesToIndices(Textures);
+
+            if (isbdl)
+            {
+                MatDisplayList = new MDL3(Materials.m_Materials, Textures.Textures);
+            }
+
+            
 
             foreach (Geometry.Shape shape in Shapes.Shapes)
                 packetCount += shape.Packets.Count;
@@ -377,12 +383,12 @@ namespace SuperBMD
 
         public void ExportBMD(string fileName, bool overwrite = false)
         {
-            bool isbdl = fileName[fileName.Length-1] == 'l' ? true : false;
+            bool isBDL = fileName[fileName.Length-1] == 'l' ? true : false;
 
             string outDir = Path.GetDirectoryName(fileName);
             string fileNameNoExt = Path.GetFileNameWithoutExtension(fileName);
             fileNameNoExt = fileNameNoExt.Split('.')[0];
-            if (isbdl)
+            if (isBDL)
             {
                 fileName = Path.Combine(outDir, fileNameNoExt + ".bdl");
 
@@ -407,10 +413,16 @@ namespace SuperBMD
             using (FileStream stream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
             {
                 EndianBinaryWriter writer = new EndianBinaryWriter(stream, Endian.Big);
-
-                writer.Write("J3D2bmd3".ToCharArray());
+                
+                if (isBDL)
+                    writer.Write("J3D2bdl4".ToCharArray());
+                else
+                    writer.Write("J3D2bmd3".ToCharArray());
                 writer.Write(0); // Placeholder for file size
-                writer.Write(8); // Number of sections; bmd has 8, bdl has 9
+                if (isBDL)
+                    writer.Write(9); // Number of sections; bmd has 8, bdl has 9
+                else
+                    writer.Write(8);
 
                 writer.Write("SuperBMD - Gamma".ToCharArray());
 
@@ -421,6 +433,8 @@ namespace SuperBMD
                 Joints.Write(writer);
                 Shapes.Write(writer);
                 Materials.Write(writer);
+                if (isBDL)
+                    MatDisplayList.Write(writer);
                 Textures.Write(writer);
 
                 writer.Seek(8, SeekOrigin.Begin);
