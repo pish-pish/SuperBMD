@@ -82,7 +82,15 @@ namespace SuperBMD_UnitTest
 
                 else if (args[i] == "--version")
                 {
-                    Console.WriteLine("VERSION: "+ GetVersion(args[i + 1]));
+                    try
+                    {
+                        Console.WriteLine("VERSION: " + GetVersion(args[i + 1]));
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("This copy of superBMD is: " + SuperBMDVersion);
+                        Console.WriteLine("SuperJSON Compatible");
+                    }
                     return;
                 }
 
