@@ -28,6 +28,7 @@ namespace SuperBMD_UnitTest
 
             bool flipyz = false;
             bool fixNormals = true; // For fixing shading on rigged models
+            bool makebdl = false;
 
             TristripOption triopt = TristripOption.DoTriStripStatic;
 
@@ -74,6 +75,11 @@ namespace SuperBMD_UnitTest
                     fixNormals = false;
                 }
 
+                else if (args[i] == "--bdl")
+                {
+                    makebdl = true;
+                }
+
                 else if (args[i] == "--help")
                 {
                     DisplayHelp();
@@ -82,7 +88,15 @@ namespace SuperBMD_UnitTest
 
                 else if (args[i] == "--version")
                 {
-                    Console.WriteLine("VERSION: "+ GetVersion(args[i + 1]));
+                    try
+                    {
+                        Console.WriteLine("VERSION: " + GetVersion(args[i + 1]));
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("This copy of superBMD is: " + SuperBMDVersion);
+                        Console.WriteLine("SuperJSON Compatible");
+                    }
                     return;
                 }
 
@@ -206,7 +220,7 @@ namespace SuperBMD_UnitTest
                         additionalTexPath = Path.GetDirectoryName(mat_file);
                     }
 
-                    Model mod = Model.Load(in_file, mat_presets, triopt, flipyz, fixNormals, additionalTexPath);
+                    Model mod = Model.Load(in_file, mat_presets, triopt, flipyz, fixNormals, additionalTexPath, makebdl);
 
                     // Load texture headers
                     if (texheader_file != "") {
@@ -249,7 +263,10 @@ namespace SuperBMD_UnitTest
                         mod.ExportBMD(out_file, true);
                     }
                     else {
-                        mod.ExportBMD(in_file + ".bmd");
+                        if (makebdl)
+                            mod.ExportBMD(in_file + ".bdl");
+                        else
+                            mod.ExportBMD(in_file + ".bmd");
                     }
                 }
                 Console.WriteLine("Finished");
@@ -262,10 +279,12 @@ namespace SuperBMD_UnitTest
         {
             Console.WriteLine();
             Console.WriteLine("SuperBMD: A tool to import and export various 3D model formats into the Binary Model (BMD) format.");
-            Console.WriteLine("Written by Sage_of_Mirrors/Gamma (@SageOfMirrors).");
+            Console.WriteLine("Written by Sage_of_Mirrors/Gamma (@SageOfMirrors) & RenolY2/Yoshi2 (@RenolY2).");
             Console.WriteLine("Made possible with help from arookas, LordNed, xDaniel, and many others.");
             Console.WriteLine("This is a fork maintained by Yoshi2 (RenolY2 on Github) with many additional features. Check the Readme.");
             Console.WriteLine("The project page of this fork is https://github.com/RenolY2/SuperBMD");
+            Console.WriteLine();
+            Console.WriteLine("BDL Export added by @SuperHackio https://github.com/SuperHackio/SuperBMD");
         }
 
         private static bool GetVersion(string version) {
