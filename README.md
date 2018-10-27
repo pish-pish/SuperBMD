@@ -23,15 +23,17 @@ If model path is a model but not BMD, it will be converted to BMD. By default tr
 are generated for static meshes but not rigged meshes. See below for more options on this.
 
 # Full usage
-`SuperBMD.exe <input path> [output path] [--mat <material path>] [--texheader <texheader path>] [--tristrip (all/static/none)] [--rotate] [--dontFix]`
+`SuperBMD.exe <input path> [output path] [--mat <material path>] [--texheader <texheader path>] [--tristrip (all/static/none)] [--rotate] [--dontFix] [--bdl] [--version]`
 
 Arguments in square brackets are optional. If output path is left out it is created from the input 
-path by replacing the extension either with `.bmd` or `.dae`, depending on input. 
+path by replacing the extension either with `.bmd`, `.bdl` or `.dae`, depending on input. 
   
 * If input path is BMD then the extracted DAE is written to output path. Textures are dumped to 
 the same directory as the DAE. 
-* If input path is not a BMD, the model is converted into a BMD and written to output path. 
+* If input path is not a BMD, the model is converted into a BMD and written to output path. If output path ends with ``.bdl``, the model is converted to BDL.  
 * If input path is a BMD/BDL and output path is a BMD, behaviour is similar to if the input was not a BMD/BDL.
+
+The ``--version`` option outputs the program's version and then exits.
 
 Any model -> BMD:
 * If material path is set, loads material data from that path (See "Materials" further down in this document)
@@ -42,6 +44,7 @@ If omitted, the default mode is generating triangle strips only for static model
 * ``--rotate`` rotates the model so that Y is up instead of Z. Default is no rotation.
 * ``--dontFix`` disables (trying to) fix normals on rigged models. This is only relevant for using materials that add shading to the model and has no 
 effect on whether a face is considered to be front or back-facing for culling purposes.
+* ``--bdl`` generates a BDL instead of a BMD. This only matters if you don't specify an output path, otherwise the output path defines whether a BMD or a BDL is generated.
 
 BMD -> DAE:
 * If material path is set, write material data to that path. Otherwise, write it in the same place as the created DAE.
