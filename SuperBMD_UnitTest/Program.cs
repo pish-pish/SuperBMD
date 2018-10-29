@@ -15,7 +15,7 @@ namespace SuperBMD_UnitTest
 {
     class Program
     {
-        static string SuperBMDVersion = "1.3.6";
+        static string SuperBMDVersion = "1.4.0";
 
         static void Main(string[] args)
         {
@@ -284,7 +284,7 @@ namespace SuperBMD_UnitTest
             Console.WriteLine("This is a fork maintained by Yoshi2 (RenolY2 on Github) with many additional features. Check the Readme.");
             Console.WriteLine("The project page of this fork is https://github.com/RenolY2/SuperBMD");
             Console.WriteLine();
-            Console.WriteLine("BDL Export added by @SuperHackio https://github.com/SuperHackio/SuperBMD");
+            Console.WriteLine("With assistance by @SuperHackio https://github.com/SuperHackio/SuperBMD");
         }
 
         private static bool GetVersion(string version) {
