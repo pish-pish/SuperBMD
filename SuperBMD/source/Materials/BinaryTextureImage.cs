@@ -144,11 +144,11 @@ namespace SuperBMD.Materials
         public byte MaxAniso { get; set; }
         public FilterMode MinFilter { get; set; }
         public FilterMode MagFilter { get; set; }
-        public sbyte MinLOD { get; set; } // Fixed point number, 1/8 = conversion (ToDo: is this multiply by 8 or divide...)
-        public sbyte MaxLOD { get; set; } // Fixed point number, 1/8 = conversion (ToDo: is this multiply by 8 or divide...)
+        public float MinLOD { get; set; } // Fixed point number, 1/8 = conversion (ToDo: is this multiply by 8 or divide...)
+        public float MaxLOD { get; set; } // Fixed point number, 1/8 = conversion (ToDo: is this multiply by 8 or divide...)
         [JsonIgnore]
-        public byte MipMapCount { get; private set; }
-        public short LodBias { get; set; } // Fixed point number, 1/100 = conversion
+        public byte ImageCount { get; private set; } // Includes the full detail texture itself and all its mipmaps 
+        public float LodBias { get; set; } // Fixed point number, 1/100 = conversion
 
         [JsonIgnore]
         private Palette m_imagePalette;
@@ -195,12 +195,12 @@ namespace SuperBMD.Materials
             MaxAniso = stream.ReadByte();
             MinFilter = (FilterMode)stream.ReadByte();
             MagFilter = (FilterMode)stream.ReadByte();
-            MinLOD = stream.ReadSByte();
-            MaxLOD = stream.ReadSByte();
+            MinLOD = ((float)stream.ReadSByte())*(1/8.0f);
+            MaxLOD = ((float)stream.ReadSByte())*(1/8.0f);
             //unknown2 = stream.ReadInt16();
-            MipMapCount = stream.ReadByte();
+            ImageCount = stream.ReadByte();
             stream.SkipByte(); //LonelyPaddingByte = stream.ReadByte();
-            LodBias = stream.ReadInt16();
+            LodBias = ((float)stream.ReadInt16())*(1/100.0f);
 
             int imageDataOffset = stream.ReadInt32();
 
@@ -246,7 +246,7 @@ namespace SuperBMD.Materials
             MaxAniso = 0x00;
             MinFilter = FilterMode.Linear;
             MagFilter = FilterMode.Linear;
-            MipMapCount = 1;
+            ImageCount = 1;
             LodBias = 0;
 
             Bitmap texData = null;
@@ -420,7 +420,7 @@ namespace SuperBMD.Materials
                 MaxAniso = 0x00;
                 MinFilter = FilterMode.Linear;
                 MagFilter = FilterMode.Linear;
-                MipMapCount = 0;
+                ImageCount = 1;
                 LodBias = 0;
 
                 byte[] data = new byte[Width * Height * 4];
@@ -461,15 +461,15 @@ namespace SuperBMD.Materials
 
             // This is an unknown
             //writer.Write((short)unknown2);
-            writer.Write(MinLOD);
-            writer.Write(MaxLOD);
+            writer.Write((sbyte)Math.Round(MinLOD*8.0));
+            writer.Write((sbyte)Math.Round(MaxLOD*8.0));
 
-            writer.Write((byte)MipMapCount);
+            writer.Write((byte)ImageCount);
 
             // This is an unknown
             writer.Write((byte)0xFF); // writer.Write((byte)LonelyPaddingByte);
 
-            writer.Write((short)LodBias);
+            writer.Write((short)Math.Round(LodBias*100.0));
 
             // This is a placeholder for ImageDataOffset
             writer.Write((int)0);
