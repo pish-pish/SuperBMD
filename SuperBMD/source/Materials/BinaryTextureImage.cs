@@ -139,8 +139,8 @@ namespace SuperBMD.Materials
         //[JsonIgnore]
         //public int EmbeddedPaletteOffset { get; private set; } // This is a guess. It seems to be 0 in most things, but it fits with min/mag filters.
         public byte MipMap { get; set; }
-        public byte EdgeLOD { get; set; }
-        public byte BiasClamp { get; set; }
+        public bool EdgeLOD { get; set; }
+        public bool BiasClamp { get; set; }
         public byte MaxAniso { get; set; }
         public FilterMode MinFilter { get; set; }
         public FilterMode MagFilter { get; set; }
@@ -190,8 +190,8 @@ namespace SuperBMD.Materials
             int paletteDataOffset = stream.ReadInt32();
             //EmbeddedPaletteOffset = stream.ReadInt32();
             MipMap = stream.ReadByte();
-            EdgeLOD = stream.ReadByte();
-            BiasClamp = stream.ReadByte();
+            EdgeLOD = stream.ReadBoolean();
+            BiasClamp = stream.ReadBoolean();
             MaxAniso = stream.ReadByte();
             MinFilter = (FilterMode)stream.ReadByte();
             MagFilter = (FilterMode)stream.ReadByte();
@@ -241,8 +241,8 @@ namespace SuperBMD.Materials
             PaletteCount = 0;
             //EmbeddedPaletteOffset = 0;
             MipMap = 0x00;
-            EdgeLOD = 0x00;
-            BiasClamp = 0x00;
+            EdgeLOD = false;
+            BiasClamp = false;
             MaxAniso = 0x00;
             MinFilter = FilterMode.Linear;
             MagFilter = FilterMode.Linear;
@@ -415,8 +415,8 @@ namespace SuperBMD.Materials
                 PaletteCount = 0;
                 //EmbeddedPaletteOffset = 0;
                 MipMap = 0x00;
-                EdgeLOD = 0x00;
-                BiasClamp = 0x00;
+                EdgeLOD = false;
+                BiasClamp = false;
                 MaxAniso = 0x00;
                 MinFilter = FilterMode.Linear;
                 MagFilter = FilterMode.Linear;
