@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -15,8 +16,6 @@ namespace SuperBMD_UnitTest
 {
     class Program
     {
-        static string SuperBMDVersion = "1.4.0";
-
         static void Main(string[] args)
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
@@ -88,15 +87,13 @@ namespace SuperBMD_UnitTest
 
                 else if (args[i] == "--version")
                 {
-                    try
-                    {
-                        Console.WriteLine("VERSION: " + GetVersion(args[i + 1]));
-                    }
-                    catch (Exception)
-                    {
-                        Console.WriteLine("This copy of superBMD is: " + SuperBMDVersion);
-                        Console.WriteLine("SuperJSON Compatible");
-                    }
+                    Assembly thisAssem = typeof(Program).Assembly;
+                    AssemblyName thisAssemName = thisAssem.GetName();
+                    Version ver = thisAssemName.Version;
+                    Console.WriteLine();
+                    Console.WriteLine("SuperBMD");
+                    Console.WriteLine(ver);
+                    Console.WriteLine();
                     return;
                 }
 
@@ -285,10 +282,6 @@ namespace SuperBMD_UnitTest
             Console.WriteLine("The project page of this fork is https://github.com/RenolY2/SuperBMD");
             Console.WriteLine();
             Console.WriteLine("With assistance by @SuperHackio https://github.com/SuperHackio/SuperBMD");
-        }
-
-        private static bool GetVersion(string version) {
-            return version == SuperBMDVersion ? true : false;
         }
     }
 }
