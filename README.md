@@ -30,7 +30,7 @@ path by replacing the extension either with `.bmd`, `.bdl` or `.dae`, depending 
   
 * If input path is BMD then the extracted DAE is written to output path. Textures are dumped to 
 the same directory as the DAE. 
-* If input path is not a BMD, the model is converted into a BMD and written to output path. If output path ends with ``.bdl``, the model is converted to BDL.  
+* If input path is not a BMD, the model is converted into a BMD and written to output path. If output path ends with ``.bdl`` and the ``--bdl`` option is set, or output path is empty and ``--bdl`` is set, the model is converted to BDL.  
 * If input path is a BMD/BDL and output path is a BMD, behaviour is similar to if the input was not a BMD/BDL.
 
 The ``--version`` option outputs the program's version and then exits.
@@ -44,7 +44,7 @@ If omitted, the default mode is generating triangle strips only for static model
 * ``--rotate`` rotates the model so that Y is up instead of Z. Default is no rotation.
 * ``--dontFix`` disables (trying to) fix normals on rigged models. This is only relevant for using materials that add shading to the model and has no 
 effect on whether a face is considered to be front or back-facing for culling purposes.
-* ``--bdl`` generates a BDL instead of a BMD. This only matters if you don't specify an output path, otherwise the output path defines whether a BMD or a BDL is generated.
+* ``--bdl`` is necessary for when you want to create a BDL instead of a BMD..
 
 BMD -> DAE:
 * If material path is set, write material data to that path. Otherwise, write it in the same place as the created DAE.
