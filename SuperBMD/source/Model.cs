@@ -383,13 +383,16 @@ namespace SuperBMD
 
         public void ExportBMD(string fileName, bool overwrite = false)
         {
-            bool isBDL = fileName[fileName.Length-1] == 'l' ? true : false;
+            bool isBDL = fileName.ToLower().EndsWith(".bdl");
 
             string outDir = Path.GetDirectoryName(fileName);
             string fileNameNoExt = Path.GetFileNameWithoutExtension(fileName);
             fileNameNoExt = fileNameNoExt.Split('.')[0];
             if (isBDL)
             {
+                if (MatDisplayList == null) {
+                    throw new System.Exception("Trying to convert to BDL but --bdl option hasn't been set! Please re-run command with the --bdl option. ");
+                }
                 fileName = Path.Combine(outDir, fileNameNoExt + ".bdl");
 
                 if (File.Exists(fileName) && overwrite == false)
