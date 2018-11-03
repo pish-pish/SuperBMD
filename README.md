@@ -1,7 +1,7 @@
 # SuperBMD
 A library to import and export various 3D model formats into the Binary Model (BMD) format.
 
-This API uses the Open Asset Import Library (AssImp). A list of supported model formats can be found [here](http://assimp.org/main_features_formats.html).
+This API uses the Open Asset Import Library (AssImp). A list of supported model formats can be found [here](http://assimp.sourceforge.net/main_features_formats.html). Recommended: .dae/.fbx.
 
 This is a fork of SuperBMD that supports generating triangle strips (a more space-efficient way to represent faces in a model) 
 and extracting and applying BMD material data as JSON, maintained by Yoshi2 (RenolY2 on github). <br>
@@ -116,7 +116,8 @@ This release has some bat scripts that apply some included materials.
 These material presets are not always the best and you are encouraged to find other 
 presets by experimenting with material data from models and making new scripts. 
 You can combine options if wanted. For example, you can add the --rotate option 
-from superbmd_rotatemodel.bat to the other bat scripts if you want shaded and rotated models.
+from superbmd_rotatemodel.bat to the other bat scripts if you want shaded and rotated models, 
+or you can add the --bdl option from superbmd_createbdl.bat to the other scripts for shaded BDL models.
 
 ### Texture header info
 When dumping BMDs to DAE you will find a texheader json file. It contains some data from the BTI headers of 
