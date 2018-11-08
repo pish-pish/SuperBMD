@@ -129,6 +129,10 @@ namespace SuperBMD_UnitTest
                         if (mat_file == "") {
                             mat_file = Path.Combine(outDir, fileNameNoExt + "_mat.json");
                         }
+
+                        if (texheader_file == "") {
+                            texheader_file = Path.Combine(outDir, fileNameNoExt + "_texheader.json");
+                        }
                     }
                     else {
                         string inDir = Path.GetDirectoryName(in_file);
