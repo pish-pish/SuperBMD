@@ -760,7 +760,7 @@ namespace SuperBMD.BMD
                 {
                     int texIndex = mat.TextureIndices[0];
                     //texIndex = m_TexRemapBlock[texIndex];
-                    string texPath = textures[texIndex].SaveImageToDisk(fileDir);
+                    string texPath = Path.GetFullPath(textures[texIndex].SaveImageToDisk(fileDir));
 
                     Assimp.TextureSlot tex = new Assimp.TextureSlot(texPath, Assimp.TextureType.Diffuse, 0,
                         Assimp.TextureMapping.FromUV, 0, 1.0f, Assimp.TextureOperation.Add,
