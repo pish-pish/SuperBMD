@@ -69,6 +69,7 @@
     </None>
     <None Include="packages.config" />
     <None Include="superbmd.config" />
+    <None Include="superbmd_createbdl.bat" />
     <None Include="superbmd_rotatemodel.bat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
