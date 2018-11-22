@@ -118,7 +118,16 @@ namespace SuperBMD.BMD
                     int packetSize = packetData[j + firstPacketIndex].Item1;
                     int packetOffset = packetData[j + firstPacketIndex].Item2;
 
-                    Packet pack = new Packet(packetSize, packetOffset + primitiveDataOffset + offset, matrixIndices[j + firstPacketIndex]);
+                    // Workaround for models made with obj2bdl which have invalid matrix indices
+                    int[] matIndices;
+                    if (j + firstPacketIndex < matrixIndices.Count) {
+                        matIndices = matrixIndices[j + firstPacketIndex];
+                    }
+                    else {
+                        matIndices = new int[16];
+                    }
+
+                    Packet pack = new Packet(packetSize, packetOffset + primitiveDataOffset + offset, matIndices);
                     pack.ReadPrimitives(reader, descriptor);
 
                     shapePackets.Add(pack);
