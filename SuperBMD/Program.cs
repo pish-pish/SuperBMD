@@ -38,8 +38,8 @@ namespace SuperBMDLib
             Console.WriteLine("Made possible with help from arookas, LordNed, xDaniel, and many others.");
             Console.WriteLine("Visit https://github.com/Sage-of-Mirrors/SuperBMD/wiki for more information.");
             Console.WriteLine();
-            Console.WriteLine("Usage: SuperBMD.exe (inputfilepath) [outputfilepath] [-m/materialPresets filePath]\n" +
-                              "       [-x/--texHeaders filePath] [-t/--tristrip mode] [-r/--rotate] [-b/--bdl]");
+            Console.WriteLine("Usage: SuperBMD.exe (inputfilepath) [outputfilepath] [-m/mat filepath]\n" +
+                              "       [-x/--texheader filepath] [-t/--tristrip mode] [-r/--rotate] [-b/--bdl]");
             Console.WriteLine();
             Console.WriteLine("Parameters:");
             Console.WriteLine("\t                   inputfilepath\tPath to the input file, either a BMD/BDL file or a DAE model.");
