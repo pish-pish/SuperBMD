@@ -30,28 +30,14 @@ namespace SuperBMDLib
             rotate_model = false;
             output_bdl = false;
 
+            int positional_arguments = 0;
+
             for (int i = 0; i < args.Length; i++)
             {
                 switch (args[i])
                 {
-                    case "-i":
-                    case "--input":
-                        if (i + 1 >= args.Length)
-                            throw new Exception("The parameters were malformed.");
-
-                        input_path = args[i + 1];
-                        i++;
-                        break;
-                    case "-o":
-                    case "--output":
-                        if (i + 1 >= args.Length)
-                            throw new Exception("The parameters were malformed.");
-
-                        output_path = args[i + 1];
-                        i++;
-                        break;
                     case "-m":
-                    case "--materialPresets":
+                    case "--mat":
                         if (i + 1 >= args.Length)
                             throw new Exception("The parameters were malformed.");
 
@@ -59,7 +45,7 @@ namespace SuperBMDLib
                         i++;
                         break;
                     case "-x":
-                    case "--texHeaders":
+                    case "--texheader":
                         if (i + 1 >= args.Length)
                             throw new Exception("The parameters were malformed.");
 
@@ -83,7 +69,19 @@ namespace SuperBMDLib
                         output_bdl = true;
                         break;
                     default:
-                        throw new Exception($"Unknown parameter \"{ args[i] }\"");
+                        if (positional_arguments == 0) {
+                            positional_arguments += 1;
+                            input_path = args[i];
+                            break;
+                        }
+                        else if (positional_arguments == 1) {
+                            positional_arguments += 1;
+                            output_path = args[i];
+                            break;
+                        }
+                        else {
+                            throw new Exception($"Unknown parameter \"{ args[i] }\"");
+                        }
                 }
             }
 

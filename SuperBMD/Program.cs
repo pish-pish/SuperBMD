@@ -38,14 +38,14 @@ namespace SuperBMDLib
             Console.WriteLine("Made possible with help from arookas, LordNed, xDaniel, and many others.");
             Console.WriteLine("Visit https://github.com/Sage-of-Mirrors/SuperBMD/wiki for more information.");
             Console.WriteLine();
-            Console.WriteLine("Usage: SuperBMD.exe -i/--input filePath [-o/--output filePath] [-m/materialPresets filePath]\n" +
+            Console.WriteLine("Usage: SuperBMD.exe (inputfilepath) [outputfilepath] [-m/materialPresets filePath]\n" +
                               "       [-x/--texHeaders filePath] [-t/--tristrip mode] [-r/--rotate] [-b/--bdl]");
             Console.WriteLine();
             Console.WriteLine("Parameters:");
-            Console.WriteLine("\t-i/--input              filePath\tPath to the input file, either a BMD/BDL file or a DAE model.");
-            Console.WriteLine("\t-o/--output             filePath\tPath to the output file.");
-            Console.WriteLine("\t-m/--materialPresets    filePath\tPath to the material presets JSON for DAE to BMD conversion.");
-            Console.WriteLine("\t-x/--textureHeaders     filePath\tPath to the texture headers JSON for DAE to BMD conversion.");
+            Console.WriteLine("\t                   inputfilepath\tPath to the input file, either a BMD/BDL file or a DAE model.");
+            Console.WriteLine("\t                  outputfilepath\tPath to the output file.");
+            Console.WriteLine("\t-m/--mat                filePath\tPath to the material presets JSON for DAE to BMD conversion.");
+            Console.WriteLine("\t-x/--texheader          filePath\tPath to the texture headers JSON for DAE to BMD conversion.");
             Console.WriteLine("\t-t/--tristrip           mode\t\tMode for tristrip generation.");
             Console.WriteLine("\t\tstatic: Only generate tristrips for static (unrigged) meshes.");
             Console.WriteLine("\t\tall:    Generate tristrips for all meshes.");
