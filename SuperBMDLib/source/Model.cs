@@ -108,7 +108,7 @@ namespace SuperBMDLib
 
         public Model(Scene scene, Arguments args)
         {
-            EnsureOneMaterialPerMesh(scene);
+            //EnsureOneMaterialPerMesh(scene);
             SortMeshesByObjectNames(scene);
 
             VertexData = new VTX1(scene);
