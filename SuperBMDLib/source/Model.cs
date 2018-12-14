@@ -109,7 +109,7 @@ namespace SuperBMDLib
         public Model(Scene scene, Arguments args)
         {
             //EnsureOneMaterialPerMesh(scene);
-            SortMeshesByObjectNames(scene);
+            //SortMeshesByObjectNames(scene);
 
             VertexData = new VTX1(scene);
             Joints = new JNT1(scene, VertexData);
