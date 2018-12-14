@@ -71,7 +71,7 @@ namespace SuperBMDLib.Materials
             PostTexMatrix = new TexMatrix?[20];
 
             TextureIndices = new int[8] { -1, -1, -1, -1, -1, -1, -1, -1 };
-            TextureNames = new string[8] { "", "", "", "", "", "", "", "" };
+            TextureNames = new string[8] { null, null, null, null, null, null, null, null };
 
             KonstColors = new Color?[4];
             KonstColors[0] = new Color(1, 1, 1, 1);
