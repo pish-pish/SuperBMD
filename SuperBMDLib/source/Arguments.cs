@@ -11,6 +11,7 @@ namespace SuperBMDLib
         public string input_path;
         public string output_path;
         public string materials_path;
+        public string output_materials_path;
         public string texheaders_path;
         public string tristrip_mode;
         public bool rotate_model;
@@ -25,6 +26,7 @@ namespace SuperBMDLib
             input_path = "";
             output_path = "";
             materials_path = "";
+            output_materials_path = "";
             texheaders_path = "";
             tristrip_mode = "static";
             rotate_model = false;
@@ -42,6 +44,13 @@ namespace SuperBMDLib
                             throw new Exception("The parameters were malformed.");
 
                         materials_path = args[i + 1];
+                        i++;
+                        break;
+                    case "--outmat":
+                        if (i + 1 >= args.Length)
+                            throw new Exception("The parameters were malformed.");
+
+                        output_materials_path = args[i + 1];
                         i++;
                         break;
                     case "-x":
