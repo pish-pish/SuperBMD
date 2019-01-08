@@ -71,7 +71,7 @@ namespace SuperBMDLib.Materials
             PostTexMatrix = new TexMatrix?[20];
 
             TextureIndices = new int[8] { -1, -1, -1, -1, -1, -1, -1, -1 };
-            TextureNames = new string[8] { null, null, null, null, null, null, null, null };
+            TextureNames = new string[8] { "", "", "", "", "", "", "", ""};
 
             KonstColors = new Color?[4];
             KonstColors[0] = new Color(1, 1, 1, 1);
@@ -385,11 +385,21 @@ namespace SuperBMDLib.Materials
 
             // Note: Despite the name, this doesn't seem to control the number of color channel controls.
             // At least in Wind Waker, every single model has 1 for this value regardless of how many color channel controls it has.
-            ColorChannelControlsCount = 1;
+            ColorChannelControlsCount = 2;
         }
 
         public static bool operator ==(Material left, Material right)
         {
+            return object.ReferenceEquals(left, right);
+
+            if (object.ReferenceEquals(left, null) && object.ReferenceEquals(right, null)) {
+                return true;
+            }
+                    
+            if (object.ReferenceEquals(left, null) || object.ReferenceEquals(right, null)) {
+                return false;
+            }
+
             if (left.Flag != right.Flag)
                 return false;
             if (left.CullMode != right.CullMode)
