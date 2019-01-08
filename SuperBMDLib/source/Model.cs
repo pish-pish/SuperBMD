@@ -26,7 +26,7 @@ namespace SuperBMDLib
         private int packetCount;
         private int vertexCount;
 
-        public static Model Load(Arguments args)
+        public static Model Load(Arguments args, List<SuperBMDLib.Materials.Material> mat_presets, string additionalTexPath)
         {
             string extension = Path.GetExtension(args.input_path);
             Model output = null;
@@ -55,7 +55,7 @@ namespace SuperBMDLib
                 }
                 Assimp.Scene aiScene = cont.ImportFile(args.input_path, postprocess);
 
-                output = new Model(aiScene, args);
+                output = new Model(aiScene, args, mat_presets, additionalTexPath);
             }
 
             return output;
@@ -89,7 +89,17 @@ namespace SuperBMDLib
             SkipMDL3(reader);
             Textures          = new TEX1(reader, (int)reader.BaseStream.Position);
             Materials.SetTextureNames(Textures);
-            Materials.DumpMaterials(Path.GetDirectoryName(args.input_path));
+
+            
+            if (args.output_materials_path != "") {
+                Materials.DumpMaterials(Path.GetDirectoryName(args.output_materials_path));
+            }
+            else {
+                string indir = Path.GetDirectoryName(args.input_path);
+                string filenameNoExt = Path.GetFileNameWithoutExtension(args.input_path);
+
+                Materials.DumpMaterials(Path.Combine(indir, filenameNoExt+"_materials.json"));
+            }
 
             foreach (Geometry.Shape shape in Shapes.Shapes)
                 packetCount += shape.Packets.Count;
@@ -106,7 +116,7 @@ namespace SuperBMDLib
             }
         }
 
-        public Model(Scene scene, Arguments args)
+        public Model(Scene scene, Arguments args, List<SuperBMDLib.Materials.Material> mat_presets = null, string additionalTexPath = "")
         {
             //EnsureOneMaterialPerMesh(scene);
             //SortMeshesByObjectNames(scene);
@@ -122,7 +132,18 @@ namespace SuperBMDLib
 
             Shapes = SHP1.Create(scene, Joints.BoneNameIndices, VertexData.Attributes, SkinningEnvelopes, PartialWeightData, args.tristrip_mode);
 
-            Materials = new MAT3(scene, Textures, Shapes, args);
+            Materials = new MAT3(scene, Textures, Shapes, args, mat_presets);
+
+            /*if (additionalTexPath == null)
+            {
+                Materials.LoadAdditionalTextures(Textures, Path.GetDirectoryName(args.input_path));
+            }
+            else
+            {
+                Materials.LoadAdditionalTextures(Textures, additionalTexPath);
+            }*/
+
+            Materials.MapTextureNamesToIndices(Textures);
 
             if (args.output_bdl)
                 MatDisplayList = new MDL3(Materials.m_Materials, Textures.Textures);

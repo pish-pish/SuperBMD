@@ -1,6 +1,12 @@
 ﻿using System;
 using System.Globalization;
 using SuperBMDLib;
+using System.Text;
+using SuperBMDLib.Materials;
+using SuperBMDLib.Geometry.Enums;
+using Newtonsoft.Json;
+using System.IO;
+using System.Collections.Generic;
 
 namespace SuperBMDLib
 {
@@ -19,7 +25,39 @@ namespace SuperBMDLib
 
             Arguments cmd_args = new Arguments(args);
 
-            Model mod = Model.Load(cmd_args);
+            List<Material> mat_presets = null; 
+
+            if (cmd_args.materials_path != "") {
+                JsonSerializer serializer = new JsonSerializer();
+
+                serializer.Converters.Add(
+                    (new Newtonsoft.Json.Converters.StringEnumConverter())
+                );
+
+                using (TextReader file = File.OpenText(cmd_args.materials_path)) {
+                    using (JsonTextReader reader = new JsonTextReader(file)) {
+                        try {
+                            mat_presets = serializer.Deserialize<List<Material>>(reader);
+                        }
+                        catch (Newtonsoft.Json.JsonReaderException e) {
+                            Console.WriteLine(String.Format("Error encountered while reading {0}", cmd_args.materials_path));
+                            Console.WriteLine(String.Format("JsonReaderException: {0}", e.Message));
+                            return;
+                        }
+                        catch (Newtonsoft.Json.JsonSerializationException e) {
+                            Console.WriteLine(String.Format("Error encountered while reading {0}", cmd_args.materials_path));
+                            Console.WriteLine(String.Format("JsonSerializationException: {0}", e.Message));
+                            return;
+                        }
+                    }
+                }
+            }
+
+            string additionalTexPath = null; 
+            if ( cmd_args.materials_path != "") {
+                additionalTexPath = Path.GetDirectoryName(cmd_args.materials_path);
+            }
+            Model mod = Model.Load(cmd_args, mat_presets, additionalTexPath);
 
             if (cmd_args.input_path.EndsWith(".bmd") || cmd_args.input_path.EndsWith(".bdl"))
                 mod.ExportAssImp(cmd_args.output_path, "dae", new ExportSettings());

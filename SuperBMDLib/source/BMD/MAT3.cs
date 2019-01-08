@@ -460,19 +460,90 @@ namespace SuperBMDLib.BMD
             m_Materials.Add(mat);
         }
 
-        public MAT3(Assimp.Scene scene, TEX1 textures, SHP1 shapes, Arguments args)
+        public MAT3(Assimp.Scene scene, TEX1 textures, SHP1 shapes, Arguments args, List<Material> mat_presets = null)
         {
             InitLists();
 
-            if (args.materials_path != "")
-                LoadFromJson(scene, textures, shapes, args.materials_path);
-            else
-                LoadFromScene(scene, textures, shapes);
+            //if (args.materials_path != "")
+            //    LoadFromJson(scene, textures, shapes, args.materials_path);
+            //else
+            //    
+            LoadFromScene(scene, textures, shapes, mat_presets);
+
 
             FillMaterialDataBlocks();
         }
 
-        private void LoadFromJson(Assimp.Scene scene, TEX1 textures, SHP1 shapes, string json_path)
+        private Material FindMatPreset(string name, List<Material> mat_presets) {
+            if (mat_presets == null) {
+                return null;
+            } 
+            Material default_mat = null;
+
+            int i = 0;
+
+            foreach (Material mat in mat_presets) {
+                if (mat == null) {
+                    Console.WriteLine(String.Format("Warning: Material entry with index {0} is malformed and has been skipped", i));
+                    continue;
+                }
+
+                i++;
+                
+                //Console.WriteLine(String.Format("{0}", mat.Name));
+                if (mat.Name == "__MatDefault") {
+                    default_mat = mat;
+                }
+
+                if (mat.Name == name) {
+                    //Console.WriteLine(String.Format("Applying material preset to {1}", default_mat.Name, name));
+                    return mat;
+                }
+            }
+            //if (default_mat != null)
+            //    Console.WriteLine(String.Format("Applying __MatDefault to {1}", default_mat.Name, name));
+
+            return default_mat;
+        }
+
+        private void SetPreset(Material bmdMaterial, Material preset) {
+            
+            // put data from preset over current material if it exists
+            bmdMaterial.Flag = preset.Flag;
+            bmdMaterial.ColorChannelControlsCount = preset.ColorChannelControlsCount;
+            bmdMaterial.NumTexGensCount = preset.NumTexGensCount;
+            bmdMaterial.NumTevStagesCount = preset.NumTevStagesCount;
+            bmdMaterial.CullMode = preset.CullMode;
+
+            if (preset.MaterialColors != null) bmdMaterial.MaterialColors = preset.MaterialColors;
+            if (preset.ChannelControls != null) bmdMaterial.ChannelControls = preset.ChannelControls;
+            if (preset.AmbientColors != null) bmdMaterial.AmbientColors = preset.AmbientColors;
+            if (preset.LightingColors != null) bmdMaterial.LightingColors = preset.LightingColors;
+
+            if (preset.TexCoord1Gens != null) bmdMaterial.TexCoord1Gens = preset.TexCoord1Gens;
+            if (preset.PostTexCoordGens != null) bmdMaterial.PostTexCoordGens = preset.PostTexCoordGens;
+            if (preset.TexMatrix1 != null) bmdMaterial.TexMatrix1 = preset.TexMatrix1;
+            if (preset.PostTexMatrix != null) bmdMaterial.PostTexMatrix = preset.PostTexMatrix;
+            bmdMaterial.TextureNames = preset.TextureNames;
+
+            if (preset.TevOrders != null) bmdMaterial.TevOrders = preset.TevOrders;
+            if (preset.ColorSels != null) bmdMaterial.ColorSels = preset.ColorSels;
+            if (preset.AlphaSels != null) bmdMaterial.AlphaSels = preset.AlphaSels;
+            if (preset.TevColors != null) bmdMaterial.TevColors = preset.TevColors;
+            if (preset.KonstColors != null) bmdMaterial.KonstColors = preset.KonstColors;
+            if (preset.TevStages != null) bmdMaterial.TevStages = preset.TevStages;
+            if (preset.SwapModes != null) bmdMaterial.SwapModes = preset.SwapModes;
+            if (preset.SwapTables != null) bmdMaterial.SwapTables = preset.SwapTables;
+            if (preset.FogInfo != null) bmdMaterial.FogInfo = preset.FogInfo;
+            if (preset.AlphCompare != null) bmdMaterial.AlphCompare = preset.AlphCompare;
+            if (preset.BMode != null) bmdMaterial.BMode = preset.BMode;
+            if (preset.ZMode != null) bmdMaterial.ZMode = preset.ZMode;
+            bmdMaterial.ZCompLoc = preset.ZCompLoc;
+            bmdMaterial.Dither = preset.Dither;
+            if (preset.NBTScale != null) bmdMaterial.NBTScale = preset.NBTScale;
+        }
+
+        /*private void LoadFromJson(Assimp.Scene scene, TEX1 textures, SHP1 shapes, string json_path)
         {
             JsonSerializer serial = new JsonSerializer();
             serial.Formatting = Formatting.Indented;
@@ -539,9 +610,9 @@ namespace SuperBMDLib.BMD
 
                 //m_RemapIndices[i] = scene.Meshes[i].MaterialIndex;
             }
-        }
+        }*/
 
-        private void LoadFromScene(Assimp.Scene scene, TEX1 textures, SHP1 shapes)
+        private void LoadFromScene(Assimp.Scene scene, TEX1 textures, SHP1 shapes, List<Material> mat_presets = null)
         {
             for (int i = 0; i < scene.MeshCount; i++)
             {
@@ -557,7 +628,15 @@ namespace SuperBMDLib.BMD
                     texIndex = textures.Textures.IndexOf(textures[texName]);
                 }
 
-                bmdMaterial.SetUpTev(meshMat.HasTextureDiffuse, hasVtxColor0, texIndex, texName);
+                bmdMaterial.SetUpTev(meshMat.HasTextureDiffuse, hasVtxColor0, texIndex, texName, meshMat);
+                Material preset = FindMatPreset(meshMat.Name, mat_presets);
+
+                if (preset != null) {
+                    Console.WriteLine(String.Format("Applying material preset for {0}", meshMat.Name));
+                    SetPreset(bmdMaterial, preset);
+                }
+
+                bmdMaterial.Readjust();
 
                 m_Materials.Add(bmdMaterial);
                 m_RemapIndices.Add(i);
@@ -1321,17 +1400,66 @@ namespace SuperBMDLib.BMD
             writer.Write((short)m_NBTScaleBlock.IndexOf(mat.NBTScale));
         }
 
-        public void DumpMaterials(string model_directory)
+        public void DumpMaterials(string out_path)
         {
             JsonSerializer serial = new JsonSerializer();
             serial.Formatting = Formatting.Indented;
             serial.Converters.Add(new StringEnumConverter());
 
-            using (FileStream strm = new FileStream(Path.Combine(model_directory, "materials.json"), FileMode.Create, FileAccess.Write))
+            using (FileStream strm = new FileStream(out_path, FileMode.Create, FileAccess.Write))
             {
                 StreamWriter writer = new StreamWriter(strm);
                 writer.AutoFlush = true;
                 serial.Serialize(writer, m_Materials);
+            }
+        }
+
+        /*public void LoadAdditionalTextures(TEX1 tex1, string texpath) {
+            //string modeldir = Path.GetDirectoryName(modelpath);
+            foreach (Material mat in m_Materials) {
+                foreach (string texname in mat.TextureNames) {
+                    if (texname != null) {
+                        if (tex1[texname] == null) {
+                            string path = "";
+                            foreach (string extension in new string[] { ".png", ".jpg", ".tga", ".bmp" }) {
+                                string tmppath = Path.Combine(texpath, texname + extension);
+                                if (File.Exists(tmppath)) {
+                                    path = tmppath;
+                                    break; 
+                                }
+                            }
+                            if (path != "") {
+                                tex1.AddTextureFromPath(path);
+                                short texindex = (short)(tex1.Textures.Count - 1);
+                                m_TexRemapBlock.Add(texindex);
+                            }
+                            else {
+                                Console.WriteLine(String.Format("Could not find texture {0} in file path {1}",
+                                                   texname, texpath));
+                            }
+                        }
+                    }
+                }
+            }
+        }*/
+
+        public void MapTextureNamesToIndices(TEX1 textures) {
+            //Console.WriteLine("Mapping names to indices");
+            foreach (Material mat in m_Materials) {
+                for (int i = 0; i < 8; i++) {
+                    if (mat.TextureNames[i] != null && mat.TextureNames[i] != "") {
+                        int j = 0;
+                        
+                        foreach (BinaryTextureImage tex in textures.Textures) {
+                            if (tex.Name == mat.TextureNames[i]) {
+                                mat.TextureIndices[i] = j;
+                                //Console.WriteLine(String.Format("Mapped {0} to index {1}", tex.Name, j));
+                                break;
+                            }
+                            j++;
+                        }
+                    }
+                }
             }
         }
 
