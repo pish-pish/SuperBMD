@@ -9,6 +9,7 @@ using GameFormatReader.Common;
 using SuperBMDLib.Util;
 using Chadsoft.CTools.Image;
 using Newtonsoft.Json;
+using DmitryBrant.ImageFormats;
 
 namespace SuperBMDLib.Materials
 {
