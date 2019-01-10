@@ -88,6 +88,11 @@ namespace SuperBMDLib.Materials
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        public enum Aniso { ANISO_1 = 0, ANISO_2, ANISO_4 }
+
+        /// <summary>
         /// The Palette simply stores the color data as loaded from the file.
         /// It does not convert the files based on the Palette type to RGBA8.
         /// </summary>
@@ -135,17 +140,20 @@ namespace SuperBMDLib.Materials
 
         [JsonIgnore]
         public ushort PaletteCount { get; set; }
-
-        [JsonIgnore]
-        public int EmbeddedPaletteOffset { get; private set; } // This is a guess. It seems to be 0 in most things, but it fits with min/mag filters.
-
+        
+        //[JsonIgnore]
+        //public int EmbeddedPaletteOffset { get; private set; } // This is a guess. It seems to be 0 in most things, but it fits with min/mag filters.
+        public byte MipMap { get; set; }
+        public bool EdgeLOD { get; set; }
+        public bool BiasClamp { get; set; }
+        public byte MaxAniso { get; set; }
         public FilterMode MinFilter { get; set; }
         public FilterMode MagFilter { get; set; }
-        public sbyte MinLOD { get; set; } // Fixed point number, 1/8 = conversion (ToDo: is this multiply by 8 or divide...)
-        public sbyte MagLOD { get; set; } // Fixed point number, 1/8 = conversion (ToDo: is this multiply by 8 or divide...)
+        public float MinLOD { get; set; } // Fixed point number, 1/8 = conversion (ToDo: is this multiply by 8 or divide...)
+        public float MaxLOD { get; set; } // Fixed point number, 1/8 = conversion (ToDo: is this multiply by 8 or divide...)
         [JsonIgnore]
-        public byte MipMapCount { get; private set; }
-        public short LodBias { get; set; } // Fixed point number, 1/100 = conversion
+        public byte ImageCount { get; private set; } // Includes the full detail texture itself and all its mipmaps 
+        public float LodBias { get; set; } // Fixed point number, 1/100 = conversion
 
         [JsonIgnore]
         private Palette m_imagePalette;
@@ -157,9 +165,6 @@ namespace SuperBMDLib.Materials
             get { return m_rgbaImageData; }
             set { m_rgbaImageData = value; }
         }
-        
-        public short unknown2 = 0;
-        public byte unknown3 = 0;
 
         public BinaryTextureImage()
         {
@@ -190,13 +195,19 @@ namespace SuperBMDLib.Materials
             PaletteFormat = (PaletteFormats)stream.ReadByte();
             PaletteCount = stream.ReadUInt16();
             int paletteDataOffset = stream.ReadInt32();
-            EmbeddedPaletteOffset = stream.ReadInt32();
+            //EmbeddedPaletteOffset = stream.ReadInt32();
+            MipMap = stream.ReadByte();
+            EdgeLOD = stream.ReadBoolean();
+            BiasClamp = stream.ReadBoolean();
+            MaxAniso = stream.ReadByte();
             MinFilter = (FilterMode)stream.ReadByte();
             MagFilter = (FilterMode)stream.ReadByte();
-            unknown2 = stream.ReadInt16();
-            MipMapCount = stream.ReadByte();
-            unknown3 = stream.ReadByte();
-            LodBias = stream.ReadInt16();
+            MinLOD = ((float)stream.ReadSByte())*(1/8.0f);
+            MaxLOD = ((float)stream.ReadSByte())*(1/8.0f);
+            //unknown2 = stream.ReadInt16();
+            ImageCount = stream.ReadByte();
+            stream.SkipByte(); //LonelyPaddingByte = stream.ReadByte();
+            LodBias = ((float)stream.ReadInt16())*(1/100.0f);
 
             int imageDataOffset = stream.ReadInt32();
 
@@ -218,10 +229,10 @@ namespace SuperBMDLib.Materials
             MinFilter = other.MinFilter;
             MagFilter = other.MagFilter;
             MinLOD = other.MinLOD;
-            MagLOD = other.MagLOD;
+            MaxLOD = other.MaxLOD;
             LodBias = other.LodBias;
-            unknown2 = other.unknown2;
-            unknown3 = other.unknown3;
+            PalettesEnabled = other.PalettesEnabled;
+            PaletteFormat = other.PaletteFormat;
         }
 
         public void Load(Assimp.TextureSlot texture, string modelDirectory)
@@ -234,40 +245,67 @@ namespace SuperBMDLib.Materials
             //WrapT = WrapModes.ClampToEdge;
             PaletteFormat = PaletteFormats.IA8;
             PaletteCount = 0;
-            EmbeddedPaletteOffset = 0;
+            //EmbeddedPaletteOffset = 0;
+            MipMap = 0x00;
+            EdgeLOD = false;
+            BiasClamp = false;
+            MaxAniso = 0x00;
             MinFilter = FilterMode.Linear;
             MagFilter = FilterMode.Linear;
-            MipMapCount = 1;
+            ImageCount = 1;
             LodBias = 0;
 
             Bitmap texData = null;
 
-            string texPath = texture.FilePath;
-            if (!Path.IsPathRooted(texPath)) {
-                texPath = Path.Combine(modelDirectory, texPath);
+            string texFilePath = texture.FilePath;
+            if (!Path.IsPathRooted(texFilePath)) {
+                texFilePath = Path.Combine(modelDirectory, texFilePath);
             }
 
-            if (File.Exists(texPath))
+            if (File.Exists(texFilePath))
             {
-                texData = new Bitmap(texture.FilePath);
-                Name = Path.GetFileNameWithoutExtension(texture.FilePath);
+                try {
+                    texData = new Bitmap(texFilePath);
+                }
+                catch (ArgumentException e) {
+                    try {
+                        texData = TgaReader.Load(texFilePath);
+                    }
+                    catch (Exception e2) {
+                        Console.WriteLine(String.Format("Failed to load texture from {0} \n Texture should be BMP, JPG, PNG or TGA", texFilePath));
+                        throw e2;
+                    }
+                }
+                Name = Path.GetFileNameWithoutExtension(texFilePath);
             }
             else
             {
-                Console.WriteLine($"Texture was not found at path \"{ texPath }\". Searching the model's directory...");
+                Console.WriteLine($"Texture was not found at path \"{ texFilePath }\". Searching the model's directory...");
                 string fileName = Path.GetFileName(texture.FilePath);
-                texPath = Path.Combine(modelDirectory, fileName);
+                texFilePath = Path.Combine(modelDirectory, fileName);
 
-                if (!File.Exists(texPath))
+                if (!File.Exists(texFilePath))
                 {
                     Console.WriteLine($"Cannot find texture { fileName }. Using a checkboard texture instead...");
                     texData = new Bitmap(SuperBMDLib.Properties.Resources.default_checker);
-                    Name = Path.GetFileNameWithoutExtension(texPath);
+                    Name = Path.GetFileNameWithoutExtension(texFilePath);
                 }
                 else
                 {
-                    texData = new Bitmap(texPath);
-                    Name = Path.GetFileNameWithoutExtension(texPath);
+                    try {
+                        texData = new Bitmap(texFilePath);
+                    }
+                    catch (Exception e) {
+                        try {
+                            texData = TgaReader.Load(texFilePath);
+                        }
+                        catch (Exception e2) {
+                            Console.WriteLine(String.Format("Failed to load texture from {0} \n Texture should be BMP, JPG, PNG or TGA", texFilePath));
+                            throw e2;
+                        } 
+                    }
+
+                    Name = Path.GetFileNameWithoutExtension(texFilePath);
                 }
             }
 
@@ -361,23 +399,43 @@ namespace SuperBMDLib.Materials
             return bmp;
         }
 
+        public byte[] GetData()
+        {
+            return m_rgbaImageData;
+        }
+
         /// <summary>
-        /// Loads image data from disk into a byte array.
+        /// This function is for debugging purposes and does not encompass encoding data.
         /// </summary>
         public void LoadImageFromDisk(string filePath)
         {
-            Bitmap bmp = new Bitmap(filePath);
-            byte[] data = new byte[bmp.Width * bmp.Height * 4];
+            using (Bitmap bitmap = new Bitmap(filePath))
+            {
+                Format = TextureFormats.RGBA32;
+                AlphaSetting = 0;
+                Width = (ushort)bitmap.Width;
+                Height = (ushort)bitmap.Height;
+                WrapS = WrapModes.ClampToEdge;
+                WrapT = WrapModes.ClampToEdge;
+                PaletteFormat = PaletteFormats.IA8;
+                PaletteCount = 0;
+                //EmbeddedPaletteOffset = 0;
+                MipMap = 0x00;
+                EdgeLOD = false;
+                BiasClamp = false;
+                MaxAniso = 0x00;
+                MinFilter = FilterMode.Linear;
+                MagFilter = FilterMode.Linear;
+                ImageCount = 1;
+                LodBias = 0;
 
-            BitmapData bmpData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height),
-                ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
-            Marshal.Copy(bmpData.Scan0, data, 0, data.Length);
-            bmp.UnlockBits(bmpData);
+                byte[] data = new byte[Width * Height * 4];
 
-            m_rgbaImageData = data;
-
-            Width = (ushort)bmp.Width;
-            Height = (ushort)bmp.Height;
+                BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                Marshal.Copy(bmpData.Scan0, data, 0, data.Length);
+                bitmap.UnlockBits(bmpData);
+                m_rgbaImageData = data;
+            }
         }
 
         public void WriteHeader(EndianBinaryWriter writer)
@@ -397,20 +455,26 @@ namespace SuperBMDLib.Materials
             // This is a placeholder for PaletteDataOffset
             writer.Write((int)0);
 
-            writer.Write(EmbeddedPaletteOffset);
+            //writer.Write(EmbeddedPaletteOffset);
+            writer.Write(MipMap);
+            writer.Write(EdgeLOD);
+            writer.Write(BiasClamp);
+            writer.Write(MaxAniso);
 
             writer.Write((byte)MinFilter);
             writer.Write((byte)MagFilter);
 
             // This is an unknown
-            writer.Write((short)unknown2);
+            //writer.Write((short)unknown2);
+            writer.Write((sbyte)Math.Round(MinLOD*8.0));
+            writer.Write((sbyte)Math.Round(MaxLOD*8.0));
 
-            writer.Write((byte)MipMapCount);
+            writer.Write((byte)ImageCount);
 
             // This is an unknown
-            writer.Write((byte)unknown3);
+            writer.Write((byte)0xFF); // writer.Write((byte)LonelyPaddingByte);
 
-            writer.Write((short)LodBias);
+            writer.Write((short)Math.Round(LodBias*100.0));
 
             // This is a placeholder for ImageDataOffset
             writer.Write((int)0);
