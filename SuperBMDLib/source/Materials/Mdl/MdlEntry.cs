@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GameFormatReader.Common;
-using SuperBMDLib.Materials.Enums;
+using SuperBMD.Materials.Enums;
 
-namespace SuperBMDLib.Materials.Mdl
+namespace SuperBMD.Materials.Mdl
 {
     public class MdlEntry
     {
@@ -110,16 +110,17 @@ namespace SuperBMDLib.Materials.Mdl
                         break;
                 }
 
-                // Unimplemented:
-                mode0.SetFlag(true, 8); // Edge LOD (diag_lod)
-                mode0.SetBits(0, 9, 8); // LoDBias (lod_bias)
-                mode0.SetBits(0, 19, 2); // Max aniso (max_aniso)
-                mode0.SetFlag(false, 21); // Bias Clamp (lod_clamp)
+                mode0.SetFlag(curTex.EdgeLOD, 8); // Edge LOD (diag_lod)
+                mode0.SetBits((byte)Math.Round(curTex.LodBias*32.0f), 9, 8); // LoDBias (lod_bias)
+                mode0.SetBits((int)curTex.MaxAniso, 19, 2); // Max aniso (max_aniso)
+                mode0.SetFlag(curTex.BiasClamp, 21); // Bias Clamp (lod_clamp)
+
                 // MinLOD
                 // MaxLOD
-
                 BPCommand mode1 = new BPCommand() { Register = texMode1Regs[i] };
-
+                mode1.SetBits((sbyte)Math.Round(curTex.MinLOD*16.0f), 0, 8); 
+                mode1.SetBits((sbyte)Math.Round(curTex.MaxLOD*16.0f), 8, 8);
+                
                 BPCommands.Add(texIndex);
                 BPCommands.Add(texInfo);
                 BPCommands.Add(mode0);
