@@ -196,6 +196,7 @@
     <Compile Include="source\Rigging\Bone.cs" />
     <Compile Include="source\Util\Color.cs" />
     <Compile Include="source\Util\Color32.cs" />
+    <Compile Include="source\Util\IO\TGA.cs" />
     <Compile Include="source\Util\J3DUtility.cs" />
     <Compile Include="source\Util\JsonUtility.cs" />
     <Compile Include="source\Util\StreamUtility.cs" />
