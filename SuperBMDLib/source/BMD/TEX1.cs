@@ -93,6 +93,20 @@ namespace SuperBMDLib.BMD
 
                 if (mat.HasTextureDiffuse)
                 {
+                    string texname = System.IO.Path.GetFileNameWithoutExtension(mat.TextureDiffuse.FilePath);
+                    bool already_exists = false;
+
+                    foreach (BinaryTextureImage image in Textures) {
+                        if (image.Name == texname) {
+                            already_exists = true;
+                            break;
+                        }
+                    }
+
+                    if (already_exists) {
+                        continue;
+                    }
+
                     BinaryTextureImage img = new BinaryTextureImage();
                     img.Load(mat.TextureDiffuse, model_directory);
                     Textures.Add(img);
@@ -100,7 +114,19 @@ namespace SuperBMDLib.BMD
             }
         }
 
-        private string FindImagePath(string name_without_ext)
+        public void AddTextureFromPath(string path) {
+            string modelDirectory = System.IO.Path.GetDirectoryName(path);
+            BinaryTextureImage img = new BinaryTextureImage();
+
+            // Only the path and the wrap mode are relevant, the rest doesn't matter for img.Load
+            TextureSlot tex = new TextureSlot(path, 0, 0, 0, 0, (float)0.0, 0, TextureWrapMode.Clamp, TextureWrapMode.Clamp, 0);
+
+            img.Load(tex, modelDirectory);
+            
+            Textures.Add(img);
+        }
+
+                private string FindImagePath(string name_without_ext)
         {
             if (File.Exists(name_without_ext + ".png"))
                 return name_without_ext + ".png";
