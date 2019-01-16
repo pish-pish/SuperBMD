@@ -126,7 +126,7 @@ namespace SuperBMDLib.BMD
             Textures.Add(img);
         }
 
-                private string FindImagePath(string name_without_ext)
+        private string FindImagePath(string name_without_ext)
         {
             if (File.Exists(name_without_ext + ".png"))
                 return name_without_ext + ".png";
