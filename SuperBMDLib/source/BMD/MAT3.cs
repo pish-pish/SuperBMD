@@ -1414,7 +1414,7 @@ namespace SuperBMDLib.BMD
             }
         }
 
-        /*public void LoadAdditionalTextures(TEX1 tex1, string texpath) {
+        public void LoadAdditionalTextures(TEX1 tex1, string texpath) {
             //string modeldir = Path.GetDirectoryName(modelpath);
             foreach (Material mat in m_Materials) {
                 foreach (string texname in mat.TextureNames) {
@@ -1441,7 +1441,7 @@ namespace SuperBMDLib.BMD
                     }
                 }
             }
-        }*/
+        }
 
         public void MapTextureNamesToIndices(TEX1 textures) {
             //Console.WriteLine("Mapping names to indices");

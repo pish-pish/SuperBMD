@@ -116,7 +116,7 @@ namespace SuperBMDLib
             }
         }
 
-        public Model(Scene scene, Arguments args, List<SuperBMDLib.Materials.Material> mat_presets = null, string additionalTexPath = "")
+        public Model(Scene scene, Arguments args, List<SuperBMDLib.Materials.Material> mat_presets = null, string additionalTexPath = null)
         {
             //EnsureOneMaterialPerMesh(scene);
             //SortMeshesByObjectNames(scene);
@@ -134,14 +134,14 @@ namespace SuperBMDLib
 
             Materials = new MAT3(scene, Textures, Shapes, args, mat_presets);
 
-            /*if (additionalTexPath == null)
+            if (additionalTexPath == null)
             {
                 Materials.LoadAdditionalTextures(Textures, Path.GetDirectoryName(args.input_path));
             }
             else
             {
                 Materials.LoadAdditionalTextures(Textures, additionalTexPath);
-            }*/
+            }
 
             Materials.MapTextureNamesToIndices(Textures);
 
