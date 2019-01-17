@@ -1418,8 +1418,8 @@ namespace SuperBMDLib.BMD
             //string modeldir = Path.GetDirectoryName(modelpath);
             foreach (Material mat in m_Materials) {
                 foreach (string texname in mat.TextureNames) {
-                    if (texname != null) {
-                        if (tex1[texname] == null) {
+                    if (texname != null && texname != "") {
+                        if (tex1[texname] == null || texname == "") {
                             string path = "";
                             foreach (string extension in new string[] { ".png", ".jpg", ".tga", ".bmp" }) {
                                 string tmppath = Path.Combine(texpath, texname + extension);
