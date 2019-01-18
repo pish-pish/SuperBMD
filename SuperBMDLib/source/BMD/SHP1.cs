@@ -10,6 +10,7 @@ using SuperBMDLib.Geometry.Enums;
 using SuperBMDLib.Util;
 using SuperBMDLib.Rigging;
 using OpenTK;
+using SuperBMD.source.Geometry.Enums;
 
 namespace SuperBMDLib.BMD
 {
@@ -92,7 +93,7 @@ namespace SuperBMDLib.BMD
 
             for (int i = 0; i < highestIndex + 1; i++)
             {
-                byte matrixType = reader.ReadByte();
+                MatrixType matrixType = (MatrixType)reader.ReadByte();
                 reader.SkipByte();
 
                 int packetCount = reader.ReadInt16();
@@ -138,8 +139,23 @@ namespace SuperBMDLib.BMD
 
             foreach (Mesh mesh in scene.Meshes)
             {
-                Shape meshShape = new Shape();
+                Shape meshShape;
+
+                /*if (mesh.Name.Contains("Bill0")) {
+                    meshShape = new Shape(0); // Matrix Type 0, unknown
+                }*/
+                if (mesh.Name.Contains("BillXY")) {
+                    meshShape = new Shape(MatrixType.BillboardXY); // Matrix Type 1, XY Billboard
+                }
+                else if (mesh.Name.Contains("BillX")) {
+                    meshShape = new Shape(MatrixType.BillboardX); // Matrix Type 2, X Billboard, i.e. the X axis is always turned towards camera
+                }
+                else {
+                     meshShape = new Shape(); // Matrix Type 3, normal
+                    
+                }
                 meshShape.SetDescriptorAttributes(mesh, boneNames.Count);
+                Console.WriteLine("Mtx type for {0}: {1}", mesh.Name, meshShape.MatrixType);
 
                 if (boneNames.Count > 1)
                     meshShape.ProcessVerticesWithWeights(   mesh, vertData, boneNames, envelopes, 
@@ -216,11 +232,27 @@ namespace SuperBMDLib.BMD
         {
             for (int i = 0; i < Shapes.Count; i++)
             {
-                Mesh mesh = new Mesh($"mesh_{ i }", PrimitiveType.Triangle);
-                mesh.MaterialIndex = i;
+                
 
                 int vertexID = 0;
                 Shape curShape = Shapes[i];
+
+                string meshname = $"mesh_{ i }";
+
+                switch (curShape.MatrixType) {
+                    case MatrixType.BillboardX:
+                        meshname += "_BillX";
+                        break;
+                    case MatrixType.BillboardXY:
+                        meshname += "_BillXY";
+                        break;
+                    default:
+                        break;
+                }
+                
+                Mesh mesh = new Mesh($"mesh_{ i }", PrimitiveType.Triangle);
+                mesh.MaterialIndex = i;
+
                 foreach (Packet pack in curShape.Packets)
                 {
                     foreach (Primitive prim in pack.Primitives)

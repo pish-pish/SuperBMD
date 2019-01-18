@@ -11,6 +11,7 @@ using SuperBMDLib.BMD;
 using SuperBMDLib.Rigging;
 using BrawlLib.Modeling.Triangle_Converter;
 using System.Diagnostics;
+using SuperBMD.source.Geometry.Enums;
 
 namespace SuperBMDLib.Geometry
 {
@@ -19,7 +20,7 @@ namespace SuperBMDLib.Geometry
         public VertexData AttributeData { get; private set; }
         public ShapeVertexDescriptor Descriptor { get; private set; }
 
-        public byte MatrixType { get; private set; }
+        public MatrixType MatrixType { get; private set; }
         public BoundingVolume Bounds { get; private set; }
 
         public List<Packet> Packets { get; private set; }
@@ -32,7 +33,7 @@ namespace SuperBMDLib.Geometry
 
         public Shape()
         {
-            MatrixType = 3;
+            MatrixType = MatrixType.Normal;
             AttributeData = new VertexData();
             Descriptor = new ShapeVertexDescriptor();
             Packets = new List<Packet>();
@@ -42,12 +43,16 @@ namespace SuperBMDLib.Geometry
             m_NormalMatrices = new Vector4[32];
         }
 
-        public Shape(ShapeVertexDescriptor desc, BoundingVolume bounds, List<Packet> prims, int matrixType)
+        public Shape(MatrixType matrixType) : this() {
+            MatrixType = matrixType;
+        }
+
+        public Shape(ShapeVertexDescriptor desc, BoundingVolume bounds, List<Packet> prims, MatrixType matrixType)
         {
             Descriptor = desc;
             Bounds = bounds;
             Packets = prims;
-            MatrixType = (byte)matrixType;
+            MatrixType = matrixType;
         }
 
         public void SetDescriptorAttributes(Mesh mesh, int jointCount)
@@ -751,7 +756,7 @@ namespace SuperBMDLib.Geometry
 
         public void Write(EndianBinaryWriter writer)
         {
-            writer.Write(MatrixType);
+            writer.Write((byte)MatrixType);
             writer.Write((sbyte)-1);
             writer.Write((short)Packets.Count);
             writer.Write((short)0); // Placeholder for descriptor offset
