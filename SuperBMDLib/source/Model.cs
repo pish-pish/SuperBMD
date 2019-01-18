@@ -223,11 +223,11 @@ namespace SuperBMDLib
             Textures.DumpTextures(outDir);
 
 
-            foreach (Mesh mesh in outScene.Meshes)
+            /*foreach (Mesh mesh in outScene.Meshes)
             {
                 // Assimp has a JoinIdenticalVertices post process step, but we can't use that or the skinning info we manually add won't take it into account.
                 RemoveDuplicateVertices(mesh);
-            }
+            }*/
 
 
             AssimpContext cont = new AssimpContext();
