@@ -120,6 +120,17 @@ namespace SuperBMDLib
         {
             //EnsureOneMaterialPerMesh(scene);
             //SortMeshesByObjectNames(scene);
+            
+            // For FBX mesh names are empty, instead we need to check the nodes and rename
+            // the meshes after the node names.
+            foreach (Assimp.Node node in scene.RootNode.Children) {
+                foreach (int meshindex in node.MeshIndices) {
+                    Assimp.Mesh mesh = scene.Meshes[meshindex];
+                    if (mesh.Name == "") {
+                        mesh.Name = node.Name;
+                    }
+                }
+            }
 
             VertexData = new VTX1(scene);
             Joints = new JNT1(scene, VertexData);
