@@ -23,6 +23,8 @@ namespace SuperBMDLib
         public MDL3 MatDisplayList    { get; private set; }
         public TEX1 Textures          { get; private set; }
 
+        private string[] characters_to_replace = new string[] { " ", "(", ")" };
+
         private int packetCount;
         private int vertexCount;
 
@@ -282,15 +284,23 @@ namespace SuperBMDLib
                 }
                 else if (line.Contains("</visual_scene>"))
                 {
-                    foreach (Mesh mesh in outScene.Meshes)
-                    {
+                    foreach (Mesh mesh in outScene.Meshes) {
+                        string matname = "mat";
+                        bool keepmatnames = false;
+                        if (keepmatnames == true) {
+                            matname = AssimpMatnameSanitize(mesh.MaterialIndex, outScene.Materials[mesh.MaterialIndex].Name);
+                        }
+                        else {
+                            matname = AssimpMatnameSanitize(mesh.MaterialIndex, Materials.m_Materials[mesh.MaterialIndex].Name);
+                        }
+
                         test.WriteLine($"      <node id=\"{ mesh.Name }\" name=\"{ mesh.Name }\" type=\"NODE\">");
 
                         test.WriteLine($"       <instance_controller url=\"#{ mesh.Name }-skin\">");
                         test.WriteLine("        <skeleton>#skeleton_root</skeleton>");
                         test.WriteLine("        <bind_material>");
                         test.WriteLine("         <technique_common>");
-                        test.WriteLine($"          <instance_material symbol=\"m{mesh.MaterialIndex}{ Materials.m_Materials[mesh.MaterialIndex].Name }\" target=\"#m{mesh.MaterialIndex}{ Materials.m_Materials[mesh.MaterialIndex].Name.Replace("(","_").Replace(")","_") }\" />");
+                        test.WriteLine($"          <instance_material symbol=\"m{matname}\" target=\"#{matname}\" />");
                         test.WriteLine("         </technique_common>");
                         test.WriteLine("        </bind_material>");
                         test.WriteLine("       </instance_controller>");
@@ -411,11 +421,11 @@ namespace SuperBMDLib
             {
                 Matrix4x4 ibm = bone.OffsetMatrix;
                 ibm.Transpose();
-
-                writer.WriteLine($"       {ibm.A1.ToString("G9")} {ibm.A2.ToString("G9")} {ibm.A3.ToString("G9")} {ibm.A4.ToString("G9")}");
-                writer.WriteLine($"       {ibm.B1.ToString("G9")} {ibm.B2.ToString("G9")} {ibm.B3.ToString("G9")} {ibm.B4.ToString("G9")}");
-                writer.WriteLine($"       {ibm.C1.ToString("G9")} {ibm.C2.ToString("G9")} {ibm.C3.ToString("G9")} {ibm.C4.ToString("G9")}");
-                writer.WriteLine($"       {ibm.D1.ToString("G9")} {ibm.D2.ToString("G9")} {ibm.D3.ToString("G9")} {ibm.D4.ToString("G9")}");
+                string fmt = "G7";
+                writer.WriteLine($"       {ibm.A1.ToString(fmt)} {ibm.A2.ToString(fmt)} {ibm.A3.ToString(fmt)} {ibm.A4.ToString(fmt)}");
+                writer.WriteLine($"       {ibm.B1.ToString(fmt)} {ibm.B2.ToString(fmt)} {ibm.B3.ToString(fmt)} {ibm.B4.ToString(fmt)}");
+                writer.WriteLine($"       {ibm.C1.ToString(fmt)} {ibm.C2.ToString(fmt)} {ibm.C3.ToString(fmt)} {ibm.C4.ToString(fmt)}");
+                writer.WriteLine($"       {ibm.D1.ToString(fmt)} {ibm.D2.ToString(fmt)} {ibm.D3.ToString(fmt)} {ibm.D4.ToString(fmt)}");
 
                 if (bone != mesh.Bones.Last())
                     writer.WriteLine("");
@@ -518,191 +528,13 @@ namespace SuperBMDLib
             writer.WriteLine($"      </vertex_weights>");
         }
 
-        private void RemoveDuplicateVertices(Mesh mesh)
-        {
-            // Calculate which vertices are duplicates (based on their position, texture coordinates, and normals).
-            List<Tuple<Vector3D, Vector3D?, List<Vector3D>>> uniqueVertInfos = new List<Tuple<Vector3D, Vector3D?, List<Vector3D>>>();
-            int[] replaceVertexIDs = new int[mesh.Vertices.Count];
-            bool[] vertexIsUnique = new bool[mesh.Vertices.Count];
-            for (var origVertexID = 0; origVertexID < mesh.Vertices.Count; origVertexID++)
-            {
-                var coordsForVert = new List<Vector3D>();
-                for (var i = 0; i < mesh.TextureCoordinateChannelCount; i++)
-                {
-                    coordsForVert.Add(mesh.TextureCoordinateChannels[i][origVertexID]);
-                }
-
-                Vector3D? normal;
-                if (origVertexID < mesh.Normals.Count)
-                {
-                    normal = mesh.Normals[origVertexID];
-                } else
-                {
-                    normal = null;
-                }
-
-                var vertInfo = new Tuple<Vector3D, Vector3D?, List<Vector3D>>(mesh.Vertices[origVertexID], normal, coordsForVert);
-
-                // Determine if this vertex is a duplicate of a previously encountered vertex or not and if it is keep track of the new index
-                var duplicateVertexIndex = -1;
-                for (var i = 0; i < uniqueVertInfos.Count; i++)
-                {
-                    Tuple<Vector3D, Vector3D?, List<Vector3D>> otherVertInfo = uniqueVertInfos[i];
-                    if (CheckVertInfosAreDuplicates(vertInfo.Item1, vertInfo.Item2, vertInfo.Item3, otherVertInfo.Item1, otherVertInfo.Item2, otherVertInfo.Item3))
-                    {
-                        duplicateVertexIndex = i;
-                        break;
-                    }
-                }
-
-                if (duplicateVertexIndex == -1)
-                {
-                    vertexIsUnique[origVertexID] = true;
-                    uniqueVertInfos.Add(vertInfo);
-                    replaceVertexIDs[origVertexID] = uniqueVertInfos.Count - 1;
-                }
-                else
-                {
-                    vertexIsUnique[origVertexID] = false;
-                    replaceVertexIDs[origVertexID] = duplicateVertexIndex;
-                }
+        // Attempt to replicate Assimp's behaviour for sanitizing material names
+        private string AssimpMatnameSanitize(int meshindex, string matname) {
+            matname = matname.Replace("#", "_");
+            foreach (string letter in characters_to_replace) {
+                matname = matname.Replace(letter, "_");
             }
-
-            // Remove duplicate vertices, normals, and texture coordinates.
-            mesh.Vertices.Clear();
-            mesh.Normals.Clear();
-            // Need to preserve the channel count since it gets set to 0 when clearing all the channels
-            int origTexCoordChannelCount = mesh.TextureCoordinateChannelCount;
-            for (var i = 0; i < origTexCoordChannelCount; i++)
-            {
-                mesh.TextureCoordinateChannels[i].Clear();
-            }
-            foreach (Tuple<Vector3D, Vector3D?, List<Vector3D>> vertInfo in uniqueVertInfos)
-            {
-                mesh.Vertices.Add(vertInfo.Item1);
-                if (vertInfo.Item2 != null)
-                {
-                    mesh.Normals.Add(vertInfo.Item2.Value);
-                }
-                for (var i = 0; i < origTexCoordChannelCount; i++)
-                {
-                    var coord = vertInfo.Item3[i];
-                    mesh.TextureCoordinateChannels[i].Add(coord);
-                }
-            }
-
-            // Update vertex indices for the faces.
-            foreach (Face face in mesh.Faces)
-            {
-                for (var i = 0; i < face.IndexCount; i++)
-                {
-                    face.Indices[i] = replaceVertexIDs[face.Indices[i]];
-                }
-            }
-
-            // Update vertex indices for the bone vertex weights.
-            foreach (Bone bone in mesh.Bones)
-            {
-                List<VertexWeight> origVertexWeights = new List<VertexWeight>(bone.VertexWeights);
-                bone.VertexWeights.Clear();
-                for (var i = 0; i < origVertexWeights.Count; i++)
-                {
-                    VertexWeight origWeight = origVertexWeights[i];
-                    int origVertexID = origWeight.VertexID;
-                    if (!vertexIsUnique[origVertexID])
-                        continue;
-
-                    int newVertexID = replaceVertexIDs[origVertexID];
-                    VertexWeight newWeight = new VertexWeight(newVertexID, origWeight.Weight);
-                    bone.VertexWeights.Add(newWeight);
-                }
-            }
-        }
-
-        private bool CheckVertInfosAreDuplicates(Vector3D vert1, Vector3D? norm1, List<Vector3D> vert1TexCoords, Vector3D vert2, Vector3D? norm2, List<Vector3D> vert2TexCoords)
-        {
-            if (vert1 != vert2)
-            {
-                // Position is different
-                return false;
-            }
-
-            if (norm1 != norm2)
-            {
-                // Normals are different
-                return false;
-            }
-
-            for (var i = 0; i < vert1TexCoords.Count; i++)
-            {
-                if (vert1TexCoords[i] != vert2TexCoords[i])
-                {
-                    // Texture coordinate is different
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private void SortMeshesByObjectNames(Scene scene)
-        {
-            // Sort meshes by their name instead of keeping the order they're in inside the file.
-            // Specifically, natural sorting is used so that mesh-9 comes before mesh-10.
-
-            List<string> meshNames = new List<string>();
-            int maxNumberLength = 0;
-            foreach (Node node in scene.RootNode.Children)
-            {
-                if (node.HasMeshes)
-                {
-                    int currMaxNumberLength = node.Name.SelectMany(i => Regex.Matches(node.Name, @"\d+").Cast<Match>().Select(m => m.Value.Length)).DefaultIfEmpty(0).Max();
-                    if (currMaxNumberLength > maxNumberLength)
-                    {
-                        maxNumberLength = currMaxNumberLength;
-                    }
-                    for (int i = 0; i < node.MeshCount; i++)
-                    {
-                        meshNames.Add(node.Name);
-                    }
-                }
-            }
-
-            if (meshNames.Count != scene.Meshes.Count)
-            {
-                throw new Exception($"Number of meshes ({scene.Meshes.Count}) is not the same as the number of mesh objects ({meshNames.Count}); cannot sort.\nMesh objects: {String.Join(", ", meshNames)}\nMeshes: {String.Join(", ", scene.Meshes.Select(mesh => mesh.Name))}");
-            }
-
-            // Pad the numbers in mesh names with 0s.
-            List<string> meshNamesPadded = new List<string>();
-            foreach (string meshName in meshNames)
-            {
-                meshNamesPadded.Add(Regex.Replace(meshName, @"\d+", m => m.Value.PadLeft(maxNumberLength, '0')));
-            }
-
-            // Use Array.Sort to sort the meshes by the order of their object names.
-            var meshNamesArray = meshNamesPadded.ToArray();
-            var meshesArray = scene.Meshes.ToArray();
-            Array.Sort(meshNamesArray, meshesArray);
-
-            for (int i = 0; i < scene.Meshes.Count; i++)
-            {
-                scene.Meshes[i] = meshesArray[i];
-            }
-        }
-
-        private void EnsureOneMaterialPerMesh(Scene scene)
-        {
-            foreach (Mesh mesh1 in scene.Meshes)
-            {
-                foreach (Mesh mesh2 in scene.Meshes)
-                {
-                    if (mesh1.Name == mesh2.Name && mesh1.MaterialIndex != mesh2.MaterialIndex)
-                    {
-                        throw new Exception($"Mesh \"{mesh1.Name}\" has more than one material assigned to it. Currently only one material per mesh is supported.");
-                    }
-                }
-            }
+            return $"m{meshindex}{matname}"; 
         }
     }
 }
