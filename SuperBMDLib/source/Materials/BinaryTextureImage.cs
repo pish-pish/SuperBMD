@@ -236,6 +236,12 @@ namespace SuperBMDLib.Materials
             PaletteFormat = other.PaletteFormat;
         }
 
+        public void Load(Assimp.TextureSlot texture, Assimp.EmbeddedTexture embeddedTexture) {
+            if (!embeddedTexture.IsCompressed) {
+
+            }
+        }
+
         public void Load(Assimp.TextureSlot texture, string modelDirectory)
         {
             Format = TextureFormats.CMPR;
