@@ -126,7 +126,7 @@ namespace SuperBMDLib
             foreach (Assimp.Node node in scene.RootNode.Children) {
                 foreach (int meshindex in node.MeshIndices) {
                     Assimp.Mesh mesh = scene.Meshes[meshindex];
-                    if (mesh.Name == "") {
+                    if (mesh.Name == String.Empty) {
                         mesh.Name = node.Name;
                     }
                 }
