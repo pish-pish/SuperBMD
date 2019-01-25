@@ -48,6 +48,8 @@ namespace SuperBMDLib.BMD
         private List<byte> NumTexGensBlock;
         private List<byte> NumTevStagesBlock;
 
+        private string[] delimiter = new string[] {":" };
+
         public MAT3(EndianBinaryReader reader, int offset)
         {
             InitLists();
@@ -491,8 +493,18 @@ namespace SuperBMDLib.BMD
                 i++;
                 
                 //Console.WriteLine(String.Format("{0}", mat.Name));
-                if (mat.Name == "__MatDefault") {
+                if (mat.Name == "__MatDefault" && default_mat == null) {
                     default_mat = mat;
+                }
+
+                if (mat.Name.StartsWith("__MatDefault:")) {
+                    string[] subs = mat.Name.Split(delimiter, 2, StringSplitOptions.None);
+                    if (subs.Length == 2) {
+                        string submat = "_"+subs[1];
+                        if (name.Contains(submat)) {
+                            default_mat = mat;
+                        }
+                    }
                 }
 
                 if (mat.Name == name) {
@@ -632,6 +644,13 @@ namespace SuperBMDLib.BMD
                 Material preset = FindMatPreset(meshMat.Name, mat_presets);
 
                 if (preset != null) {
+                    if (preset.Name.StartsWith("__MatDefault:")) {
+                        // If a material has a suffix that fits one of the default presets, we remove the suffix as the
+                        // suffix serves no further purpose
+                        string[] subs = preset.Name.Split(delimiter, 2, StringSplitOptions.None);
+                        string substring = "_"+subs[1];
+                        bmdMaterial.Name = bmdMaterial.Name.Replace(substring, "");
+                    }
                     Console.WriteLine(String.Format("Applying material preset for {0}", meshMat.Name));
                     SetPreset(bmdMaterial, preset);
                 }
