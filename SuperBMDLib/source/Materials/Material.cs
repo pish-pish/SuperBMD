@@ -267,7 +267,7 @@ namespace SuperBMDLib.Materials
                     break;
                 }
 
-                if (i == 9)
+                if (i == 7)
                     throw new Exception($"TevOrder array for material \"{ Name }\" is full!");
             }
         }
@@ -371,6 +371,9 @@ namespace SuperBMDLib.Materials
 
         public void Readjust()
         {
+            NumTevStagesCount = 0;
+            NumTexGensCount = 0;
+
             for (int i = 0; i < 16; i++)
             {
                 if (TevStages[i] != null)
