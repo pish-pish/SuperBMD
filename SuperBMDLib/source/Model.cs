@@ -134,6 +134,56 @@ namespace SuperBMDLib
                 }
             }
 
+            Assimp.Node root = null;
+            for (int i = 0; i < scene.RootNode.ChildCount; i++) {
+                if (scene.RootNode.Children[i].Name.ToLowerInvariant() == "skeleton_root") {
+                    if (scene.RootNode.Children[i].ChildCount == 0) {
+                        throw new System.Exception("skeleton_root has no children! If you are making a rigged model, make sure skeleton_root contains the root of your skeleton.");
+                    }
+                    root = scene.RootNode.Children[i].Children[0];
+                    break;
+                }
+            }
+
+            foreach (Mesh mesh in scene.Meshes) {
+                if (mesh.HasBones && root == null) {
+                    throw new System.Exception("Model uses bones but the skeleton root has not been found! Make sure your skeleton is inside a dummy object called 'skeleton_root'.");
+                } 
+            }
+
+            Console.WriteLine("rotate model? {0}", args.rotate_model);
+            if (args.rotate_model) {
+                Console.WriteLine("Rotating the model...");
+                int i = 0;
+                Matrix4x4 rotate = Matrix4x4.FromRotationX((float)(-(1 / 2.0) * Math.PI));
+                Matrix4x4 rotateinv = rotate;
+                rotateinv.Inverse();
+
+
+                foreach (Mesh mesh in scene.Meshes) {
+                    Console.WriteLine(mesh.Name);
+                    Console.WriteLine(String.Format("Does it have bones? {0}", mesh.HasBones));
+
+                    if (root != null) {
+                        foreach (Assimp.Bone bone in mesh.Bones) {
+                            bone.OffsetMatrix = rotateinv*bone.OffsetMatrix;
+                        }
+                    }
+
+                    for (i = 0; i < mesh.VertexCount; i++) {
+                        Vector3D vertex = mesh.Vertices[i];
+                        vertex.Set(vertex.X, vertex.Z, -vertex.Y);
+                        mesh.Vertices[i] = vertex;
+                    }
+                    for (i = 0; i < mesh.Normals.Count; i++) {
+                        Vector3D norm = mesh.Normals[i];
+                        norm.Set(norm.X, norm.Z, -norm.Y);
+
+                        mesh.Normals[i] = norm;
+                    }
+                }
+            }
+
             VertexData = new VTX1(scene);
             Joints = new JNT1(scene, VertexData);
             Textures = new TEX1(scene, args);
