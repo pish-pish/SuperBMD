@@ -628,7 +628,9 @@ namespace SuperBMDLib.BMD
         {
             for (int i = 0; i < scene.MeshCount; i++)
             {
+                
                 Assimp.Material meshMat = scene.Materials[scene.Meshes[i].MaterialIndex];
+                Console.WriteLine("Mesh {0} has material {1}", scene.Meshes[i].Name, meshMat.Name);
                 Materials.Material bmdMaterial = new Material();
 
                 bool hasVtxColor0 = shapes.Shapes[i].AttributeData.CheckAttribute(GXVertexAttribute.Color0);
