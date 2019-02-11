@@ -221,6 +221,7 @@ namespace SuperBMDLib.Materials
             stream.BaseStream.Position = headerStart + imageDataOffset + (0x20 * imageIndex);
 
             if (imageDataOffset == 0) {
+                Console.WriteLine("Texture {0} has missing texture data. Crearting a full white texture...", Name);
                 m_rgbaImageData = new byte[Width * Height * 4];
                 for (uint i = 0; i < Width*Height; i++) {
                     m_rgbaImageData[i] = 0xFF;
