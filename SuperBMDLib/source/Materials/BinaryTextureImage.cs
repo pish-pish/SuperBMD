@@ -219,7 +219,19 @@ namespace SuperBMDLib.Materials
 
             // Now load and decode image data into an ARGB array.
             stream.BaseStream.Position = headerStart + imageDataOffset + (0x20 * imageIndex);
-            m_rgbaImageData = DecodeData(stream, Width, Height, Format, m_imagePalette, PaletteFormat);
+
+            if (imageDataOffset == 0) {
+                m_rgbaImageData = new byte[Width * Height * 4];
+                for (uint i = 0; i < Width*Height; i++) {
+                    m_rgbaImageData[i] = 0xFF;
+                    m_rgbaImageData[i+1] = 0xFF;
+                    m_rgbaImageData[i+2] = 0xFF;
+                    m_rgbaImageData[i+3] = 0xFF;
+                }
+            }
+            else {
+                m_rgbaImageData = DecodeData(stream, Width, Height, Format, m_imagePalette, PaletteFormat);
+            }
         }
 
         public void ReplaceHeaderInfo(BinaryTextureImage other) {
