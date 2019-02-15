@@ -56,6 +56,24 @@ namespace SuperBMDLib.BMD
             reader.BaseStream.Seek(offset + vtx1Size, System.IO.SeekOrigin.Begin);
         }
 
+        bool use_float_for_texcoords(Assimp.Mesh mesh, int texchannel) 
+        {
+            // SuperBMD normally converts UV coords into signed 16 bit integers
+            // with a fractional part of 8 bits so these are the minimum and maximum values that can be represented.
+            float min = -(float)(1<<15) / (float)(1<<8);
+            float max = (float)((1<<15) - 1) / (float)(1<<8);
+
+            foreach (Assimp.Vector3D texcoord in mesh.TextureCoordinateChannels[texchannel]) {
+                if (texcoord.X < min || texcoord.X > max || texcoord.Y < min || texcoord.Y > max) {
+                    // Texture coordinates exceed the maximum limit so we need
+                    // to use floats
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public VTX1(Assimp.Scene scene)
         {
             Attributes = new VertexData();
@@ -110,10 +128,22 @@ namespace SuperBMDLib.BMD
                 {
                     if (mesh.HasTextureCoords(texCoords))
                     {
+                        
+
                         //Console.WriteLine($"Mesh \"{ mesh.Name }\" ({i}) has texture coordinates on channel { texCoords }.");
                         SetAssimpTexCoordAttribute(texCoords, GXVertexAttribute.Tex0 + texCoords, mesh);
                         if (!StorageFormats.ContainsKey(GXVertexAttribute.Tex0 + texCoords))
-                            StorageFormats.Add(GXVertexAttribute.Tex0 + texCoords, new Tuple<GXDataType, byte>(GXDataType.Signed16, 8));
+                        {
+                            bool use_float = use_float_for_texcoords(mesh, texCoords);
+
+                            if (use_float) {
+                                Console.WriteLine($"Mesh \"{ mesh.Name }\" ({i}) has big texture coordinate values on channel { texCoords } and will use floats.");
+                                StorageFormats.Add(GXVertexAttribute.Tex0 + texCoords, new Tuple<GXDataType, byte>(GXDataType.Float32, 0));
+                            }
+                            else {
+                                StorageFormats.Add(GXVertexAttribute.Tex0 + texCoords, new Tuple<GXDataType, byte>(GXDataType.Signed16, 8));
+                            }
+                        }
                     }
                     //else
                     //    Console.WriteLine($"Mesh \"{ mesh.Name }\" has no texture coordinates on channel { texCoords }.");
