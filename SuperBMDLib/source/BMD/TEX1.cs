@@ -235,11 +235,14 @@ namespace SuperBMDLib.BMD
             // Write the image data and note the offset in imageDataOffsets
             foreach (string key in image_palette_Data.Keys)
             {
-                imageDataOffsets[key] = (int)(curOffset - start);
+                // Avoid writing duplicate image data
+                if (imageDataOffsets[key] == 0) {
+                    imageDataOffsets[key] = (int)(curOffset - start);
 
-                writer.Write(image_palette_Data[key].Item1);
+                    writer.Write(image_palette_Data[key].Item1);
 
-                curOffset = writer.BaseStream.Position;
+                    curOffset = writer.BaseStream.Position;
+                }
             }
 
             // Write texture name table offset
