@@ -458,6 +458,22 @@ namespace SuperBMDLib.Materials
             }
         }
 
+        public void LoadImageDataFromDisk(string filePath)
+        {
+            using (Bitmap bitmap = new Bitmap(filePath))
+            {
+                Width = (ushort)bitmap.Width;
+                Height = (ushort)bitmap.Height;
+
+                byte[] data = new byte[Width * Height * 4];
+
+                BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                Marshal.Copy(bmpData.Scan0, data, 0, data.Length);
+                bitmap.UnlockBits(bmpData);
+                m_rgbaImageData = data;
+            }
+        }
+
         public void WriteHeader(EndianBinaryWriter writer)
         {
             writer.Write((byte)Format);

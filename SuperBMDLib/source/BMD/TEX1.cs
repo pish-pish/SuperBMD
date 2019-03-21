@@ -81,7 +81,7 @@ namespace SuperBMDLib.BMD
                     throw new Exception($"Could not find texture \"{ name_without_ext }\".");
                 }
 
-                tex.LoadImageFromDisk(full_img_path);
+                tex.LoadImageDataFromDisk(full_img_path);
             }
         }
 
