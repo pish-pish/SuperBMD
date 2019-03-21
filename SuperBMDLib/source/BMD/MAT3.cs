@@ -1474,7 +1474,10 @@ namespace SuperBMDLib.BMD
                         foreach (BinaryTextureImage tex in textures.Textures) {
                             if (tex.Name == mat.TextureNames[i]) {
                                 mat.TextureIndices[i] = j;
-                                //Console.WriteLine(String.Format("Mapped {0} to index {1}", tex.Name, j));
+                                if (!m_TexRemapBlock.Contains((short)j)) {
+                                    m_TexRemapBlock.Add((short)j);
+                                }
+                                Console.WriteLine(String.Format("Mapped {0} to index {1}", tex.Name, j));
                                 break;
                             }
                             j++;
