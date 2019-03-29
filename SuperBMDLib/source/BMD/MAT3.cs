@@ -314,16 +314,26 @@ namespace SuperBMDLib.BMD
                 int chanIndex = reader.ReadInt16();
                 if (chanIndex == -1)
                     continue;
-                else
+                else if (chanIndex < m_ChannelControlBlock.Count) {
                     mat.ChannelControls[i] = m_ChannelControlBlock[chanIndex];
+                }
+                else {
+                    Console.WriteLine(String.Format("Warning for material {0} i={2}, color channel index out of range: {1}",
+                                                    mat.Name, chanIndex, i));
+                }
             }
-
-            int ambColorIndex = reader.ReadInt16();
-            if (ambColorIndex != -1)
-                mat.AmbientColors[0] = m_AmbientColorBlock[ambColorIndex];
-            ambColorIndex = reader.ReadInt16();
-            if (ambColorIndex != -1)
-                mat.AmbientColors[1] = m_AmbientColorBlock[ambColorIndex];
+            for (int i = 0; i < 2; i++) {
+                int ambColorIndex = reader.ReadInt16();
+                if (ambColorIndex == -1)
+                    continue;
+                else if (ambColorIndex < m_AmbientColorBlock.Count) {
+                    mat.AmbientColors[i] = m_AmbientColorBlock[ambColorIndex];
+                }
+                else {
+                    Console.WriteLine(String.Format("Warning for material {0} i={2}, ambient color index out of range: {1}",
+                                                    mat.Name, ambColorIndex, i));
+                }
+            }
 
             for (int i = 0; i  < 8; i++)
             {
