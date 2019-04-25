@@ -573,10 +573,13 @@ namespace SuperBMDLib.BMD
         private void SetAssimpColorAttribute(int channel, GXVertexAttribute colorAttrib, Assimp.Mesh mesh)
         {
             List<Color> tempList = new List<Color>();
-
-            for (int col = 0; col < mesh.VertexColorChannels[channel].Count; col++)
-                tempList.Add(mesh.VertexColorChannels[channel][col].ToSuperBMDColorRGBA());
-
+            Color color;
+            for (int col = 0; col < mesh.VertexColorChannels[channel].Count; col++) {
+                color = mesh.VertexColorChannels[channel][col].ToSuperBMDColorRGBA();
+                if (!tempList.Contains(color)) {
+                    tempList.Add(color);
+                }
+            }
             if (!Attributes.CheckAttribute(colorAttrib))
                 Attributes.SetAttributeData(colorAttrib, tempList);
             else
