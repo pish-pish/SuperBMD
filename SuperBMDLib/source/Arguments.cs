@@ -16,6 +16,7 @@ namespace SuperBMDLib
         public string tristrip_mode;
         public bool rotate_model;
         public bool output_bdl;
+        public bool do_profile;
 
         /// <summary>
         /// Initializes a new Arguments instance from the arguments passed in to SuperBMD.
@@ -31,6 +32,7 @@ namespace SuperBMDLib
             tristrip_mode = "static";
             rotate_model = false;
             output_bdl = false;
+            do_profile = false;
 
             int positional_arguments = 0;
 
@@ -76,6 +78,9 @@ namespace SuperBMDLib
                     case "-b":
                     case "--bdl":
                         output_bdl = true;
+                        break;
+                    case "--profile":
+                        do_profile = true;
                         break;
                     default:
                         if (positional_arguments == 0) {

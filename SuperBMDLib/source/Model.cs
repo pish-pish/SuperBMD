@@ -22,7 +22,7 @@ namespace SuperBMDLib
         public MAT3 Materials         { get; private set; }
         public MDL3 MatDisplayList    { get; private set; }
         public TEX1 Textures          { get; private set; }
-
+        public BMDInfo ModelStats     { get; private set; }
         private string[] characters_to_replace = new string[] { " ", "(", ")" };
 
         private int packetCount;
@@ -65,6 +65,8 @@ namespace SuperBMDLib
 
         public Model(EndianBinaryReader reader, Arguments args)
         {
+            ModelStats = new BMDInfo();
+
             int j3d2Magic = reader.ReadInt32();
             int modelMagic = reader.ReadInt32();
 
@@ -75,21 +77,22 @@ namespace SuperBMDLib
 
             int modelSize = reader.ReadInt32();
             int sectionCount = reader.ReadInt32();
+            ModelStats.TotalSize = modelSize;
 
             // Skip the dummy section, SVR3
             reader.Skip(16);
 
-            Scenegraph        = new INF1(reader, 32);
-            VertexData        = new VTX1(reader, (int)reader.BaseStream.Position);
-            SkinningEnvelopes = new EVP1(reader, (int)reader.BaseStream.Position);
-            PartialWeightData = new DRW1(reader, (int)reader.BaseStream.Position);
-            Joints            = new JNT1(reader, (int)reader.BaseStream.Position);
+            Scenegraph        = new INF1(reader, 32, ModelStats);
+            VertexData        = new VTX1(reader, (int)reader.BaseStream.Position, ModelStats);
+            SkinningEnvelopes = new EVP1(reader, (int)reader.BaseStream.Position, ModelStats);
+            PartialWeightData = new DRW1(reader, (int)reader.BaseStream.Position, ModelStats);
+            Joints            = new JNT1(reader, (int)reader.BaseStream.Position, ModelStats);
             SkinningEnvelopes.SetInverseBindMatrices(Joints.FlatSkeleton);
-            Shapes            = SHP1.Create(reader, (int)reader.BaseStream.Position);
+            Shapes            = SHP1.Create(reader, (int)reader.BaseStream.Position, ModelStats);
             Shapes.SetVertexWeights(SkinningEnvelopes, PartialWeightData);
-            Materials         = new MAT3(reader, (int)reader.BaseStream.Position);
+            Materials         = new MAT3(reader, (int)reader.BaseStream.Position, ModelStats);
             SkipMDL3(reader);
-            Textures          = new TEX1(reader, (int)reader.BaseStream.Position);
+            Textures          = new TEX1(reader, (int)reader.BaseStream.Position, ModelStats);
             Materials.SetTextureNames(Textures);
 
             
@@ -114,12 +117,15 @@ namespace SuperBMDLib
             if (reader.PeekReadInt32() == 0x4D444C33)
             {
                 int mdl3Size = reader.ReadInt32At(reader.BaseStream.Position + 4);
+                ModelStats.MDL3Size = mdl3Size;
                 reader.Skip(mdl3Size);
             }
         }
 
         public Model(Scene scene, Arguments args, List<SuperBMDLib.Materials.Material> mat_presets = null, string additionalTexPath = null)
         {
+            ModelStats = new BMDInfo();
+
             //EnsureOneMaterialPerMesh(scene);
             //SortMeshesByObjectNames(scene);
             
@@ -585,6 +591,48 @@ namespace SuperBMDLib
                 matname = matname.Replace(letter, "_");
             }
             return $"m{meshindex}{matname}"; 
+        }
+    }
+    public class BMDInfo {
+        public int TotalSize; //{ get; private set; }
+        public int INF1Size; //{ get; private set; }
+        public int VTX1Size; //{ get; private set; }
+        public int EVP1Size; //{ get; private set; }
+        public int DRW1Size; //{ get; private set; }
+        public int JNT1Size; //{ get; private set; }
+        public int SHP1Size; //{ get; private set; }
+        public int MAT3Size; //{ get; private set; }
+        public int MDL3Size; //{ get; private set; }
+        public int TEX1Size; //{ get; private set; }
+
+        public BMDInfo() {
+            TotalSize = 0;
+            INF1Size = 0;
+            VTX1Size = 0;
+            EVP1Size = 0;
+            DRW1Size = 0;
+            JNT1Size = 0;
+            SHP1Size = 0;
+            MAT3Size = 0;
+            MDL3Size = 0;
+            TEX1Size = 0;
+        }
+
+        public void DisplayInfo() {
+            Console.WriteLine("Total size: {0} bytes ({1} KiB)", TotalSize, (float)TotalSize/(float)1024);
+            DisplaySize("INF1", "SceneGraph", INF1Size);
+            DisplaySize("VTX1", "Vertices", VTX1Size);
+            DisplaySize("EVP1", "Envelopes", EVP1Size);
+            DisplaySize("DRW1", "Partial Weights", DRW1Size);
+            DisplaySize("JNT1", "Joints", JNT1Size);
+            DisplaySize("SHP1", "Shape Data", SHP1Size);
+            DisplaySize("MAT3", "Materials", MAT3Size);
+            DisplaySize("MDL3", "Display Lists", MDL3Size);
+            DisplaySize("TEX1", "Textures", TEX1Size);
+        }
+        private void DisplaySize(string sectionName, string longDescription, int size) {
+            Console.WriteLine("Section {0} ({1}) size: {2} bytes ({3} KiB, {4:0.00}% of total)",
+                            sectionName, longDescription, size, (float)size/(float)1024, ((float)size/(float)TotalSize)*100);
         }
     }
 }

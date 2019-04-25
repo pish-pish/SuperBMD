@@ -16,7 +16,7 @@ namespace SuperBMDLib.BMD
         public VertexData Attributes { get; private set; }
         public SortedDictionary<GXVertexAttribute, Tuple<GXDataType, byte>> StorageFormats { get; private set; }
 
-        public VTX1(EndianBinaryReader reader, int offset)
+        public VTX1(EndianBinaryReader reader, int offset, BMDInfo modelstats=null)
         {
             Attributes = new VertexData();
             StorageFormats = new SortedDictionary<GXVertexAttribute, Tuple<GXDataType, byte>>();
@@ -26,6 +26,10 @@ namespace SuperBMDLib.BMD
             reader.SkipInt32();
             int vtx1Size = reader.ReadInt32();
             int attributeHeaderOffset = reader.ReadInt32();
+
+            if (modelstats != null) {
+                modelstats.VTX1Size = vtx1Size;
+            }
 
             int[] attribDataOffsets = new int[13];
 

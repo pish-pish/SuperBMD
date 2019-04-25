@@ -25,7 +25,7 @@ namespace SuperBMDLib.BMD
             RemapTable = new List<int>();
         }
 
-        private SHP1(EndianBinaryReader reader, int offset)
+        private SHP1(EndianBinaryReader reader, int offset, BMDInfo modelstats=null)
         {
             Shapes = new List<Shape>();
             RemapTable = new List<int>();
@@ -35,6 +35,10 @@ namespace SuperBMDLib.BMD
             int shp1Size = reader.ReadInt32();
             int entryCount = reader.ReadInt16();
             reader.SkipInt16();
+
+            if (modelstats != null) {
+                modelstats.SHP1Size = shp1Size;
+            }
 
             int shapeHeaderDataOffset = reader.ReadInt32();
             int shapeRemapTableOffset = reader.ReadInt32();
@@ -171,9 +175,9 @@ namespace SuperBMDLib.BMD
             }
         }
 
-        public static SHP1 Create(EndianBinaryReader reader, int offset)
+        public static SHP1 Create(EndianBinaryReader reader, int offset, BMDInfo modelstats=null)
         {
-            return new SHP1(reader, offset);
+            return new SHP1(reader, offset, modelstats);
         }
 
         public static SHP1 Create(  Scene scene, Dictionary<string, int> boneNames, VertexData vertData, 

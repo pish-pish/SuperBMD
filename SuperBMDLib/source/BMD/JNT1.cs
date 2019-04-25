@@ -17,7 +17,7 @@ namespace SuperBMDLib.BMD
         public Dictionary<string, int> BoneNameIndices { get; private set; }
         public Rigging.Bone SkeletonRoot { get; private set; }
 
-        public JNT1(EndianBinaryReader reader, int offset)
+        public JNT1(EndianBinaryReader reader, int offset, BMDInfo modelstats=null)
         {
             BoneNameIndices = new Dictionary<string, int>();
             FlatSkeleton = new List<Rigging.Bone>();
@@ -28,6 +28,11 @@ namespace SuperBMDLib.BMD
             int jnt1Size = reader.ReadInt32();
             int jointCount = reader.ReadInt16();
             reader.SkipInt16();
+
+            if (modelstats != null) {
+                modelstats.JNT1Size = jnt1Size;
+            }
+
             int jointDataOffset = reader.ReadInt32();
             int internTableOffset = reader.ReadInt32();
             int nameTableOffset = reader.ReadInt32();

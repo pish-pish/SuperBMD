@@ -14,7 +14,7 @@ namespace SuperBMDLib.BMD
     {
         public List<BinaryTextureImage> Textures { get; private set; }
 
-        public TEX1(EndianBinaryReader reader, int offset)
+        public TEX1(EndianBinaryReader reader, int offset, BMDInfo modelstats=null)
         {
             Textures = new List<BinaryTextureImage>();
 
@@ -23,6 +23,10 @@ namespace SuperBMDLib.BMD
             int tex1Size = reader.ReadInt32();
             short texCount = reader.ReadInt16();
             reader.SkipInt16();
+
+            if (modelstats != null) {
+                modelstats.TEX1Size = tex1Size;
+            }
 
             int textureHeaderOffset = reader.ReadInt32();
             int textureNameTableOffset = reader.ReadInt32();

@@ -22,7 +22,7 @@ namespace SuperBMDLib.BMD
             InverseBindMatrices = new List<Matrix4>();
         }
 
-        public EVP1(EndianBinaryReader reader, int offset)
+        public EVP1(EndianBinaryReader reader, int offset, BMDInfo modelstats=null)
         {
             Weights = new List<Weight>();
             InverseBindMatrices = new List<Matrix4>();
@@ -32,6 +32,10 @@ namespace SuperBMDLib.BMD
             int evp1Size = reader.ReadInt32();
             int entryCount = reader.ReadInt16();
             reader.SkipInt16();
+
+            if (modelstats != null) {
+                modelstats.EVP1Size = evp1Size;
+            }
 
             int weightCountsOffset = reader.ReadInt32();
             int boneIndicesOffset = reader.ReadInt32();

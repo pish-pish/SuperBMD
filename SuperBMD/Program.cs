@@ -26,6 +26,18 @@ namespace SuperBMDLib
             Arguments cmd_args = new Arguments(args);
 
             List<Material> mat_presets = null; 
+            Model mod;
+            if (cmd_args.do_profile) {
+                if (cmd_args.input_path.EndsWith(".bmd") || cmd_args.input_path.EndsWith(".bdl")) {
+                    mod = Model.Load(cmd_args, mat_presets, "");
+                    mod.ModelStats.DisplayInfo();
+                    return;
+                }
+                else {
+                    Console.WriteLine("Profiling is only supported for BMD/BDL!");
+                }
+
+            }
 
             if (cmd_args.materials_path != "") {
                 JsonSerializer serializer = new JsonSerializer();
@@ -57,7 +69,7 @@ namespace SuperBMDLib
             if ( cmd_args.materials_path != "") {
                 additionalTexPath = Path.GetDirectoryName(cmd_args.materials_path);
             }
-            Model mod = Model.Load(cmd_args, mat_presets, additionalTexPath);
+            mod = Model.Load(cmd_args, mat_presets, additionalTexPath);
 
             if (cmd_args.input_path.EndsWith(".bmd") || cmd_args.input_path.EndsWith(".bdl"))
                 mod.ExportAssImp(cmd_args.output_path, "dae", new ExportSettings());

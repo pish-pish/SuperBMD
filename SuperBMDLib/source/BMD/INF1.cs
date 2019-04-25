@@ -16,7 +16,7 @@ namespace SuperBMDLib.BMD
         public List<SceneNode> FlatNodes { get; private set; }
         public SceneNode Root { get; private set; }
 
-        public INF1(EndianBinaryReader reader, int offset)
+        public INF1(EndianBinaryReader reader, int offset, BMDInfo modelstats=null)
         {
             FlatNodes = new List<SceneNode>();
 
@@ -25,6 +25,10 @@ namespace SuperBMDLib.BMD
             int inf1Size = reader.ReadInt32();
             int unk1 = reader.ReadInt16();
             reader.SkipInt16();
+
+            if (modelstats != null) {
+                modelstats.INF1Size = inf1Size;
+            }
 
             int packetCount = reader.ReadInt32();
             int vertexCount = reader.ReadInt32();

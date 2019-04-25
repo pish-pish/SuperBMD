@@ -50,7 +50,7 @@ namespace SuperBMDLib.BMD
 
         private string[] delimiter = new string[] {":" };
 
-        public MAT3(EndianBinaryReader reader, int offset)
+        public MAT3(EndianBinaryReader reader, int offset, BMDInfo modelstats=null)
         {
             InitLists();
 
@@ -61,6 +61,10 @@ namespace SuperBMDLib.BMD
             int matCount = reader.ReadInt16();
             long matInitOffset = 0;
             reader.SkipInt16();
+
+            if (modelstats != null) {
+                modelstats.MAT3Size = mat3Size;
+            }
 
             for (Mat3OffsetIndex i = 0; i <= Mat3OffsetIndex.NBTScaleData; ++i)
             {

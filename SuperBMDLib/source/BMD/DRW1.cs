@@ -24,7 +24,7 @@ namespace SuperBMDLib.BMD
             MeshWeights = new List<Weight>();
         }
 
-        public DRW1(EndianBinaryReader reader, int offset)
+        public DRW1(EndianBinaryReader reader, int offset, BMDInfo modelstats=null)
         {
             Indices = new List<int>();
 
@@ -33,6 +33,10 @@ namespace SuperBMDLib.BMD
             int drw1Size = reader.ReadInt32();
             int entryCount = reader.ReadInt16();
             reader.SkipInt16();
+
+            if (modelstats != null) {
+                modelstats.DRW1Size = drw1Size;
+            }
 
             int boolDataOffset = reader.ReadInt32();
             int indexDataOffset = reader.ReadInt32();
