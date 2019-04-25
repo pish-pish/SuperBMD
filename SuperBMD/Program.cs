@@ -31,6 +31,7 @@ namespace SuperBMDLib
                 if (cmd_args.input_path.EndsWith(".bmd") || cmd_args.input_path.EndsWith(".bdl")) {
                     mod = Model.Load(cmd_args, mat_presets, "");
                     mod.ModelStats.DisplayInfo();
+                    mod.ModelStats.DisplayModelInfo(mod);
                     return;
                 }
                 else {

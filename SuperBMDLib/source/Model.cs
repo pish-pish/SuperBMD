@@ -621,7 +621,7 @@ namespace SuperBMDLib
         public void DisplayInfo() {
             Console.WriteLine("Total size: {0} bytes ({1} KiB)", TotalSize, (float)TotalSize/(float)1024);
             DisplaySize("INF1", "SceneGraph", INF1Size);
-            DisplaySize("VTX1", "Vertices", VTX1Size);
+            DisplaySize("VTX1", "Vertex Attributes", VTX1Size);
             DisplaySize("EVP1", "Envelopes", EVP1Size);
             DisplaySize("DRW1", "Partial Weights", DRW1Size);
             DisplaySize("JNT1", "Joints", JNT1Size);
@@ -634,5 +634,43 @@ namespace SuperBMDLib
             Console.WriteLine("Section {0} ({1}) size: {2} bytes ({3} KiB, {4:0.00}% of total)",
                             sectionName, longDescription, size, (float)size/(float)1024, ((float)size/(float)TotalSize)*100);
         }
+        public void DisplayModelInfo(Model mod) {
+            DisplayVertexAttributeInfo(mod.VertexData);
+            Console.WriteLine("INF: {0} scene nodes", mod.Scenegraph.FlatNodes.Count);
+            Console.WriteLine("EVP1: {0} weights", mod.SkinningEnvelopes.Weights.Count);
+            Console.WriteLine("EVP1: {0} inverse bind matrices", mod.SkinningEnvelopes.InverseBindMatrices.Count);
+            Console.WriteLine("DRW1: {0} WeightTypeCheck flags, {1} indices", 
+                mod.PartialWeightData.WeightTypeCheck.Count, mod.PartialWeightData.Indices.Count);
+            Console.WriteLine("JNT1: {0} joints", mod.Joints.FlatSkeleton.Count);
+            Console.WriteLine("SHP1: {0} meshes", mod.Shapes.Shapes.Count);
+            Console.WriteLine("MAT3: {0} materials", mod.Materials.m_Materials.Count);
+            Console.WriteLine("TEX1: {0} textures", mod.Textures.Textures.Count);
+            
+        }
+
+        private void DisplayVertexAttributeInfo(VTX1 vertexData) {
+            Console.WriteLine("{0} Vertex Positions", vertexData.Attributes.Positions.Count);
+            Console.WriteLine("{0} Vertex Normals", vertexData.Attributes.Normals.Count);
+            if (vertexData.Attributes.Color_0.Count > 0) 
+                Console.WriteLine("{0} Vertex Colors (Channel 0)", vertexData.Attributes.Color_0.Count);
+            if (vertexData.Attributes.Color_1.Count > 0) 
+                Console.WriteLine("{0} Vertex Colors (Channel 1)", vertexData.Attributes.Color_1.Count);
+            Console.WriteLine("{0} Vertex Texture Coords (Channel 0)", vertexData.Attributes.TexCoord_0.Count);
+            if (vertexData.Attributes.TexCoord_1.Count > 0)
+                Console.WriteLine("{0} Vertex Texture Coords (Channel 1)", vertexData.Attributes.TexCoord_1.Count);
+            if (vertexData.Attributes.TexCoord_2.Count > 0)
+                Console.WriteLine("{0} Vertex Texture Coords (Channel 2)", vertexData.Attributes.TexCoord_2.Count);
+            if (vertexData.Attributes.TexCoord_3.Count > 0)
+                Console.WriteLine("{0} Vertex Texture Coords (Channel 3)", vertexData.Attributes.TexCoord_3.Count);
+            if (vertexData.Attributes.TexCoord_4.Count > 0)
+                Console.WriteLine("{0} Vertex Texture Coords (Channel 4)", vertexData.Attributes.TexCoord_4.Count);
+            if (vertexData.Attributes.TexCoord_5.Count > 0)
+                Console.WriteLine("{0} Vertex Texture Coords (Channel 5)", vertexData.Attributes.TexCoord_5.Count);
+            if (vertexData.Attributes.TexCoord_6.Count > 0)
+                Console.WriteLine("{0} Vertex Texture Coords (Channel 6)", vertexData.Attributes.TexCoord_6.Count);
+            if (vertexData.Attributes.TexCoord_7.Count > 0)
+                Console.WriteLine("{0} Vertex Texture Coords (Channel 7)", vertexData.Attributes.TexCoord_7.Count);
+        }
+
     }
 }
