@@ -292,11 +292,11 @@ namespace SuperBMDLib
             Textures.DumpTextures(outDir);
 
 
-            /*foreach (Mesh mesh in outScene.Meshes)
+            foreach (Mesh mesh in outScene.Meshes)
             {
                 // Assimp has a JoinIdenticalVertices post process step, but we can't use that or the skinning info we manually add won't take it into account.
                 RemoveDuplicateVertices(mesh);
-            }*/
+            }
 
 
             AssimpContext cont = new AssimpContext();
@@ -592,6 +592,170 @@ namespace SuperBMDLib
             }
             return $"m{meshindex}{matname}"; 
         }
+        private void RemoveDuplicateVertices(Mesh mesh)
+        {
+            // Calculate which vertices are duplicates (based on their position, texture coordinates, and normals).
+            List<
+                Tuple<Vector3D, Vector3D?, List<Vector3D>, List<Color4D>>
+                > uniqueVertInfos = new List<
+                                            Tuple<Vector3D, Vector3D?, List<Vector3D>, List<Color4D>>
+                                            >();
+
+            int[] replaceVertexIDs = new int[mesh.Vertices.Count];
+            bool[] vertexIsUnique = new bool[mesh.Vertices.Count];
+            for (var origVertexID = 0; origVertexID < mesh.Vertices.Count; origVertexID++)
+            {
+
+                var colorsForVert = new List<Color4D>();
+                for (var i = 0; i < mesh.VertexColorChannelCount; i++)
+                {
+                    colorsForVert.Add(mesh.VertexColorChannels[i][origVertexID]);
+                }
+
+                var coordsForVert = new List<Vector3D>();
+                for (var i = 0; i < mesh.TextureCoordinateChannelCount; i++)
+                {
+                    coordsForVert.Add(mesh.TextureCoordinateChannels[i][origVertexID]);
+                }
+
+                Vector3D? normal;
+                if (origVertexID < mesh.Normals.Count)
+                {
+                    normal = mesh.Normals[origVertexID];
+                } else
+                {
+                    normal = null;
+                }
+
+                var vertInfo = new Tuple<
+                    Vector3D, Vector3D?, List<Vector3D>, List<Color4D>
+                    >(mesh.Vertices[origVertexID], normal, coordsForVert, colorsForVert);
+
+                // Determine if this vertex is a duplicate of a previously encountered vertex or not and if it is keep track of the new index
+                var duplicateVertexIndex = -1;
+                for (var i = 0; i < uniqueVertInfos.Count; i++)
+                {
+                    Tuple<Vector3D, Vector3D?, List<Vector3D>, List<Color4D>> otherVertInfo = uniqueVertInfos[i];
+                    if (CheckVertInfosAreDuplicates(
+                        vertInfo.Item1, vertInfo.Item2, vertInfo.Item3, vertInfo.Item4, 
+                        otherVertInfo.Item1, otherVertInfo.Item2, otherVertInfo.Item3, otherVertInfo.Item4))
+                    {
+                        duplicateVertexIndex = i;
+                        break;
+                    }
+                }
+
+                if (duplicateVertexIndex == -1)
+                {
+                    vertexIsUnique[origVertexID] = true;
+                    uniqueVertInfos.Add(vertInfo);
+                    replaceVertexIDs[origVertexID] = uniqueVertInfos.Count - 1;
+                }
+                else
+                {
+                    vertexIsUnique[origVertexID] = false;
+                    replaceVertexIDs[origVertexID] = duplicateVertexIndex;
+                }
+            }
+
+            // Remove duplicate vertices, normals, and texture coordinates.
+            mesh.Vertices.Clear();
+            mesh.Normals.Clear();
+            // Need to preserve the channel count since it gets set to 0 when clearing all the channels
+            int origTexCoordChannelCount = mesh.TextureCoordinateChannelCount;
+            for (var i = 0; i < origTexCoordChannelCount; i++)
+            {
+                mesh.TextureCoordinateChannels[i].Clear();
+            }
+
+            int origColorChannelCount = mesh.VertexColorChannelCount;
+            for (var i = 0; i < origColorChannelCount; i++)
+            {
+                mesh.VertexColorChannels[i].Clear();
+            }
+
+            foreach (Tuple<Vector3D, Vector3D?, List<Vector3D>, List<Color4D>> vertInfo in uniqueVertInfos)
+            {
+                mesh.Vertices.Add(vertInfo.Item1);
+                if (vertInfo.Item2 != null)
+                {
+                    mesh.Normals.Add(vertInfo.Item2.Value);
+                }
+                for (var i = 0; i < origTexCoordChannelCount; i++)
+                {
+                    var coord = vertInfo.Item3[i];
+                    mesh.TextureCoordinateChannels[i].Add(coord);
+                }
+                for (var i = 0; i < origColorChannelCount; i++)
+                {
+                    var color = vertInfo.Item4[i];
+                    mesh.VertexColorChannels[i].Add(color);
+                }
+            }
+
+            // Update vertex indices for the faces.
+            foreach (Face face in mesh.Faces)
+            {
+                for (var i = 0; i < face.IndexCount; i++)
+                {
+                    face.Indices[i] = replaceVertexIDs[face.Indices[i]];
+                }
+            }
+
+            // Update vertex indices for the bone vertex weights.
+            foreach (Bone bone in mesh.Bones)
+            {
+                List<VertexWeight> origVertexWeights = new List<VertexWeight>(bone.VertexWeights);
+                bone.VertexWeights.Clear();
+                for (var i = 0; i < origVertexWeights.Count; i++)
+                {
+                    VertexWeight origWeight = origVertexWeights[i];
+                    int origVertexID = origWeight.VertexID;
+                    if (!vertexIsUnique[origVertexID])
+                        continue;
+
+                    int newVertexID = replaceVertexIDs[origVertexID];
+                    VertexWeight newWeight = new VertexWeight(newVertexID, origWeight.Weight);
+                    bone.VertexWeights.Add(newWeight);
+                }
+            }
+        }
+
+        private bool CheckVertInfosAreDuplicates(Vector3D vert1, Vector3D? norm1, List<Vector3D> vert1TexCoords, List<Color4D> vert1Colors,
+                                                Vector3D vert2, Vector3D? norm2, List<Vector3D> vert2TexCoords, List<Color4D> vert2Colors)
+        {
+            if (vert1 != vert2)
+            {
+                // Position is different
+                return false;
+            }
+
+            if (norm1 != norm2)
+            {
+                // Normals are different
+                return false;
+            }
+
+            for (var i = 0; i < vert1TexCoords.Count; i++)
+            {
+                if (vert1TexCoords[i] != vert2TexCoords[i])
+                {
+                    // Texture coordinate is different
+                    return false;
+                }
+            }
+
+            for (var i = 0; i < vert1Colors.Count; i++)
+            {
+                if (vert1Colors[i] != vert2Colors[i])
+                {
+                    // Color is different
+                    return false;
+                }
+            }
+
+            return true;
+}
     }
     public class BMDInfo {
         public int TotalSize; //{ get; private set; }
@@ -645,7 +809,18 @@ namespace SuperBMDLib
             Console.WriteLine("SHP1: {0} meshes", mod.Shapes.Shapes.Count);
             Console.WriteLine("MAT3: {0} materials", mod.Materials.m_Materials.Count);
             Console.WriteLine("TEX1: {0} textures", mod.Textures.Textures.Count);
-            
+            DisplayTextureInfo(mod.Textures);
+        }
+
+        private void DisplayTextureInfo(TEX1 textures) {
+            int i = 0;
+            Console.WriteLine("Textures in model:");
+            foreach (Materials.BinaryTextureImage tex in textures.Textures) {
+                Console.WriteLine("{0}) {1} Format: {2}, {3}x{4}, {5} mipmaps", i, tex.Name, tex.Format, 
+                    tex.Width, tex.Height, tex.ImageCount);
+                i++;
+
+            }
         }
 
         private void DisplayVertexAttributeInfo(VTX1 vertexData) {
