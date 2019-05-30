@@ -526,6 +526,14 @@ namespace SuperBMDLib.BMD
                     //Console.WriteLine(String.Format("Applying material preset to {1}", default_mat.Name, name));
                     return mat;
                 }
+                if (name.StartsWith("m")) {
+                    if (
+                        (name.Length > 2 && name.Substring(2) == mat.Name) ||
+                        (name.Length > 3 && name.Substring(3) == mat.Name) ||
+                        (name.Length > 4 && name.Substring(4) == mat.Name)) {
+                        return mat;
+                    }
+                }
             }
             //if (default_mat != null)
             //    Console.WriteLine(String.Format("Applying __MatDefault to {1}", default_mat.Name, name));
