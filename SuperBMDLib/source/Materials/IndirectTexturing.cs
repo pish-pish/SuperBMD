@@ -72,7 +72,7 @@ namespace SuperBMDLib.Materials
             IndTexStageNum = reader.ReadByte();
             reader.SkipInt16();
 
-            TevOrders = new IndirectTevOrder[8];
+            TevOrders = new IndirectTevOrder[4];
             for (int i = 0; i < 4; i++)
                 TevOrders[i] = new IndirectTevOrder(reader);
 
