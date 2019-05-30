@@ -297,6 +297,7 @@ namespace SuperBMDLib.BMD
             mat.ColorChannelControlsCount = NumColorChannelsBlock[reader.ReadByte()];
             mat.NumTexGensCount = NumTexGensBlock[reader.ReadByte()];
             mat.NumTevStagesCount = NumTevStagesBlock[reader.ReadByte()];
+            mat.IndTexEntry = m_IndirectTexBlock[matindex];
 
             mat.ZCompLoc = m_zCompLocBlock[reader.ReadByte()];
             mat.ZMode = m_zModeBlock[reader.ReadByte()];
@@ -540,6 +541,8 @@ namespace SuperBMDLib.BMD
             bmdMaterial.NumTexGensCount = preset.NumTexGensCount;
             bmdMaterial.NumTevStagesCount = preset.NumTevStagesCount;
             bmdMaterial.CullMode = preset.CullMode;
+
+            if (preset.IndTexEntry != null) bmdMaterial.IndTexEntry = preset.IndTexEntry;
 
             if (preset.MaterialColors != null) bmdMaterial.MaterialColors = preset.MaterialColors;
             if (preset.ChannelControls != null) bmdMaterial.ChannelControls = preset.ChannelControls;
