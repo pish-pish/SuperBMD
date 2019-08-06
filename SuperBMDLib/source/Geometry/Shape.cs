@@ -88,7 +88,7 @@ namespace SuperBMDLib.Geometry
                     if (face.Indices.Count < 3) {
                         throw new System.Exception(
                             String.Format(
-                                "Edge No. {0} in mesh {1} has less than 3 vertices (loose vertex or edge). " +
+                                "A face in mesh {1} has less than 3 vertices (loose vertex or edge). " +
                                 "You need to remove it.", i, mesh.Name)
                             );
                     }
