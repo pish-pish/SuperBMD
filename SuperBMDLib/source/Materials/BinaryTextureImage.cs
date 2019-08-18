@@ -306,7 +306,9 @@ namespace SuperBMDLib.Materials
 
                 if (!File.Exists(texFilePath))
                 {
-                    Console.WriteLine($"Cannot find texture { fileName }. Using a checkboard texture instead...");
+                    Console.WriteLine($"Texture was not found at path \"{ texFilePath }\".");
+                    throw new System.Exception($"Texture \"{ fileName }\" wasn't found, cannot proceed.");
+                    //Console.WriteLine($"Cannot find texture { fileName }. Using a checkboard texture instead...");
                     texData = new Bitmap(SuperBMDLib.Properties.Resources.default_checker);
                     Name = Path.GetFileNameWithoutExtension(texFilePath);
                 }
