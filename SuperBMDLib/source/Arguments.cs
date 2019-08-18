@@ -18,6 +18,7 @@ namespace SuperBMDLib
         public bool output_bdl;
         public bool do_profile;
         public bool sort_meshes;
+        public bool ensure_one_material_per_mesh;
 
         /// <summary>
         /// Initializes a new Arguments instance from the arguments passed in to SuperBMD.
@@ -35,7 +36,7 @@ namespace SuperBMDLib
             output_bdl = false;
             do_profile = false;
             sort_meshes = true;
-
+            ensure_one_material_per_mesh = false;
             int positional_arguments = 0;
 
             for (int i = 0; i < args.Length; i++)
@@ -86,6 +87,9 @@ namespace SuperBMDLib
                         break;
                     case "--nosort":
                         sort_meshes = false;
+                        break;
+                    case "--onematpermesh":
+                        ensure_one_material_per_mesh = true;
                         break;
                     default:
                         if (positional_arguments == 0) {
