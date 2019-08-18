@@ -300,13 +300,13 @@ namespace SuperBMDLib.Materials
             }
             else
             {
-                Console.WriteLine($"Texture was not found at path \"{ texFilePath }\". Searching the model's directory...");
+                Console.WriteLine($"Texture was not found at path \"{ Path.GetFullPath(texFilePath) }\". Searching the model's directory...");
                 string fileName = Path.GetFileName(texture.FilePath);
                 texFilePath = Path.Combine(modelDirectory, fileName);
 
                 if (!File.Exists(texFilePath))
                 {
-                    Console.WriteLine($"Texture was not found at path \"{ texFilePath }\".");
+                    Console.WriteLine($"Texture was not found at path \"{ Path.GetFullPath(texFilePath) }\".");
                     throw new System.Exception($"Texture \"{ fileName }\" wasn't found, cannot proceed.");
                     //Console.WriteLine($"Cannot find texture { fileName }. Using a checkboard texture instead...");
                     texData = new Bitmap(SuperBMDLib.Properties.Resources.default_checker);
