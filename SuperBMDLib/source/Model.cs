@@ -125,9 +125,12 @@ namespace SuperBMDLib
         public Model(Scene scene, Arguments args, List<SuperBMDLib.Materials.Material> mat_presets = null, string additionalTexPath = null)
         {
             ModelStats = new BMDInfo();
-
             //EnsureOneMaterialPerMesh(scene);
-            //SortMeshesByObjectNames(scene);
+
+            if (args.sort_meshes) {
+                SortMeshesByObjectNames(scene);
+            }
+            
             
             // For FBX mesh names are empty, instead we need to check the nodes and rename
             // the meshes after the node names.
@@ -755,8 +758,56 @@ namespace SuperBMDLib
             }
 
             return true;
-}
+        }
+        private void SortMeshesByObjectNames(Scene scene)
+        {
+            // Sort meshes by their name instead of keeping the order they're in inside the file.
+            // Specifically, natural sorting is used so that mesh-9 comes before mesh-10.
+
+            List<string> meshNames = new List<string>();
+            int maxNumberLength = 0;
+            foreach (Node node in scene.RootNode.Children)
+            {
+                if (node.HasMeshes)
+                {
+                    int currMaxNumberLength = node.Name.SelectMany(i => Regex.Matches(node.Name, @"\d+").Cast<Match>().Select(m => m.Value.Length)).DefaultIfEmpty(0).Max();
+                    if (currMaxNumberLength > maxNumberLength)
+                    {
+                        maxNumberLength = currMaxNumberLength;
+                    }
+                    for (int i = 0; i < node.MeshCount; i++)
+                    {
+                        meshNames.Add(node.Name);
+                    }
+                }
+            }
+
+            if (meshNames.Count != scene.Meshes.Count)
+            {
+                throw new Exception($"Number of meshes ({scene.Meshes.Count}) is not the same as the number of mesh objects ({meshNames.Count}); cannot sort.\nMesh objects: {String.Join(", ", meshNames)}\nMeshes: {String.Join(", ", scene.Meshes.Select(mesh => mesh.Name))}");
+            }
+
+            // Pad the numbers in mesh names with 0s.
+            List<string> meshNamesPadded = new List<string>();
+            foreach (string meshName in meshNames)
+            {
+                meshNamesPadded.Add(Regex.Replace(meshName, @"\d+", m => m.Value.PadLeft(maxNumberLength, '0')));
+            }
+
+            // Use Array.Sort to sort the meshes by the order of their object names.
+            var meshNamesArray = meshNamesPadded.ToArray();
+            var meshesArray = scene.Meshes.ToArray();
+            Array.Sort(meshNamesArray, meshesArray);
+
+            for (int i = 0; i < scene.Meshes.Count; i++)
+            {
+                scene.Meshes[i] = meshesArray[i];
+            }
+        }
     }
+
+
+
     public class BMDInfo {
         public int TotalSize; //{ get; private set; }
         public int INF1Size; //{ get; private set; }

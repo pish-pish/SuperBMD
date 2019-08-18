@@ -17,6 +17,7 @@ namespace SuperBMDLib
         public bool rotate_model;
         public bool output_bdl;
         public bool do_profile;
+        public bool sort_meshes;
 
         /// <summary>
         /// Initializes a new Arguments instance from the arguments passed in to SuperBMD.
@@ -33,6 +34,7 @@ namespace SuperBMDLib
             rotate_model = false;
             output_bdl = false;
             do_profile = false;
+            sort_meshes = true;
 
             int positional_arguments = 0;
 
@@ -81,6 +83,9 @@ namespace SuperBMDLib
                         break;
                     case "--profile":
                         do_profile = true;
+                        break;
+                    case "--nosort":
+                        sort_meshes = false;
                         break;
                     default:
                         if (positional_arguments == 0) {
