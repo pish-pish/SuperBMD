@@ -241,14 +241,17 @@ namespace SuperBMDLib.BMD
                 int vertexID = 0;
                 Shape curShape = Shapes[i];
 
+                Console.Write("Mesh " + i + ": ");
                 string meshname = $"mesh_{ i }";
 
                 switch (curShape.MatrixType) {
                     case MatrixType.BillboardX:
                         meshname += "_BillX";
+                        Console.Write("Billboarding Detected! ");
                         break;
                     case MatrixType.BillboardXY:
                         meshname += "_BillXY";
+                        Console.Write("Billboarding Detected! ");
                         break;
                     default:
                         break;
@@ -383,9 +386,12 @@ namespace SuperBMDLib.BMD
                             }
                         }
                     }
+                    Console.Write("...");
                 }
 
                 scene.Meshes.Add(mesh);
+                Console.Write("✓");
+                Console.WriteLine();
             }
         }
 

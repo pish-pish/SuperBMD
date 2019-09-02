@@ -290,7 +290,7 @@ namespace SuperBMDLib.BMD
         private void LoadInitData(EndianBinaryReader reader, int matindex)
         {
             Material mat = new Material();
-
+            mat.Name = m_MaterialNames[matindex];
             mat.Flag = reader.ReadByte();
             mat.CullMode = m_CullModeBlock[reader.ReadByte()];
 
@@ -323,8 +323,7 @@ namespace SuperBMDLib.BMD
                     mat.ChannelControls[i] = m_ChannelControlBlock[chanIndex];
                 }
                 else {
-                    Console.WriteLine(String.Format("Warning for material {0} i={2}, color channel index out of range: {1}",
-                                                    mat.Name, chanIndex, i));
+                    Console.WriteLine(string.Format("Warning for material {0} i={2}, color channel index out of range: {1}", mat.Name, chanIndex, i));
                 }
             }
             for (int i = 0; i < 2; i++) {
@@ -335,8 +334,7 @@ namespace SuperBMDLib.BMD
                     mat.AmbientColors[i] = m_AmbientColorBlock[ambColorIndex];
                 }
                 else {
-                    Console.WriteLine(String.Format("Warning for material {0} i={2}, ambient color index out of range: {1}",
-                                                    mat.Name, ambColorIndex, i));
+                    Console.WriteLine(string.Format("Warning for material {0} i={2}, ambient color index out of range: {1}", mat.Name, ambColorIndex, i));
                 }
             }
 
@@ -357,8 +355,7 @@ namespace SuperBMDLib.BMD
                 else if (texGenIndex < m_TexCoord1GenBlock.Count)
                     mat.TexCoord1Gens[i] = m_TexCoord1GenBlock[texGenIndex];
                 else
-                    Console.WriteLine(String.Format("Warning for material {0} i={2}, TexCoord1GenBlock index out of range: {1}",
-                                                    mat.Name, texGenIndex, i));
+                    Console.WriteLine(string.Format("Warning for material {0} i={2}, TexCoord1GenBlock index out of range: {1}", mat.Name, texGenIndex, i));
             }
 
             for (int i = 0; i < 8; i++)
@@ -387,8 +384,7 @@ namespace SuperBMDLib.BMD
                 else if (texMatIndex < m_TexMatrix2Block.Count)
                     mat.PostTexMatrix[i] = m_TexMatrix2Block[texMatIndex];
                 else
-                    Console.WriteLine(String.Format("Warning for material {0}, TexMatrix2Block index out of range: {1}",
-                                                    mat.Name, texMatIndex));
+                    Console.WriteLine(string.Format("Warning for material {0}, TexMatrix2Block index out of range: {1}", mat.Name, texMatIndex));
             }
 
             for (int i = 0; i < 8; i++)
@@ -895,6 +891,7 @@ namespace SuperBMDLib.BMD
 
             foreach (Material mat in m_Materials)
             {
+                Console.Write(mat.Name + " - ");
                 Assimp.Material assMat = new Assimp.Material();
                 assMat.Name = mat.Name;
                 if (mat.TextureIndices[0] != -1)
@@ -921,6 +918,8 @@ namespace SuperBMDLib.BMD
                 }
 
                 scene.Materials.Add(assMat);
+                Console.Write("✓");
+                Console.WriteLine();
             }
         }
 

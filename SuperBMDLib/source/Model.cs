@@ -290,17 +290,30 @@ namespace SuperBMDLib
 
             outScene.RootNode = new Node("RootNode");
 
+            Console.WriteLine();
+            Console.WriteLine("Processing Materials ->");
             Materials.FillScene(outScene, Textures, outDir);
+            Console.WriteLine();
+            Console.WriteLine("Processing Meshes ->");
             Shapes.FillScene(outScene, VertexData.Attributes, Joints.FlatSkeleton, SkinningEnvelopes.InverseBindMatrices);
+            Console.WriteLine();
+            Console.Write("Processing Skeleton");
             Scenegraph.FillScene(outScene, Joints.FlatSkeleton, settings.UseSkeletonRoot);
             Scenegraph.CorrectMaterialIndices(outScene, Materials);
-            Textures.DumpTextures(outDir);
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("Processing Textures ->");
+            Textures.DumpTextures(outDir,true);
 
-
+            Console.WriteLine();
+            Console.WriteLine("Removing Duplicate Verticies ->");
             foreach (Mesh mesh in outScene.Meshes)
             {
+                Console.Write(mesh.Name.Replace('_',' ')+": ");
                 // Assimp has a JoinIdenticalVertices post process step, but we can't use that or the skinning info we manually add won't take it into account.
                 RemoveDuplicateVertices(mesh);
+                Console.Write("✓");
+                Console.WriteLine();
             }
 
 
@@ -315,7 +328,9 @@ namespace SuperBMDLib
 
             StreamWriter test = new StreamWriter(fileName + ".tmp");
             StreamReader dae = File.OpenText(fileName);
-            
+
+            Console.WriteLine();
+            Console.Write("Finalizing the Mesh");
             while (!dae.EndOfStream)
             {
                 string line = dae.ReadLine();
@@ -384,7 +399,11 @@ namespace SuperBMDLib
                     test.WriteLine(line);
                     test.Flush();
                 }
+                Console.Write(".");
             }
+
+            Console.Write("✓");
+            Console.WriteLine();
 
             test.Close();
             dae.Close();

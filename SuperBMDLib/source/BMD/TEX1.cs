@@ -160,7 +160,7 @@ namespace SuperBMDLib.BMD
             return "";
         }
 
-        public void DumpTextures(string directory)
+        public void DumpTextures(string directory, bool list = false)
         {
             if (!System.IO.Directory.Exists(directory) && directory != "")
                 System.IO.Directory.CreateDirectory(directory);
@@ -168,6 +168,8 @@ namespace SuperBMDLib.BMD
             foreach (BinaryTextureImage tex in Textures)
             {
                 tex.SaveImageToDisk(directory);
+                if (list)
+                    Console.WriteLine($"Saved \"{tex.Name}\" to Disk");
             }
 
             JsonSerializer serial = new JsonSerializer();
@@ -180,6 +182,8 @@ namespace SuperBMDLib.BMD
                 writer.AutoFlush = true;
                 serial.Serialize(writer, Textures);
             }
+            if (list)
+                Console.WriteLine("Texture Headers have been saved!");
         }
 
         public void Write(EndianBinaryWriter writer)

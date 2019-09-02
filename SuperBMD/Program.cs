@@ -1,12 +1,10 @@
-﻿using System;
-using System.Globalization;
-using SuperBMDLib;
-using System.Text;
+﻿using Newtonsoft.Json;
 using SuperBMDLib.Materials;
-using SuperBMDLib.Geometry.Enums;
-using Newtonsoft.Json;
-using System.IO;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Reflection;
 
 namespace SuperBMDLib
 {
@@ -14,6 +12,12 @@ namespace SuperBMDLib
     {
         static void Main(string[] args)
         {
+            Console.Title = "SuperBMD Console";
+            Assembly thisAssem = typeof(Program).Assembly;
+            AssemblyName thisAssemName = thisAssem.GetName();
+            Version ver = thisAssemName.Version;
+            Console.WriteLine("SuperBMD v" + ver);
+            Console.WriteLine();
             // Prevents floats being written to the .dae with commas instead of periods on European systems.
             CultureInfo.CurrentCulture = new CultureInfo("", false);
 
@@ -28,10 +32,16 @@ namespace SuperBMDLib
             List<Material> mat_presets = null; 
             Model mod;
             if (cmd_args.do_profile) {
-                if (cmd_args.input_path.EndsWith(".bmd") || cmd_args.input_path.EndsWith(".bdl")) {
+                if (cmd_args.input_path.EndsWith(".bmd") || cmd_args.input_path.EndsWith(".bdl"))
+                {
+                    Console.WriteLine("Reading the model...");
                     mod = Model.Load(cmd_args, mat_presets, "");
+                    Console.WriteLine();
+                    Console.WriteLine("Profiling ->");
                     mod.ModelStats.DisplayInfo();
-                    mod.ModelStats.DisplayModelInfo(mod);
+                    mod.ModelStats.DisplayModelInfo(mod); Console.WriteLine();
+                    Console.WriteLine("Press any key to Exit");
+                    Console.ReadKey();
                     return;
                 }
                 else {
@@ -46,7 +56,7 @@ namespace SuperBMDLib
                 serializer.Converters.Add(
                     (new Newtonsoft.Json.Converters.StringEnumConverter())
                 );
-
+                Console.WriteLine("Reading the Materials...");
                 using (TextReader file = File.OpenText(cmd_args.materials_path)) {
                     using (JsonTextReader reader = new JsonTextReader(file)) {
                         try {
@@ -70,12 +80,20 @@ namespace SuperBMDLib
             if ( cmd_args.materials_path != "") {
                 additionalTexPath = Path.GetDirectoryName(cmd_args.materials_path);
             }
+            FileInfo fi = new FileInfo(cmd_args.input_path);
+            Console.WriteLine(string.Format("Preparing to convert {0} from {1} to {2}", fi.Name.Replace(fi.Extension, ""), fi.Extension.ToUpper(), (fi.Extension == ".bmd" || fi.Extension == ".bdl") ? ".DAE" : (cmd_args.output_bdl ? ".bdl" : ".bmd")));
             mod = Model.Load(cmd_args, mat_presets, additionalTexPath);
 
+            Console.WriteLine(string.Format("Converting {0} into {1}...", fi.Extension.ToUpper(), (fi.Extension == ".bmd" || fi.Extension == ".bdl") ? ".DAE" : (cmd_args.output_bdl ? ".bdl" : ".bmd")));
             if (cmd_args.input_path.EndsWith(".bmd") || cmd_args.input_path.EndsWith(".bdl"))
                 mod.ExportAssImp(cmd_args.output_path, "dae", new ExportSettings());
             else
                 mod.ExportBMD(cmd_args.output_path, cmd_args.output_bdl);
+
+            Console.WriteLine("The Conversion is complete!");
+            Console.WriteLine();
+            Console.WriteLine("Press any key to Exit");
+            Console.ReadKey();
         }
 
         /// <summary>

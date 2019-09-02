@@ -209,6 +209,7 @@ namespace SuperBMDLib.BMD
                     lastNode = curNode;
                     lastAssNode = assCurNode;
                 }
+                Console.Write(".");
             }
 
             DeleteNodesRecursive(root);
@@ -217,6 +218,7 @@ namespace SuperBMDLib.BMD
             {
                 scene.RootNode.Children.Add(root);
             }
+            Console.Write("✓");
         }
 
         private void DeleteNodesRecursive(Node assNode)
