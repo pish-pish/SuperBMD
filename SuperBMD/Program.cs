@@ -86,6 +86,7 @@ namespace SuperBMDLib
             Console.WriteLine();
             Console.WriteLine("SuperBMD: A tool to import and export various 3D model formats into the Binary Model (BMD or BDL) format.");
             Console.WriteLine("Written by Sage_of_Mirrors/Gamma (@SageOfMirrors) and Yoshi2/RenolY2.");
+            Console.WriteLine("Console lines written by Super Hackio");
             Console.WriteLine("Made possible with help from arookas, LordNed, xDaniel, and many others.");
             Console.WriteLine("Visit https://github.com/Sage-of-Mirrors/SuperBMD/wiki for more information.");
             Console.WriteLine();
@@ -104,6 +105,11 @@ namespace SuperBMDLib
             Console.WriteLine();
             Console.WriteLine("\t-r/--rotate\t\t\t\tRotate the model from Z-up to Y-up orientation.");
             Console.WriteLine("\t-b/--bdl\t\t\t\tGenerate a BDL instead of a BMD.");
+            Console.WriteLine();
+            Console.WriteLine("\t-b/--profile\t\t\t\tGenerate a report with information on the .BMD/.BDL (Other formats not supported)");
+            Console.WriteLine();
+            Console.WriteLine("Press any key to Exit");
+            Console.ReadKey();
         }
     }
 }
