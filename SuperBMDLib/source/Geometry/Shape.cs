@@ -77,6 +77,7 @@ namespace SuperBMDLib.Geometry
                 if (mesh.HasTextureCoords(i))
                     Descriptor.SetAttribute(Enums.GXVertexAttribute.Tex0 + i, Enums.VertexInputType.Index16, indexOffset++);
             }
+            Console.Write(".");
         }
 
         uint[] MakeTriIndexList(Mesh mesh) {
@@ -226,6 +227,7 @@ namespace SuperBMDLib.Geometry
             Packets.Add(pack);
 
             Bounds.GetBoundsValues(AttributeData.Positions);
+            Console.Write("...✓");
         }
 
         public void ProcessVerticesWithWeights(Mesh mesh, VertexData vertData, Dictionary<string, int> boneNames, EVP1 envelopes, DRW1 partialWeight, bool doStrip = true)

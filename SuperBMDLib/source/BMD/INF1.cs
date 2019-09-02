@@ -72,6 +72,7 @@ namespace SuperBMDLib.BMD
             // This includes any objects that are weighted to multiple bones, as well as objects weighted to only the root bone itself.
             for (int mat_index = 0; mat_index < scene.MaterialCount; mat_index++)
             {
+                Console.Write(".");
                 for (int i = 0; i < scene.MeshCount; i++)
                 {
                     if (scene.Meshes[i].MaterialIndex != mat_index)
@@ -112,6 +113,7 @@ namespace SuperBMDLib.BMD
                 FlatNodes.Add(new SceneNode(NodeType.CloseChild, 0, Root));
 
             FlatNodes.Add(new SceneNode(NodeType.Terminator, 0, Root));
+            Console.WriteLine("✓");
         }
 
         private void GetNodesRecursive(Rigging.Bone bone, List<Rigging.Bone> skeleton, SceneNode parent, List<Mesh> meshes, List<Material> materials)

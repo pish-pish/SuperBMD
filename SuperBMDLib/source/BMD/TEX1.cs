@@ -93,6 +93,7 @@ namespace SuperBMDLib.BMD
         {
             foreach (Assimp.Mesh mesh in scene.Meshes)
             {
+                Console.Write(mesh.Name);
                 Assimp.Material mat = scene.Materials[mesh.MaterialIndex];
 
                 if (mat.HasTextureDiffuse)
@@ -131,6 +132,8 @@ namespace SuperBMDLib.BMD
                     }
                     Textures.Add(img);
                 }
+                else
+                    Console.WriteLine(" -> Has No Textures");
             }
         }
 
@@ -335,7 +338,7 @@ namespace SuperBMDLib.BMD
                         return tex;
                 }
 
-                Console.WriteLine($"No texture with the name { s } was found.");
+                Console.Write($"No texture with the name { s } was found.");
                 return null;
             }
 

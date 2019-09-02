@@ -148,6 +148,7 @@ namespace SuperBMDLib.BMD
             {
                 foreach (Assimp.Bone bone in mesh.Bones)
                 {
+                    Console.Write(".");
                     Matrix4x4 assMat = bone.OffsetMatrix;
 
                     Matrix4 transposed = new Matrix4(assMat.A1, assMat.B1, assMat.C1, assMat.D1,
@@ -163,6 +164,7 @@ namespace SuperBMDLib.BMD
                     flatSkel[index].SetInverseBindMatrix(transposed);
                 }
             }
+            Console.Write(".✓");
         }
 
         public void SetInverseBindMatrices(List<Rigging.Bone> flatSkel)

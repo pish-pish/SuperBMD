@@ -71,6 +71,7 @@ namespace SuperBMDLib.BMD
                 {
                     foreach (VertexWeight assWeight in bone.VertexWeights)
                     {
+                        Console.Write(".");
                         if (!weights.ContainsKey(assWeight.VertexID))
                         {
                             weights.Add(assWeight.VertexID, new Weight());
@@ -85,6 +86,7 @@ namespace SuperBMDLib.BMD
 
                 foreach (Weight weight in weights.Values)
                 {
+                    Console.Write(".");
                     weight.reorderBones();
                     if (weight.WeightCount == 1)
                     {
@@ -106,6 +108,7 @@ namespace SuperBMDLib.BMD
 
             foreach (Weight weight in MeshWeights)
             {
+                Console.Write(".");
                 if (weight.WeightCount == 1)
                 {
                     WeightTypeCheck.Add(false);
@@ -117,6 +120,7 @@ namespace SuperBMDLib.BMD
                     Indices.Add(0); // This will get filled with the correct value when SHP1 is generated
                 }
             }
+            Console.Write(".✓");
         }
 
         public void Write(EndianBinaryWriter writer)

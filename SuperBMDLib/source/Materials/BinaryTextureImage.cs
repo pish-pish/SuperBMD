@@ -300,7 +300,7 @@ namespace SuperBMDLib.Materials
             }
             else
             {
-                Console.WriteLine($"Texture was not found at path \"{ Path.GetFullPath(texFilePath) }\". Searching the model's directory...");
+                Console.WriteLine("Texture was not found, Searching the model's directory...");
                 string fileName = Path.GetFileName(texture.FilePath);
                 texFilePath = Path.Combine(modelDirectory, fileName);
 
@@ -344,7 +344,7 @@ namespace SuperBMDLib.Materials
             texData.Dispose();
             DetectAndSetFittingFormat();
 
-            Console.WriteLine(String.Format("Format of Texture {0} set to {1}", Name, Format));
+            Console.WriteLine(string.Format("Format set to {0}", Format));
         }
 
         // We analyze the image data and check 
