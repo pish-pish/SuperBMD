@@ -539,7 +539,7 @@ namespace SuperBMDLib.BMD
 
         private void SetPreset(Material bmdMaterial, Material preset) {
             // put data from preset over current material if it exists
-            bmdMaterial.Name = preset.Name;
+
             bmdMaterial.Flag = preset.Flag;
             bmdMaterial.ColorChannelControlsCount = preset.ColorChannelControlsCount;
             bmdMaterial.NumTexGensCount = preset.NumTexGensCount;
@@ -653,6 +653,7 @@ namespace SuperBMDLib.BMD
                 Assimp.Material meshMat = scene.Materials[scene.Meshes[i].MaterialIndex];
                 Console.Write("Mesh {0} has material {1}...", scene.Meshes[i].Name, meshMat.Name);
                 Materials.Material bmdMaterial = new Material();
+                bmdMaterial.Name = meshMat.Name;
 
                 bool hasVtxColor0 = shapes.Shapes[i].AttributeData.CheckAttribute(GXVertexAttribute.Color0);
                 int texIndex = -1;
