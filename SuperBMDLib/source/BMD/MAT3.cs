@@ -538,7 +538,6 @@ namespace SuperBMDLib.BMD
         }
 
         private void SetPreset(Material bmdMaterial, Material preset) {
-
             // put data from preset over current material if it exists
             bmdMaterial.Name = preset.Name;
             bmdMaterial.Flag = preset.Flag;

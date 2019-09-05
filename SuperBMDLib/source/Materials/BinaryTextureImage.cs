@@ -344,7 +344,7 @@ namespace SuperBMDLib.Materials
             texData.Dispose();
             DetectAndSetFittingFormat();
 
-            Console.WriteLine(string.Format("Format set to {0}", Format));
+            Console.WriteLine(string.Format(" - {0} Format set to {1}", Name, Format));
         }
 
         // We analyze the image data and check 
