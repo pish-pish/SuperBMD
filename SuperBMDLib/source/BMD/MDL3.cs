@@ -24,7 +24,11 @@ namespace SuperBMDLib.BMD
             Entries = new List<MdlEntry>();
 
             foreach (Material mat in materials)
+            {
+                Console.Write(string.Format("Generating for {0} - ",mat.Name));
                 Entries.Add(new MdlEntry(mat, textures));
+                Console.WriteLine("Completed");
+            }
         }
 
         public void Write(EndianBinaryWriter writer)

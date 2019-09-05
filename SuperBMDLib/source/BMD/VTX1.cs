@@ -88,7 +88,7 @@ namespace SuperBMDLib.BMD
             foreach (Assimp.Mesh mesh in scene.Meshes)
             {
                 i++;
-
+                Console.Write(mesh.Name);
 
                 if (mesh.HasVertices)
                 {
@@ -151,7 +151,11 @@ namespace SuperBMDLib.BMD
                     }
                     //else
                     //    Console.WriteLine($"Mesh \"{ mesh.Name }\" has no texture coordinates on channel { texCoords }.");
+
+                    Console.Write(".");
                 }
+                Console.Write("✓");
+                Console.WriteLine();
             }
         }
 

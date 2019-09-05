@@ -135,14 +135,14 @@ namespace SuperBMDLib.BMD
             reader.BaseStream.Seek(offset + shp1Size, System.IO.SeekOrigin.Begin);
         }
 
-        private SHP1(   Assimp.Scene scene, VertexData vertData, Dictionary<string, int> boneNames, 
-                        EVP1 envelopes, DRW1 partialWeight, string tristrip_mode = "static")
+        private SHP1(   Assimp.Scene scene, VertexData vertData, Dictionary<string, int> boneNames, EVP1 envelopes, DRW1 partialWeight, string tristrip_mode = "static")
         {
             Shapes = new List<Shape>();
             RemapTable = new List<int>();
 
             foreach (Mesh mesh in scene.Meshes)
             {
+                Console.Write(mesh.Name+": ");
                 Shape meshShape;
 
                 /*if (mesh.Name.Contains("Bill0")) {
@@ -150,20 +150,20 @@ namespace SuperBMDLib.BMD
                 }*/
                 if (mesh.Name.Contains("BillXY")) {
                     meshShape = new Shape(MatrixType.BillboardXY); // Matrix Type 1, XY Billboard
+                    Console.Write("Billboarding on the X & Y axis");
                 }
                 else if (mesh.Name.Contains("BillX")) {
                     meshShape = new Shape(MatrixType.BillboardX); // Matrix Type 2, X Billboard, i.e. the X axis is always turned towards camera
+                    Console.Write("Billboarding on the X axis");
                 }
                 else {
                      meshShape = new Shape(); // Matrix Type 3, normal
-                    
+                    Console.Write("Normal Mesh");
                 }
                 meshShape.SetDescriptorAttributes(mesh, boneNames.Count);
-                Console.WriteLine("Mtx type for {0}: {1}", mesh.Name, meshShape.MatrixType);
 
                 if (boneNames.Count > 1)
-                    meshShape.ProcessVerticesWithWeights(   mesh, vertData, boneNames, envelopes, 
-                                                            partialWeight, tristrip_mode == "all");
+                    meshShape.ProcessVerticesWithWeights(mesh, vertData, boneNames, envelopes, partialWeight, tristrip_mode == "all");
                 else
                 {
                     meshShape.ProcessVerticesWithoutWeights(mesh, vertData);
@@ -172,6 +172,7 @@ namespace SuperBMDLib.BMD
                 }
 
                 Shapes.Add(meshShape);
+                Console.WriteLine();
             }
         }
 
@@ -180,8 +181,7 @@ namespace SuperBMDLib.BMD
             return new SHP1(reader, offset, modelstats);
         }
 
-        public static SHP1 Create(  Scene scene, Dictionary<string, int> boneNames, VertexData vertData, 
-                                    EVP1 evp1, DRW1 drw1, string tristrip_mode = "static")
+        public static SHP1 Create(  Scene scene, Dictionary<string, int> boneNames, VertexData vertData, EVP1 evp1, DRW1 drw1, string tristrip_mode = "static")
         {
             SHP1 shp1 = new SHP1(scene, vertData, boneNames, evp1, drw1, tristrip_mode);
 
@@ -241,14 +241,17 @@ namespace SuperBMDLib.BMD
                 int vertexID = 0;
                 Shape curShape = Shapes[i];
 
+                Console.Write("Mesh " + i + ": ");
                 string meshname = $"mesh_{ i }";
 
                 switch (curShape.MatrixType) {
                     case MatrixType.BillboardX:
                         meshname += "_BillX";
+                        Console.Write("Billboarding Detected! ");
                         break;
                     case MatrixType.BillboardXY:
                         meshname += "_BillXY";
+                        Console.Write("Billboarding Detected! ");
                         break;
                     default:
                         break;
@@ -383,9 +386,12 @@ namespace SuperBMDLib.BMD
                             }
                         }
                     }
+                    Console.Write("...");
                 }
 
                 scene.Meshes.Add(mesh);
+                Console.Write("✓");
+                Console.WriteLine();
             }
         }
 

@@ -90,6 +90,7 @@ namespace SuperBMDLib.BMD
                     root = scene.RootNode.Children[i].Children[0];
                     break;
                 }
+                Console.Write(".");
             }
 
             if (root == null)
@@ -108,6 +109,8 @@ namespace SuperBMDLib.BMD
                 foreach (Rigging.Bone bone in FlatSkeleton)
                     BoneNameIndices.Add(bone.Name, FlatSkeleton.IndexOf(bone));
             }
+            Console.Write("✓");
+            Console.WriteLine();
         }
 
         private Rigging.Bone AssimpNodesToBonesRecursive(Assimp.Node node, Rigging.Bone parent, List<Rigging.Bone> boneList)

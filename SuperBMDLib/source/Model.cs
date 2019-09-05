@@ -60,6 +60,7 @@ namespace SuperBMDLib
                 output = new Model(aiScene, args, mat_presets, additionalTexPath);
             }
 
+            Console.WriteLine();
             return output;
         }
 
@@ -129,11 +130,13 @@ namespace SuperBMDLib
                 EnsureOneMaterialPerMesh(scene);
             }
 
+            Console.WriteLine();
             if (args.sort_meshes) {
                 SortMeshesByObjectNames(scene);
+                Console.WriteLine();
             }
-            
-            
+
+
             // For FBX mesh names are empty, instead we need to check the nodes and rename
             // the meshes after the node names.
             foreach (Assimp.Node node in scene.RootNode.Children) {
@@ -145,6 +148,8 @@ namespace SuperBMDLib
                 }
             }
 
+            Console.WriteLine();
+            Console.Write("Searching for the Skeleton Root");
             Assimp.Node root = null;
             for (int i = 0; i < scene.RootNode.ChildCount; i++) {
                 if (scene.RootNode.Children[i].Name.ToLowerInvariant() == "skeleton_root") {
@@ -154,30 +159,34 @@ namespace SuperBMDLib
                     root = scene.RootNode.Children[i].Children[0];
                     break;
                 }
+                Console.Write(".");
             }
+
+            Console.Write(root == null ? "✓ No Skeleton found" : "✓ Skeleton Found");
+            Console.WriteLine();
 
             foreach (Mesh mesh in scene.Meshes) {
                 if (mesh.HasBones && root == null) {
                     throw new System.Exception("Model uses bones but the skeleton root has not been found! Make sure your skeleton is inside a dummy object called 'skeleton_root'.");
-                } 
+                }
             }
 
-            Console.WriteLine("rotate model? {0}", args.rotate_model);
+
             if (args.rotate_model) {
-                Console.WriteLine("Rotating the model...");
+                Console.WriteLine();
+                Console.Write("Rotating the model");
                 int i = 0;
                 Matrix4x4 rotate = Matrix4x4.FromRotationX((float)(-(1 / 2.0) * Math.PI));
                 Matrix4x4 rotateinv = rotate;
                 rotateinv.Inverse();
 
 
-                foreach (Mesh mesh in scene.Meshes) {
-                    Console.WriteLine(mesh.Name);
-                    Console.WriteLine(String.Format("Does it have bones? {0}", mesh.HasBones));
-
+                foreach (Mesh mesh in scene.Meshes)
+                {
                     if (root != null) {
                         foreach (Assimp.Bone bone in mesh.Bones) {
-                            bone.OffsetMatrix = rotateinv*bone.OffsetMatrix;
+                            bone.OffsetMatrix = rotateinv * bone.OffsetMatrix;
+                            Console.Write("|");
                         }
                     }
 
@@ -192,22 +201,41 @@ namespace SuperBMDLib
 
                         mesh.Normals[i] = norm;
                     }
+                    Console.Write(".");
                 }
+                Console.Write("✓");
+                Console.WriteLine();
             }
 
+            Console.WriteLine();
+            Console.WriteLine("Generating the Vertex Data ->");
             VertexData = new VTX1(scene);
+            Console.WriteLine();
+            Console.Write("Generating the Bone Data");
             Joints = new JNT1(scene, VertexData);
+            Console.WriteLine();
+            Console.WriteLine("Generating the Texture Data -> ");
             Textures = new TEX1(scene, args);
-
+            Console.WriteLine();
+            Console.Write("Generating the Envelope Data");
             SkinningEnvelopes = new EVP1();
             SkinningEnvelopes.SetInverseBindMatrices(scene, Joints.FlatSkeleton);
 
+            Console.WriteLine();
+            Console.Write("Generating the Weight Data");
             PartialWeightData = new DRW1(scene, Joints.BoneNameIndices);
+            Console.WriteLine();
 
+            Console.WriteLine();
+            Console.WriteLine("Generating the Mesh Data ->");
             Shapes = SHP1.Create(scene, Joints.BoneNameIndices, VertexData.Attributes, SkinningEnvelopes, PartialWeightData, args.tristrip_mode);
 
+            Console.WriteLine();
+            Console.WriteLine("Generating the Material Data ->");
             Materials = new MAT3(scene, Textures, Shapes, args, mat_presets);
 
+            Console.WriteLine();
+            Console.WriteLine("Loading the Textures ->");
             if (additionalTexPath == null)
             {
                 Materials.LoadAdditionalTextures(Textures, Path.GetDirectoryName(args.input_path));
@@ -220,8 +248,14 @@ namespace SuperBMDLib
             Materials.MapTextureNamesToIndices(Textures);
 
             if (args.output_bdl)
+            {
+                Console.WriteLine();
+                Console.WriteLine("Compiling the MDL3 ->");
                 MatDisplayList = new MDL3(Materials.m_Materials, Textures.Textures);
+            }
 
+            Console.WriteLine();
+            Console.Write("Generating the Joints");
             Scenegraph = new INF1(scene, Joints);
 
             foreach (Geometry.Shape shape in Shapes.Shapes)
@@ -286,21 +320,32 @@ namespace SuperBMDLib
             string fileNameNoExt = Path.GetFileNameWithoutExtension(fileName);
             fileName = Path.Combine(outDir, fileNameNoExt + ".dae");
 
-            Scene outScene = new Scene();
+            Scene outScene = new Scene { RootNode = new Node("RootNode") };
 
-            outScene.RootNode = new Node("RootNode");
-
+            Console.WriteLine();
+            Console.WriteLine("Processing Materials ->");
             Materials.FillScene(outScene, Textures, outDir);
+            Console.WriteLine();
+            Console.WriteLine("Processing Meshes ->");
             Shapes.FillScene(outScene, VertexData.Attributes, Joints.FlatSkeleton, SkinningEnvelopes.InverseBindMatrices);
+            Console.WriteLine();
+            Console.Write("Processing Skeleton");
             Scenegraph.FillScene(outScene, Joints.FlatSkeleton, settings.UseSkeletonRoot);
             Scenegraph.CorrectMaterialIndices(outScene, Materials);
-            Textures.DumpTextures(outDir);
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("Processing Textures ->");
+            Textures.DumpTextures(outDir,true);
 
-
+            Console.WriteLine();
+            Console.WriteLine("Removing Duplicate Verticies ->");
             foreach (Mesh mesh in outScene.Meshes)
             {
+                Console.Write(mesh.Name.Replace('_',' ')+": ");
                 // Assimp has a JoinIdenticalVertices post process step, but we can't use that or the skinning info we manually add won't take it into account.
                 RemoveDuplicateVertices(mesh);
+                Console.Write("✓");
+                Console.WriteLine();
             }
 
 
@@ -315,7 +360,9 @@ namespace SuperBMDLib
 
             StreamWriter test = new StreamWriter(fileName + ".tmp");
             StreamReader dae = File.OpenText(fileName);
-            
+
+            Console.WriteLine();
+            Console.Write("Finalizing the Mesh");
             while (!dae.EndOfStream)
             {
                 string line = dae.ReadLine();
@@ -384,7 +431,11 @@ namespace SuperBMDLib
                     test.WriteLine(line);
                     test.Flush();
                 }
+                Console.Write(".");
             }
+
+            Console.Write("✓");
+            Console.WriteLine();
 
             test.Close();
             dae.Close();
@@ -765,7 +816,7 @@ namespace SuperBMDLib
         {
             // Sort meshes by their name instead of keeping the order they're in inside the file.
             // Specifically, natural sorting is used so that mesh-9 comes before mesh-10.
-
+            Console.Write("Sorting Meshes...");
             List<string> meshNames = new List<string>();
             int maxNumberLength = 0;
             foreach (Node node in scene.RootNode.Children)
@@ -782,6 +833,7 @@ namespace SuperBMDLib
                         meshNames.Add(node.Name);
                     }
                 }
+                Console.Write(".");
             }
 
             if (meshNames.Count != scene.Meshes.Count)
@@ -805,6 +857,7 @@ namespace SuperBMDLib
             {
                 scene.Meshes[i] = meshesArray[i];
             }
+            Console.Write("✓");
         }
         private void EnsureOneMaterialPerMesh(Scene scene)
         {

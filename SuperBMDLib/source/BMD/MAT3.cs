@@ -290,7 +290,7 @@ namespace SuperBMDLib.BMD
         private void LoadInitData(EndianBinaryReader reader, int matindex)
         {
             Material mat = new Material();
-
+            mat.Name = m_MaterialNames[matindex];
             mat.Flag = reader.ReadByte();
             mat.CullMode = m_CullModeBlock[reader.ReadByte()];
 
@@ -323,8 +323,7 @@ namespace SuperBMDLib.BMD
                     mat.ChannelControls[i] = m_ChannelControlBlock[chanIndex];
                 }
                 else {
-                    Console.WriteLine(String.Format("Warning for material {0} i={2}, color channel index out of range: {1}",
-                                                    mat.Name, chanIndex, i));
+                    Console.WriteLine(string.Format("Warning for material {0} i={2}, color channel index out of range: {1}", mat.Name, chanIndex, i));
                 }
             }
             for (int i = 0; i < 2; i++) {
@@ -335,8 +334,7 @@ namespace SuperBMDLib.BMD
                     mat.AmbientColors[i] = m_AmbientColorBlock[ambColorIndex];
                 }
                 else {
-                    Console.WriteLine(String.Format("Warning for material {0} i={2}, ambient color index out of range: {1}",
-                                                    mat.Name, ambColorIndex, i));
+                    Console.WriteLine(string.Format("Warning for material {0} i={2}, ambient color index out of range: {1}", mat.Name, ambColorIndex, i));
                 }
             }
 
@@ -357,8 +355,7 @@ namespace SuperBMDLib.BMD
                 else if (texGenIndex < m_TexCoord1GenBlock.Count)
                     mat.TexCoord1Gens[i] = m_TexCoord1GenBlock[texGenIndex];
                 else
-                    Console.WriteLine(String.Format("Warning for material {0} i={2}, TexCoord1GenBlock index out of range: {1}",
-                                                    mat.Name, texGenIndex, i));
+                    Console.WriteLine(string.Format("Warning for material {0} i={2}, TexCoord1GenBlock index out of range: {1}", mat.Name, texGenIndex, i));
             }
 
             for (int i = 0; i < 8; i++)
@@ -387,8 +384,7 @@ namespace SuperBMDLib.BMD
                 else if (texMatIndex < m_TexMatrix2Block.Count)
                     mat.PostTexMatrix[i] = m_TexMatrix2Block[texMatIndex];
                 else
-                    Console.WriteLine(String.Format("Warning for material {0}, TexMatrix2Block index out of range: {1}",
-                                                    mat.Name, texMatIndex));
+                    Console.WriteLine(string.Format("Warning for material {0}, TexMatrix2Block index out of range: {1}", mat.Name, texMatIndex));
             }
 
             for (int i = 0; i < 8; i++)
@@ -542,8 +538,8 @@ namespace SuperBMDLib.BMD
         }
 
         private void SetPreset(Material bmdMaterial, Material preset) {
-            
             // put data from preset over current material if it exists
+
             bmdMaterial.Flag = preset.Flag;
             bmdMaterial.ColorChannelControlsCount = preset.ColorChannelControlsCount;
             bmdMaterial.NumTexGensCount = preset.NumTexGensCount;
@@ -655,8 +651,9 @@ namespace SuperBMDLib.BMD
             {
                 
                 Assimp.Material meshMat = scene.Materials[scene.Meshes[i].MaterialIndex];
-                Console.WriteLine("Mesh {0} has material {1}", scene.Meshes[i].Name, meshMat.Name);
+                Console.Write("Mesh {0} has material {1}...", scene.Meshes[i].Name, meshMat.Name);
                 Materials.Material bmdMaterial = new Material();
+                bmdMaterial.Name = meshMat.Name;
 
                 bool hasVtxColor0 = shapes.Shapes[i].AttributeData.CheckAttribute(GXVertexAttribute.Color0);
                 int texIndex = -1;
@@ -678,7 +675,7 @@ namespace SuperBMDLib.BMD
                         string substring = "_"+subs[1];
                         bmdMaterial.Name = bmdMaterial.Name.Replace(substring, "");
                     }
-                    Console.WriteLine(String.Format("Applying material preset for {0}", meshMat.Name));
+                    Console.Write(string.Format("Applying material preset for {0}...", meshMat.Name));
                     SetPreset(bmdMaterial, preset);
                 }
 
@@ -687,6 +684,7 @@ namespace SuperBMDLib.BMD
                 m_Materials.Add(bmdMaterial);
                 m_RemapIndices.Add(i);
                 m_MaterialNames.Add(meshMat.Name);
+                Console.WriteLine("✓");
             }
         }
 
@@ -895,6 +893,7 @@ namespace SuperBMDLib.BMD
 
             foreach (Material mat in m_Materials)
             {
+                Console.Write(mat.Name + " - ");
                 Assimp.Material assMat = new Assimp.Material();
                 assMat.Name = mat.Name;
                 if (mat.TextureIndices[0] != -1)
@@ -921,6 +920,8 @@ namespace SuperBMDLib.BMD
                 }
 
                 scene.Materials.Add(assMat);
+                Console.Write("✓");
+                Console.WriteLine();
             }
         }
 
@@ -1465,23 +1466,28 @@ namespace SuperBMDLib.BMD
             foreach (Material mat in m_Materials) {
                 foreach (string texname in mat.TextureNames) {
                     if (texname != null && texname != "") {
-                        if (tex1[texname] == null || texname == "") {
+                        if (tex1[texname] == null || texname == "")
+                        {
+                            Console.WriteLine();
+                            Console.Write("Searching for "+texname);
                             string path = "";
                             foreach (string extension in new string[] { ".png", ".jpg", ".tga", ".bmp" }) {
+                                Console.Write(".");
                                 string tmppath = Path.Combine(texpath, texname + extension);
                                 if (File.Exists(tmppath)) {
                                     path = tmppath;
                                     break; 
                                 }
                             }
+                            Console.WriteLine();
                             if (path != "") {
                                 tex1.AddTextureFromPath(path);
                                 short texindex = (short)(tex1.Textures.Count - 1);
                                 m_TexRemapBlock.Add(texindex);
+                                Console.WriteLine("----------------------------------------");
                             }
                             else {
-                                Console.WriteLine(String.Format("Could not find texture {0} in file path {1}",
-                                                   texname, texpath));
+                                Console.WriteLine(string.Format("Could not find texture {0} in file path {1}", texname, texpath));
                             }
                         }
                     }
@@ -1502,7 +1508,8 @@ namespace SuperBMDLib.BMD
                                 if (!m_TexRemapBlock.Contains((short)j)) {
                                     m_TexRemapBlock.Add((short)j);
                                 }
-                                Console.WriteLine(String.Format("Mapped {0} to index {1}", tex.Name, j));
+                                Console.WriteLine(string.Format("Mapped \"{0}\" to index {1}", tex.Name, j));
+                                Console.WriteLine("---------------------------------------------------");
                                 break;
                             }
                             j++;

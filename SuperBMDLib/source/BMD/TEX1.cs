@@ -93,6 +93,7 @@ namespace SuperBMDLib.BMD
         {
             foreach (Assimp.Mesh mesh in scene.Meshes)
             {
+                Console.Write(mesh.Name);
                 Assimp.Material mat = scene.Materials[mesh.MaterialIndex];
 
                 if (mat.HasTextureDiffuse)
@@ -131,6 +132,8 @@ namespace SuperBMDLib.BMD
                     }
                     Textures.Add(img);
                 }
+                else
+                    Console.WriteLine(" -> Has No Textures");
             }
         }
 
@@ -160,7 +163,7 @@ namespace SuperBMDLib.BMD
             return "";
         }
 
-        public void DumpTextures(string directory)
+        public void DumpTextures(string directory, bool list = false)
         {
             if (!System.IO.Directory.Exists(directory) && directory != "")
                 System.IO.Directory.CreateDirectory(directory);
@@ -168,6 +171,8 @@ namespace SuperBMDLib.BMD
             foreach (BinaryTextureImage tex in Textures)
             {
                 tex.SaveImageToDisk(directory);
+                if (list)
+                    Console.WriteLine($"Saved \"{tex.Name}\" to Disk");
             }
 
             JsonSerializer serial = new JsonSerializer();
@@ -180,6 +185,8 @@ namespace SuperBMDLib.BMD
                 writer.AutoFlush = true;
                 serial.Serialize(writer, Textures);
             }
+            if (list)
+                Console.WriteLine("Texture Headers have been saved!");
         }
 
         public void Write(EndianBinaryWriter writer)
@@ -331,7 +338,7 @@ namespace SuperBMDLib.BMD
                         return tex;
                 }
 
-                Console.WriteLine($"No texture with the name { s } was found.");
+                Console.Write($"No texture with the name { s } was found.");
                 return null;
             }
 
