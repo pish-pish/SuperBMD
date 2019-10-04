@@ -261,7 +261,7 @@ namespace DmitryBrant.ImageFormats
                                     bmpData[4 * (y * imgWidth + x)] = scanline[x * 4];
                                     bmpData[4 * (y * imgWidth + x) + 1] = scanline[x * 4 + 1];
                                     bmpData[4 * (y * imgWidth + x) + 2] = scanline[x * 4 + 2];
-                                    bmpData[4 * (y * imgWidth + x) + 3] = 0xFF; // scanline[x * 4 + 3];
+                                    bmpData[4 * (y * imgWidth + x) + 3] = scanline[x * 4 + 3];//0xFF; // scanline[x * 4 + 3];
                                 }
                                 break;
                         }
@@ -344,7 +344,7 @@ namespace DmitryBrant.ImageFormats
                                         bmpData[4 * (y * imgWidth + x)] = scanline[j * 4];
                                         bmpData[4 * (y * imgWidth + x) + 1] = scanline[j * 4 + 1];
                                         bmpData[4 * (y * imgWidth + x) + 2] = scanline[j * 4 + 2];
-                                        bmpData[4 * (y * imgWidth + x) + 3] = 0xFF; // scanline[j * 4 + 3];
+                                        bmpData[4 * (y * imgWidth + x) + 3] = scanline[j * 4 + 3];//0xFF; // scanline[j * 4 + 3];
                                         x++;
                                         if (x >= imgWidth) { x = 0; y--; }
                                     }
@@ -423,7 +423,7 @@ namespace DmitryBrant.ImageFormats
                                         bmpData[4 * (y * imgWidth + x)] = (byte)r;
                                         bmpData[4 * (y * imgWidth + x) + 1] = (byte)g;
                                         bmpData[4 * (y * imgWidth + x) + 2] = (byte)b;
-                                        bmpData[4 * (y * imgWidth + x) + 3] = 0xFF; // (byte)a;
+                                        bmpData[4 * (y * imgWidth + x) + 3] = (byte)a;//0xFF; // (byte)a;
                                         x++;
                                         if (x >= imgWidth) { x = 0; y--; }
                                     }
