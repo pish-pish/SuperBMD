@@ -132,7 +132,7 @@ namespace SuperBMDLib.Materials.Mdl
         {
             for (int i = 0; i < 8; i++)
             {
-                if (mat.TexCoord1Gens[i] == null)
+                if ((uint)mat.TextureIndices[i] == 0xFFFFFFFF)
                     continue;
 
                 BPCommand suSizeMask = new BPCommand() { Register = BPRegister.BP_MASK };
@@ -142,7 +142,7 @@ namespace SuperBMDLib.Materials.Mdl
                 sSize.SetFlag(false, 16);
                 BPCommand tSize = new BPCommand() { Register = BPRegister.SU_TSIZE0 + (i * 2) };
                 tSize.SetFlag(false, 16);
-                
+
                 BinaryTextureImage curTex = textures[mat.TextureIndices[i]];
                 sSize.SetBits(curTex.Width - 1, 0, 16);
                 tSize.SetBits(curTex.Height - 1, 0, 16);
