@@ -945,27 +945,61 @@ namespace SuperBMDLib
 
         private void DisplayVertexAttributeInfo(VTX1 vertexData) {
             Console.WriteLine("{0} Vertex Positions", vertexData.Attributes.Positions.Count);
+            DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Position);
             Console.WriteLine("{0} Vertex Normals", vertexData.Attributes.Normals.Count);
-            if (vertexData.Attributes.Color_0.Count > 0) 
+            DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Normal);
+            if (vertexData.Attributes.Color_0.Count > 0) {
                 Console.WriteLine("{0} Vertex Colors (Channel 0)", vertexData.Attributes.Color_0.Count);
-            if (vertexData.Attributes.Color_1.Count > 0) 
+                DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Color0);
+            }
+            if (vertexData.Attributes.Color_1.Count > 0) {
                 Console.WriteLine("{0} Vertex Colors (Channel 1)", vertexData.Attributes.Color_1.Count);
+                DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Color1);
+            }
+
             Console.WriteLine("{0} Vertex Texture Coords (Channel 0)", vertexData.Attributes.TexCoord_0.Count);
-            if (vertexData.Attributes.TexCoord_1.Count > 0)
+            DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Tex0);
+            
+            if (vertexData.Attributes.TexCoord_1.Count > 0) {
                 Console.WriteLine("{0} Vertex Texture Coords (Channel 1)", vertexData.Attributes.TexCoord_1.Count);
-            if (vertexData.Attributes.TexCoord_2.Count > 0)
+                DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Tex1);
+            }
+            if (vertexData.Attributes.TexCoord_2.Count > 0) {
                 Console.WriteLine("{0} Vertex Texture Coords (Channel 2)", vertexData.Attributes.TexCoord_2.Count);
-            if (vertexData.Attributes.TexCoord_3.Count > 0)
+                DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Tex2);
+            }
+            if (vertexData.Attributes.TexCoord_3.Count > 0) {
                 Console.WriteLine("{0} Vertex Texture Coords (Channel 3)", vertexData.Attributes.TexCoord_3.Count);
-            if (vertexData.Attributes.TexCoord_4.Count > 0)
+                DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Tex3);
+            }
+            if (vertexData.Attributes.TexCoord_4.Count > 0) {
                 Console.WriteLine("{0} Vertex Texture Coords (Channel 4)", vertexData.Attributes.TexCoord_4.Count);
-            if (vertexData.Attributes.TexCoord_5.Count > 0)
+                DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Tex4);
+            }
+            if (vertexData.Attributes.TexCoord_5.Count > 0) {
                 Console.WriteLine("{0} Vertex Texture Coords (Channel 5)", vertexData.Attributes.TexCoord_5.Count);
-            if (vertexData.Attributes.TexCoord_6.Count > 0)
+                DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Tex5);
+            }
+            if (vertexData.Attributes.TexCoord_6.Count > 0) {
                 Console.WriteLine("{0} Vertex Texture Coords (Channel 6)", vertexData.Attributes.TexCoord_6.Count);
-            if (vertexData.Attributes.TexCoord_7.Count > 0)
+                DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Tex6);
+            }
+            if (vertexData.Attributes.TexCoord_7.Count > 0) {
                 Console.WriteLine("{0} Vertex Texture Coords (Channel 7)", vertexData.Attributes.TexCoord_7.Count);
+                DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Tex7);
+            }
         }
+        private void DisplayAttributeFormat(VTX1 vertexData, Geometry.Enums.GXVertexAttribute attr) {
+            if (vertexData.StorageFormats.ContainsKey(attr)) {
+                Tuple<Geometry.Enums.GXDataType, byte> tuple;
+                if (vertexData.StorageFormats.TryGetValue(attr, out tuple)) {
+                    Console.WriteLine("Attribute {0} has format {1} with fractionional part of {2} bits", 
+                        attr, tuple.Item1, tuple.Item2);
+                };
+            }
+
+        }
+
 
     }
 }
