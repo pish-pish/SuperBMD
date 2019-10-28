@@ -993,7 +993,7 @@ namespace SuperBMDLib
             if (vertexData.StorageFormats.ContainsKey(attr)) {
                 Tuple<Geometry.Enums.GXDataType, byte> tuple;
                 if (vertexData.StorageFormats.TryGetValue(attr, out tuple)) {
-                    Console.WriteLine("Attribute {0} has format {1} with fractionional part of {2} bits", 
+                    Console.WriteLine("Attribute {0} has format {1} with fractional part of {2} bits", 
                         attr, tuple.Item1, tuple.Item2);
                 };
             }
