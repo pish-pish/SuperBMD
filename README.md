@@ -23,7 +23,7 @@ If model path is a model but not BMD, it will be converted to BMD. By default tr
 are generated for static meshes but not rigged meshes. See below for more options on this.
 
 # Full usage
-`SuperBMD.exe <input path> [output path] [--mat <material path>] [--outmat <material path>] [--texheader <texheader path>] [--tristrip (all/static/none)] [--rotate] [--bdl] [--profile] [--nosort] [--onematpermesh]`
+`SuperBMD.exe <input path> [output path] [--mat <material path>] [--outmat <material path>] [--texheader <texheader path>] [--tristrip (all/static/none)] [--rotate] [--bdl] [--profile] [--nosort] [--onematpermesh]`<br>
 Arguments in square brackets are optional. If output path is left out it is created from the input 
 path by replacing the extension either with `.bmd`, `.bdl` or `.dae`, depending on input. 
   
@@ -31,8 +31,6 @@ path by replacing the extension either with `.bmd`, `.bdl` or `.dae`, depending 
 the same directory as the DAE. 
 * If input path is not a BMD, the model is converted into a BMD and written to output path. If output path ends with ``.bdl`` and the ``--bdl`` option is set, or output path is empty and ``--bdl`` is set, the model is converted to BDL.  
 * If input path is a BMD/BDL and output path is a BMD, behaviour is similar to if the input was not a BMD/BDL.
-
-The ``--version`` option outputs the program's version and then exits.
 
 Any model -> BMD/BDL:
 * If --mat material path is set, loads material data from that path (See "Materials" further down in this document)
@@ -49,7 +47,6 @@ meshes due to use of multiple materials on a single mesh. (When a mesh uses seve
 
 BMD/BDL -> DAE:
 * If --outmat path is set, write the material data to that path, otherwise write it into the same folder as the created dae. 
-* If texheader path is set, write texture header info to that path. Otherwise, write it in the same place as the created DAE.
 * If ``--profile`` is set, then do not do any conversion. Instead, print information about the BMD/BDL such as section sizes, textures 
 and other useful information that tells you more about what is taking up so much space in your model. Useful for optimization.
 * None of the other options have an effect.
@@ -59,7 +56,8 @@ and other useful information that tells you more about what is taking up so much
 * When exporting a model for conversion to BMD, rotate the model about the X axis by -90 degrees. 
 Most modeling programs define the Z axis as the up axis, but Nintendo games use the Y axis instead. 
 Rotating the model ensures that the model is not sideways when imported into a game. Alternatively, 
-set the --rotate option when calling SuperBMD.exe which will rotate the model appropriately without you having to do it.
+set the --rotate option when calling SuperBMD.exe which will rotate the model appropriately without you having to do it. <br>
+If your model is skinned, then rotation isn't necessary.
 
 ### Skinning
 * SuperBMD supports both skinned and unskinned models.
@@ -109,7 +107,7 @@ the name in this order: ``.png``, ``.jpg``, ``.tga``, ``.bmp``. (Example: If the
 
 * You can modify materials if you know what you are doing. Look on the internet for info on the GX API 
 (Useful: TevStage, TevOrder, AlphaCompare, Blend) and  check the source code of SuperBMD for possible values 
-for some of the enums (When viewing the source code in VS or other good IDEs, check ``SuperBMD/source/Materials/Material.cs``). 
+for some of the enums (When viewing the source code in VS or other good IDEs, check ``SuperBMDLib/source/Materials/Material.cs``). 
 A recap of all enums and useful info about materials will be available here https://github.com/RenolY2/SuperBMD/wiki when 
 it is added.
 
