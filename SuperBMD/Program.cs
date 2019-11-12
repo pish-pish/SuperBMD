@@ -100,8 +100,6 @@ namespace SuperBMDLib
             Console.WriteLine();
             Console.WriteLine("The Conversion is complete!");
             Console.WriteLine();
-            Console.WriteLine("Press any key to Exit");
-            Console.ReadKey();
         }
 
         /// <summary>
@@ -134,8 +132,6 @@ namespace SuperBMDLib
             Console.WriteLine();
             Console.WriteLine("\t-b/--profile\t\t\t\tGenerate a report with information on the .BMD/.BDL (Other formats not supported)");
             Console.WriteLine();
-            Console.WriteLine("Press any key to Exit");
-            Console.ReadKey();
         }
     }
 }
