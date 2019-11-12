@@ -120,7 +120,8 @@ namespace SuperBMDLib
             Console.WriteLine("Parameters:");
             Console.WriteLine("\t                   inputfilepath\tPath to the input file, either a BMD/BDL file or a DAE model.");
             Console.WriteLine("\t                  outputfilepath\tPath to the output file.");
-            Console.WriteLine("\t-m/--mat                filePath\tPath to the material presets JSON for DAE to BMD conversion.");
+            Console.WriteLine("\t-m/--mat                filePath\tPath to the material configuration JSON for DAE to BMD conversion.");
+            Console.WriteLine("\t-m/--outmat             filePath\tOutput path for the material configuration JSON for BMD to DAE conversion.");
             Console.WriteLine("\t-x/--texheader          filePath\tPath to the texture headers JSON for DAE to BMD conversion.");
             Console.WriteLine("\t-t/--tristrip           mode\t\tMode for tristrip generation.");
             Console.WriteLine("\t\tstatic: Only generate tristrips for static (unrigged) meshes.");
@@ -129,6 +130,8 @@ namespace SuperBMDLib
             Console.WriteLine();
             Console.WriteLine("\t-r/--rotate\t\t\t\tRotate the model from Z-up to Y-up orientation.");
             Console.WriteLine("\t-b/--bdl\t\t\t\tGenerate a BDL instead of a BMD.");
+            Console.WriteLine("\t-b/--nosort\t\t\t\tDisable naturalistic sorting of meshes by name.");
+            Console.WriteLine("\t-b/--onematpermesh\t\t\t\tEnsure one material per mesh.");
             Console.WriteLine();
             Console.WriteLine("\t-b/--profile\t\t\t\tGenerate a report with information on the .BMD/.BDL (Other formats not supported)");
             Console.WriteLine();
