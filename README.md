@@ -117,7 +117,7 @@ it is added.
 This release has some bat scripts that apply some included materials.
 * sms-toon: This provides toon shading for Super Mario Sunshine.
 * sms-shiny: Based on the toon shading material, this gives the model a shine but without the toon. Known to work with SMS.
-* pikmin2-simpleshading: Creates shadows based on the direction a triangle is facing. Known to work with Pikmin 2.
+* pikmin2-simpleshading: Creates basic light/shades on a model. Known to work with Pikmin 2.
 
 These material presets are not always the best and you are encouraged to find other 
 presets by experimenting with material data from models and making new scripts. 
