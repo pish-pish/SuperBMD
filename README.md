@@ -136,7 +136,7 @@ the way UV maps will wrap when going beyond the edges) attributes. They are appl
 using --texheader to specify the path to such a file. Header data is applied to textures with a matching name. 
 Please note: If you use a texture header file then the file needs to contain the headers for all the textures you are using in the model.
 
-Supported texture formats: I4, I8, IA4, IA8, RGB565, RGB5A3, RGBA32, CMPR, C4, C8, C14x2. 
+Supported texture formats: I4, I8, IA4, IA8, RGB565, RGB5A3, RGBA32, and CMPR. 
 Supported wrap modes: ClampToEdge, Repeat and MirroredRepeat 
 When using I4 or I8, note that intensity equals alpha.
 
