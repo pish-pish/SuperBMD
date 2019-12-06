@@ -23,7 +23,7 @@ namespace SuperBMDLib
         public MDL3 MatDisplayList    { get; private set; }
         public TEX1 Textures          { get; private set; }
         public BMDInfo ModelStats     { get; private set; }
-        private string[] characters_to_replace = new string[] { " ", "(", ")", ":" };
+        static private string[] characters_to_replace = new string[] { " ", "(", ")", ":" };
 
         private int packetCount;
         private int vertexCount;
@@ -648,6 +648,15 @@ namespace SuperBMDLib
             }
             return $"m{meshindex}{matname}"; 
         }
+
+        static public string AssimpMatnamePartSanitize(string matname) {
+            matname = matname.Replace("#", "_");
+            foreach (string letter in characters_to_replace) {
+                matname = matname.Replace(letter, "_");
+            }
+            return matname;
+        }
+
         private void RemoveDuplicateVertices(Mesh mesh)
         {
             // Calculate which vertices are duplicates (based on their position, texture coordinates, and normals).

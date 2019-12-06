@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using SuperBMDLib;
 using SuperBMDLib.Materials;
 using SuperBMDLib.Util;
 using SuperBMDLib.Materials.Enums;
@@ -523,10 +524,12 @@ namespace SuperBMDLib.BMD
                     return mat;
                 }
                 if (name.StartsWith("m")) {
+                    string sanitized = Model.AssimpMatnamePartSanitize(mat.Name);
                     if (
-                        (name.Length > 2 && name.Substring(2) == mat.Name) ||
-                        (name.Length > 3 && name.Substring(3) == mat.Name) ||
-                        (name.Length > 4 && name.Substring(4) == mat.Name)) {
+                        (name.Length > 2 && name.Substring(2) == sanitized) ||
+                        (name.Length > 3 && name.Substring(3) == sanitized) ||
+                        (name.Length > 4 && name.Substring(4) == sanitized)) {
+                        Console.WriteLine(String.Format("Matched up {0} with {1} from the json file", name, mat.Name));
                         return mat;
                     }
                 }
@@ -651,7 +654,7 @@ namespace SuperBMDLib.BMD
             {
                 
                 Assimp.Material meshMat = scene.Materials[scene.Meshes[i].MaterialIndex];
-                Console.Write("Mesh {0} has material {1}...", scene.Meshes[i].Name, meshMat.Name);
+                Console.Write("Mesh {0} has material {1}...\n", scene.Meshes[i].Name, meshMat.Name);
                 Materials.Material bmdMaterial = new Material();
                 bmdMaterial.Name = meshMat.Name;
 
