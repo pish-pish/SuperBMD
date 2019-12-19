@@ -356,7 +356,64 @@ namespace SuperBMDLib
             AssimpContext cont = new AssimpContext();
 
             if (modelType == "obj") {
-                cont.ExportFile(outScene, fileName, "obj", PostProcessSteps.ValidateDataStructure);
+                Console.WriteLine("Writing the OBJ file...");
+                cont.ExportFile(outScene, fileName, "obj");//, PostProcessSteps.ValidateDataStructure);
+                using (System.IO.StreamWriter file = new System.IO.StreamWriter(fileName)) {
+                    string mtllibname = fileName.Split(new char[] {'\\', '/'}, StringSplitOptions.RemoveEmptyEntries).Last()+".mtl";
+                    file.WriteLine(String.Format("mtllib {0}", mtllibname));
+                    foreach (Assimp.Mesh mesh in outScene.Meshes) {
+                        foreach (Assimp.Vector3D vertex in mesh.Vertices) {
+                            file.WriteLine(String.Format("v {0} {1} {2}", vertex.X, vertex.Y, vertex.Z));
+                        }
+                    }
+
+                    foreach (Assimp.Mesh mesh in outScene.Meshes) {
+                        foreach (Assimp.Vector3D normal in mesh.Normals) {
+                            file.WriteLine(String.Format("vn {0} {1} {2}", normal.X, normal.Y, normal.Z));
+                        }
+                    }
+
+                    foreach (Assimp.Mesh mesh in outScene.Meshes) {
+                        if (mesh.HasTextureCoords(0)) {
+                            foreach(Assimp.Vector3D uv in mesh.TextureCoordinateChannels[0]) {
+                                file.WriteLine(String.Format("vt {0} {1}", uv.X, uv.Y));
+                            }
+                        }
+                    }
+
+                    int vertex_offset = 1;
+
+                    foreach (Assimp.Mesh mesh in outScene.Meshes) {
+                        string material_name = outScene.Materials[mesh.MaterialIndex].Name;
+                        file.WriteLine(String.Format("usemtl {0}", material_name));
+
+
+
+                        foreach (Assimp.Face face in mesh.Faces) {
+                            file.Write("f ");
+                            foreach (int index in face.Indices) {
+                                file.Write(index+vertex_offset);
+                                if (mesh.HasTextureCoords(0)) {
+                                    file.Write("/");
+                                    file.Write(index+vertex_offset);
+                                }
+                                if (!mesh.HasTextureCoords(0) && mesh.HasNormals) {
+                                    file.Write("//");
+                                    file.Write(index+vertex_offset);
+                                }
+                                else if (mesh.HasNormals) {
+                                    file.Write("/");
+                                    file.Write(index+vertex_offset);
+                                }
+                                file.Write(" ");
+                            }
+                            file.Write("\n");
+                        }
+
+                        vertex_offset += mesh.VertexCount;
+                    }
+
+                }
                 return;
             }
             else {
