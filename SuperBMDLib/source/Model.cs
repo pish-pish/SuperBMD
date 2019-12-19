@@ -318,8 +318,12 @@ namespace SuperBMDLib
             fileName = Path.GetFullPath(fileName); // Get absolute path instead of relative
             string outDir = Path.GetDirectoryName(fileName);
             string fileNameNoExt = Path.GetFileNameWithoutExtension(fileName);
-            fileName = Path.Combine(outDir, fileNameNoExt + ".dae");
-
+            if (modelType == "obj") {
+                fileName = Path.Combine(outDir, fileNameNoExt + ".obj");
+            }
+            else {
+                fileName = Path.Combine(outDir, fileNameNoExt + ".dae");
+            }
             Scene outScene = new Scene { RootNode = new Node("RootNode") };
 
             Console.WriteLine();
@@ -350,8 +354,14 @@ namespace SuperBMDLib
 
 
             AssimpContext cont = new AssimpContext();
-            cont.ExportFile(outScene, fileName, "collada", PostProcessSteps.ValidateDataStructure);
 
+            if (modelType == "obj") {
+                cont.ExportFile(outScene, fileName, "obj", PostProcessSteps.ValidateDataStructure);
+                return;
+            }
+            else {
+                cont.ExportFile(outScene, fileName, "collada", PostProcessSteps.ValidateDataStructure);
+            }
 
             //if (SkinningEnvelopes.Weights.Count == 0)
             //    return; // There's no skinning information, so we can stop here
