@@ -81,14 +81,24 @@ namespace SuperBMDLib
                 additionalTexPath = Path.GetDirectoryName(cmd_args.materials_path);
             }
             FileInfo fi = new FileInfo(cmd_args.input_path);
-            Console.WriteLine(string.Format("Preparing to convert {0} from {1} to {2}", fi.Name.Replace(fi.Extension, ""), fi.Extension.ToUpper(), (fi.Extension == ".bmd" || fi.Extension == ".bdl") ? ".DAE" : (cmd_args.output_bdl ? ".BDL" : ".BMD")));
+            string destinationFormat = (fi.Extension == ".bmd" || fi.Extension == ".bdl") ? ".DAE" : (cmd_args.output_bdl ? ".BDL" : ".BMD");
+            
+            if (destinationFormat == ".DAE" && cmd_args.export_obj) {
+                destinationFormat = ".OBJ";
+            }
+
+            Console.WriteLine(string.Format("Preparing to convert {0} from {1} to {2}", fi.Name.Replace(fi.Extension, ""), fi.Extension.ToUpper(), destinationFormat));
             mod = Model.Load(cmd_args, mat_presets, additionalTexPath);
 
             if (cmd_args.input_path.EndsWith(".bmd") || cmd_args.input_path.EndsWith(".bdl"))
             {
-                Console.WriteLine(string.Format("Converting {0} into {1}...", fi.Extension.ToUpper(), (fi.Extension == ".bmd" || fi.Extension == ".bdl") ? ".DAE" : (cmd_args.output_bdl ? ".BDL" : ".BMD")));
-
-                mod.ExportAssImp(cmd_args.output_path, "dae", new ExportSettings());
+                Console.WriteLine(string.Format("Converting {0} into {1}...", fi.Extension.ToUpper(), destinationFormat));
+                if (cmd_args.export_obj) {
+                    mod.ExportAssImp(cmd_args.output_path, "obj", new ExportSettings());
+                }
+                else {
+                    mod.ExportAssImp(cmd_args.output_path, "dae", new ExportSettings());
+                }
             }
             else
             {
@@ -132,6 +142,7 @@ namespace SuperBMDLib
             Console.WriteLine("\t-b/--bdl\t\t\t\tGenerate a BDL instead of a BMD.");
             Console.WriteLine("\t-b/--nosort\t\t\t\tDisable naturalistic sorting of meshes by name.");
             Console.WriteLine("\t-b/--onematpermesh\t\t\t\tEnsure one material per mesh.");
+            Console.WriteLine("\t-b/--exportobj\t\t\t\tIf input is BMD/BDL, export the model as Wavefront OBJ instead of Collada (.DAE).");
             Console.WriteLine();
             Console.WriteLine("\t-b/--profile\t\t\t\tGenerate a report with information on the .BMD/.BDL (Other formats not supported)");
             Console.WriteLine();
