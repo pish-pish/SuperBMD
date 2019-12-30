@@ -101,10 +101,18 @@ namespace SuperBMDLib
                 Materials.DumpMaterials(Path.GetDirectoryName(args.output_materials_path));
             }
             else {
-                string indir = Path.GetDirectoryName(args.input_path);
-                string filenameNoExt = Path.GetFileNameWithoutExtension(args.input_path);
+                if (args.output_path != "") {
+                    string outDir = Path.GetDirectoryName(args.output_path);
+                    string filenameNoExt = Path.GetFileNameWithoutExtension(args.input_path);
+                    Materials.DumpMaterials(Path.Combine(outDir, filenameNoExt+"_materials.json"));
+                }
+                else {
+                    string inDir = Path.GetDirectoryName(args.input_path);
+                    string filenameNoExt = Path.GetFileNameWithoutExtension(args.input_path);
 
-                Materials.DumpMaterials(Path.Combine(indir, filenameNoExt+"_materials.json"));
+                    Materials.DumpMaterials(Path.Combine(inDir, filenameNoExt+"_materials.json"));
+                }
+
             }
 
             foreach (Geometry.Shape shape in Shapes.Shapes)
