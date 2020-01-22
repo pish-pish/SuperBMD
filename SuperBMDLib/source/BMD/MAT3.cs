@@ -488,6 +488,31 @@ namespace SuperBMDLib.BMD
             FillMaterialDataBlocks();
         }
 
+        private string FindOriginalMaterialName(string name, List<Material> mat_presets) {
+            string result = null;
+
+            foreach (Material mat in mat_presets) {
+                if (mat == null) {
+                    continue;
+                }
+                if (mat.Name.StartsWith("__MatDefault")) {
+                    continue;
+                }
+                if (name.StartsWith("m")) {
+                    string sanitized = Model.AssimpMatnamePartSanitize(mat.Name);
+                    if (
+                        (name.Length > 2 && name.Substring(2) == sanitized) ||
+                        (name.Length > 3 && name.Substring(3) == sanitized) ||
+                        (name.Length > 4 && name.Substring(4) == sanitized)) {
+                        Console.WriteLine(String.Format("Matched up {0} with {1} from the json file", name, mat.Name));
+                        result = mat.Name;
+                        break;
+                    }
+                }
+            }
+            return result;
+        }
+
         private Material FindMatPreset(string name, List<Material> mat_presets) {
             if (mat_presets == null) {
                 return null;
@@ -668,6 +693,12 @@ namespace SuperBMDLib.BMD
                 }
 
                 bmdMaterial.SetUpTev(meshMat.HasTextureDiffuse, hasVtxColor0, texIndex, texName, meshMat);
+                string originalName = FindOriginalMaterialName(meshMat.Name, mat_presets);
+                if (originalName != null) {
+                    Console.WriteLine("Material name {0} renamed to {1}", meshMat.Name, originalName);
+                    meshMat.Name = originalName;
+                }
+
                 Material preset = FindMatPreset(meshMat.Name, mat_presets);
 
                 if (preset != null) {
