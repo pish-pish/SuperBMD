@@ -55,6 +55,7 @@ namespace SuperBMDLib.Materials
 
         public Material()
         {
+            CullMode = CullMode.Back;
             MaterialColors = new Color?[2] { new Color(1, 1, 1, 1), null};
 
             ChannelControls = new ChannelControl?[4];
