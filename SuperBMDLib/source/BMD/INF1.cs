@@ -133,7 +133,7 @@ namespace SuperBMDLib.BMD
                         continue;
 
                     SceneNode downNode1 = new SceneNode(NodeType.OpenChild, 0, Root);
-                    SceneNode matNode = new SceneNode(NodeType.Material, mesh.MaterialIndex, Root);
+                    SceneNode matNode = new SceneNode(NodeType.Material, meshes.IndexOf(mesh), Root);
                     SceneNode downNode2 = new SceneNode(NodeType.OpenChild, 0, Root);
                     SceneNode shapeNode = new SceneNode(NodeType.Shape, meshes.IndexOf(mesh), Root);
 
