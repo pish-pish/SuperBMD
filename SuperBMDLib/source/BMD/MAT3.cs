@@ -490,6 +490,9 @@ namespace SuperBMDLib.BMD
 
         private string FindOriginalMaterialName(string name, List<Material> mat_presets) {
             string result = null;
+            if (mat_presets == null) {
+                return result;
+            }
 
             foreach (Material mat in mat_presets) {
                 if (mat == null) {
