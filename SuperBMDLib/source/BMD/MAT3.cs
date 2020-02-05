@@ -298,8 +298,13 @@ namespace SuperBMDLib.BMD
             mat.ColorChannelControlsCount = NumColorChannelsBlock[reader.ReadByte()];
             mat.NumTexGensCount = NumTexGensBlock[reader.ReadByte()];
             mat.NumTevStagesCount = NumTevStagesBlock[reader.ReadByte()];
-            mat.IndTexEntry = m_IndirectTexBlock[matindex];
 
+            if (matindex < m_IndirectTexBlock.Count) {
+                mat.IndTexEntry = m_IndirectTexBlock[matindex];
+            }
+            else {
+                Console.WriteLine("Warning: Material {0} referenced an out of range IndirectTexBlock index", mat.Name);
+            }
             mat.ZCompLoc = m_zCompLocBlock[reader.ReadByte()];
             mat.ZMode = m_zModeBlock[reader.ReadByte()];
 
