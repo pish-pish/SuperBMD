@@ -161,6 +161,8 @@ namespace SuperBMDLib.Materials
         [JsonIgnore]
         private byte[] m_rgbaImageData;
         [JsonIgnore]
+        private List<byte[]> m_rgbaMipImageData;
+        [JsonIgnore]
         public byte[] RGBAImageData
         {
             get { return m_rgbaImageData; }
@@ -232,6 +234,16 @@ namespace SuperBMDLib.Materials
             }
             else {
                 m_rgbaImageData = DecodeData(stream, Width, Height, Format, m_imagePalette, PaletteFormat);
+                m_rgbaMipImageData = new List<byte[]>();
+                if (ImageCount > 1) {
+                    for (ushort i = 1; i < ImageCount; i++) {
+                        int factor = (int)Math.Pow(2.0f, (float)i);
+                        ushort mipWidth = (ushort)(Width/factor);
+                        ushort mipHeight = (ushort)(Height/factor);
+                        byte[] mipdata = DecodeData(stream, mipWidth, mipHeight, Format, m_imagePalette, PaletteFormat);
+                        m_rgbaMipImageData.Add(mipdata);
+                    }
+                }
             }
         }
 
@@ -281,70 +293,153 @@ namespace SuperBMDLib.Materials
             if (!Path.IsPathRooted(texFilePath)) {
                 texFilePath = Path.Combine(modelDirectory, texFilePath);
             }
-
-            if (File.Exists(texFilePath))
-            {
-                try {
-                    texData = new Bitmap(texFilePath);
-                }
-                catch (ArgumentException e) {
-                    try {
-                        texData = TgaReader.Load(texFilePath);
-                    }
-                    catch (Exception e2) {
-                        Console.WriteLine(String.Format("Failed to load texture from {0} \n Texture should be BMP, JPG, PNG or TGA", texFilePath));
-                        throw e2;
-                    }
-                }
-                Name = Path.GetFileNameWithoutExtension(texFilePath);
-            }
-            else
-            {
-                Console.WriteLine("Texture was not found, Searching the model's directory...");
-                string fileName = Path.GetFileName(texture.FilePath);
-                texFilePath = Path.Combine(modelDirectory, fileName);
-
-                if (!File.Exists(texFilePath))
-                {
-                    Console.WriteLine($"Texture was not found at path \"{ Path.GetFullPath(texFilePath) }\".");
-                    throw new System.Exception($"Texture \"{ fileName }\" wasn't found, cannot proceed.");
-                    //Console.WriteLine($"Cannot find texture { fileName }. Using a checkboard texture instead...");
-                    texData = new Bitmap(SuperBMDLib.Properties.Resources.default_checker);
-                    Name = Path.GetFileNameWithoutExtension(texFilePath);
-                }
-                else
-                {
-                    try {
-                        texData = new Bitmap(texFilePath);
-                    }
-                    catch (Exception e) {
-                        try {
-                            texData = TgaReader.Load(texFilePath);
-                        }
-                        catch (Exception e2) {
-                            Console.WriteLine(String.Format("Failed to load texture from {0} \n Texture should be BMP, JPG, PNG or TGA", texFilePath));
-                            throw e2;
-                        } 
-                    }
-
-                    Name = Path.GetFileNameWithoutExtension(texFilePath);
-                }
-            }
+            
+            texFilePath = FindTexture(texture, texFilePath, modelDirectory);
+            texData = LoadImageFromPath(texFilePath);
+            Name = Path.GetFileNameWithoutExtension(texFilePath);
+            
 
             Width = (ushort)texData.Width;
             Height = (ushort)texData.Height;
+
+            int texDataSize = 0;
+
 
             m_rgbaImageData = new byte[Width * Height * 4];
             BitmapData dat = texData.LockBits(new Rectangle(0, 0, Width, Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
             Marshal.Copy(dat.Scan0, m_rgbaImageData, 0, m_rgbaImageData.Length);
 
 
+            int mipCount = DetectMipCount(texFilePath, texData);
+            ImageCount = (byte)mipCount;
             texData.UnlockBits(dat);
 
             texData.Dispose();
+
+            if (mipCount > 1) {
+                MinFilter = FilterMode.LinearMipmapLinear;
+                MaxLOD = (float)mipCount;
+            }
+
+            m_rgbaMipImageData = new List<byte[]>();
+
+            for (uint i = 1; i < mipCount; i++) {
+                int factor = (int)Math.Pow(2.0f, (float)i);
+                ushort mipWidth = (ushort)(Width/factor);
+                ushort mipHeight = (ushort)(Height/factor);
+                byte[] mipmapData = new byte[mipWidth*mipHeight*4];
+
+                string mipPath = GetMipTexture(texFilePath, i);
+                texData = LoadImageFromPath(mipPath);
+                if (texData.Width != mipWidth || texData.Height != mipHeight) {
+                    throw new Exception(String.Format("Mipmap dimension mismatch for texture {5}! For Mip Level {0} expected {1}x{2} but got {3}x{4}!",
+                        i, mipWidth, mipHeight, texData.Width, texData.Height, Name));
+                }
+
+                dat = texData.LockBits(new Rectangle(0, 0, mipWidth, mipHeight), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                Marshal.Copy(dat.Scan0, mipmapData, 0, mipmapData.Length);
+
+                texData.UnlockBits(dat);
+
+                texData.Dispose();
+
+                m_rgbaMipImageData.Add(mipmapData);
+            }
+
             DetectAndSetFittingFormat();
 
             Console.WriteLine(string.Format(" - {0} Format set to {1}", Name, Format));
+        }
+
+        private string GetMipTexture(string texFilePath, uint miplevel) {
+            string fileName = Path.GetFileNameWithoutExtension(texFilePath);
+            string folderPath = Path.GetDirectoryName(texFilePath);
+            string extension = Path.GetExtension(texFilePath);
+
+            if (miplevel == 0) {
+                return texFilePath;
+            }
+            else {
+                return Path.Combine(folderPath, String.Format("{0}_mip{1}{2}", fileName, miplevel, extension));
+            }
+        }
+
+        private double log2(double val) {
+            return Math.Log(val)/Math.Log(2);
+        }
+
+        private int GetMaxMipLevel(Bitmap texdata) {
+            double miplevel = log2(texdata.Width);
+            if (log2(texdata.Height) < miplevel) {
+                miplevel = log2(texdata.Height);
+            } 
+
+            if (miplevel % 1.0 > 0) {
+                Console.WriteLine("Calculated max miplevel of 1 for texture width height {0} {1}", texdata.Width, texdata.Height);
+                return 1;
+            }
+            else {
+                return (int)miplevel;
+            }
+        }
+
+        private int DetectMipCount(string texFilePath, Bitmap texdata) {
+            int maxMipCount = GetMaxMipLevel(texdata);
+            int mipCount = 0;
+
+            for (uint i = 0; i < maxMipCount; i++) {
+                string mipPath = GetMipTexture(texFilePath, i);
+                if (File.Exists(mipPath)) {
+                    mipCount += 1;
+                }
+                else {
+                    break;
+                }
+            }
+
+            return mipCount;
+
+        }
+        
+        private string FindTexture(Assimp.TextureSlot texture, string texFilePath, string modelDirectory, bool suppressMessages = false) {
+            if (File.Exists(texFilePath)) {
+                return texFilePath;
+            }
+            else {
+                if (!suppressMessages)
+                    Console.WriteLine("Texture was not found, Searching the model's directory...");
+                string fileName = Path.GetFileName(texture.FilePath);
+                texFilePath = Path.Combine(modelDirectory, fileName);
+
+                if (!File.Exists(texFilePath))
+                {
+                    if (!suppressMessages)
+                        Console.WriteLine($"Texture was not found at path \"{ Path.GetFullPath(texFilePath) }\".");
+                    throw new System.Exception($"Texture \"{ fileName }\" wasn't found, cannot proceed.");
+                }
+
+                return texFilePath;
+            }
+        }
+
+        private Bitmap LoadImageFromPath(string texFilePath) {
+            Bitmap texData;
+            
+
+            try {
+                texData = new Bitmap(texFilePath);
+            }
+            catch (ArgumentException e) {
+                try {
+                    texData = TgaReader.Load(texFilePath);
+                }
+                catch (Exception e2) {
+                    Console.WriteLine(String.Format("Failed to load texture from {0} \n Texture should be BMP, JPG, PNG or TGA", texFilePath));
+                    throw e2;
+                }
+            }
+
+            return texData;
         }
 
         // We analyze the image data and check 
@@ -390,7 +485,7 @@ namespace SuperBMDLib.Materials
             }
         }
 
-        public string SaveImageToDisk(string outputFile)
+        public string SaveImageToDisk(string outputFile, bool writeMips=true)
         {
             string fileName = Path.Combine(outputFile, $"{ Name }.png");
 
@@ -403,18 +498,44 @@ namespace SuperBMDLib.Materials
                 bmp.Save(fileName, ImageFormat.Png);
             }
 
+            if (writeMips) {
+                if (ImageCount != m_rgbaMipImageData.Count+1) {
+                    Console.WriteLine("Warning: Texture {0} has mipmap count mismatch", Name);
+                }
+
+                for (int i = 1; i < m_rgbaMipImageData.Count+1; i++) {
+                    string outpath = GetMipTexture(fileName, (uint)i);
+                    using (Bitmap bmp = CreateBitmap(i)) {
+                        bmp.Save(outpath, ImageFormat.Png);
+                    }
+                }
+            }
+
             return fileName;
         }
 
-        public Bitmap CreateBitmap()
-        {
-            Bitmap bmp = new Bitmap(Width, Height);
-            Rectangle rect = new Rectangle(0, 0, Width, Height);
+        public Bitmap CreateBitmap(int mipLevel=0)
+        {   
+            int factor = (int)Math.Pow(2.0f, (float)mipLevel);
+            ushort mipWidth = (ushort)(Width/factor);
+            ushort mipHeight = (ushort)(Height/factor);
+            
+            
+            Bitmap bmp = new Bitmap(mipWidth, mipHeight);
+            Rectangle rect = new Rectangle(0, 0, mipWidth, mipHeight);
+            
             BitmapData bmpData = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
 
             //Lock the bitmap for writing, copy the bits and then unlock for saving.
             IntPtr ptr = bmpData.Scan0;
-            byte[] imageData = m_rgbaImageData;
+            
+            byte[] imageData;
+            if (mipLevel == 0) {
+                imageData = m_rgbaImageData;
+            }
+            else {
+                imageData = m_rgbaMipImageData[mipLevel-1];
+            }
             Marshal.Copy(imageData, 0, ptr, imageData.Length);
             bmp.UnlockBits(bmpData);
 
@@ -1162,7 +1283,7 @@ namespace SuperBMDLib.Materials
         #region Encoding
         public Tuple<byte[], ushort[]> EncodeData()
         {
-            switch (Format)
+            /*switch (Format)
             {
                 case TextureFormats.I4:
                     return new Tuple<byte[], ushort[]>(ImageDataFormat.I4.ConvertTo(m_rgbaImageData, Width, Height, null), new ushort[0]);
@@ -1184,6 +1305,59 @@ namespace SuperBMDLib.Materials
                     return EncodeC8();
                 case TextureFormats.CMPR:
                     return new Tuple<byte[], ushort[]>(ImageDataFormat.Cmpr.ConvertTo(m_rgbaImageData, Width, Height, null), new ushort[0]);
+                default:
+                    return new Tuple<byte[], ushort[]>(new byte[0], new ushort[0]);
+            }*/
+            Tuple<byte[], ushort[]> result = EncodeDataMiplevel(0);
+            byte[] imagedata = result.Item1;
+            for (int i = 1; i < m_rgbaMipImageData.Count+1; i++) {
+                Tuple<byte[], ushort[]> mipresult = EncodeDataMiplevel(i);
+                imagedata = (byte[])imagedata.Concat(mipresult.Item1).ToArray();
+            }
+
+            return new Tuple<byte[], ushort[]>(imagedata, result.Item2);
+        }
+
+        public Tuple<byte[], ushort[]> EncodeDataMiplevel(int mipLevel)
+        {
+            byte[] imageData;
+            if (mipLevel == 0) {
+                imageData = m_rgbaImageData;
+            }
+            else {
+                imageData = m_rgbaMipImageData[mipLevel - 1];
+            }
+
+            int factor = (int)Math.Pow(2.0f, (float)mipLevel);
+            ushort mipWidth = (ushort)(Width/factor);
+            ushort mipHeight = (ushort)(Height/factor);
+
+            switch (Format)
+            {
+                case TextureFormats.I4:
+                    return new Tuple<byte[], ushort[]>(ImageDataFormat.I4.ConvertTo(imageData, mipWidth, mipHeight, null), new ushort[0]);
+                case TextureFormats.I8:
+                    return new Tuple<byte[], ushort[]>(ImageDataFormat.I8.ConvertTo(imageData, mipWidth, mipHeight, null), new ushort[0]);
+                case TextureFormats.IA4:
+                    return new Tuple<byte[], ushort[]>(ImageDataFormat.IA4.ConvertTo(imageData, mipWidth, mipHeight, null), new ushort[0]);
+                case TextureFormats.IA8:
+                    return new Tuple<byte[], ushort[]>(ImageDataFormat.IA8.ConvertTo(imageData, mipWidth, mipHeight, null), new ushort[0]);
+                case TextureFormats.RGB565:
+                    return new Tuple<byte[], ushort[]>(ImageDataFormat.RGB565.ConvertTo(imageData, mipWidth, mipHeight, null), new ushort[0]);
+                case TextureFormats.RGB5A3:
+                    return new Tuple<byte[], ushort[]>(ImageDataFormat.RGB5A3.ConvertTo(imageData, mipWidth, mipHeight, null), new ushort[0]);
+                case TextureFormats.RGBA32:
+                    return new Tuple<byte[], ushort[]>(ImageDataFormat.Rgba32.ConvertTo(imageData, mipWidth, mipHeight, null), new ushort[0]);
+                case TextureFormats.C4:
+                    if (mipLevel > 0) 
+                        throw new Exception("Mipmaps for C4 not supported!");
+                    return EncodeC4();
+                case TextureFormats.C8:
+                    if (mipLevel > 0) 
+                        throw new Exception("Mipmaps for C8 not supported!");
+                    return EncodeC8();
+                case TextureFormats.CMPR:
+                    return new Tuple<byte[], ushort[]>(ImageDataFormat.Cmpr.ConvertTo(imageData, mipWidth, mipHeight, null), new ushort[0]);
                 default:
                     return new Tuple<byte[], ushort[]>(new byte[0], new ushort[0]);
             }
