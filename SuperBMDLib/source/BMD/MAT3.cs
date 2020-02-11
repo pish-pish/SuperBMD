@@ -1554,9 +1554,21 @@ namespace SuperBMDLib.BMD
             foreach (Material mat in m_Materials) {
                 for (int i = 0; i < 8; i++) {
                     if (mat.TextureNames[i] != null && mat.TextureNames[i] != "") {
-                        int j = 0;
-                        
-                        foreach (BinaryTextureImage tex in textures.Textures) {
+
+                        int index = textures.getTextureIndexFromInstanceName(mat.TextureNames[i]);
+                        if (index < 0) {
+                            Console.WriteLine("Failed to get texture index for texture {0} in material {1}", mat.TextureNames[i], mat.Name);
+                        }
+                        else {
+                            mat.TextureIndices[i] = index;
+                            BinaryTextureImage tex = textures[index];
+                            if (!m_TexRemapBlock.Contains((short)index)) {
+                                m_TexRemapBlock.Add((short)index);
+                            }
+                            Console.WriteLine(string.Format("Mapped \"{0}\" to index {1} ({2})", mat.TextureNames[i], index, tex.Name));
+                            Console.WriteLine("---------------------------------------------------");
+                        }
+                        /*foreach (BinaryTextureImage tex in textures.Textures) {
                             if (tex.Name == mat.TextureNames[i]) {
                                 mat.TextureIndices[i] = j;
                                 if (!m_TexRemapBlock.Contains((short)j)) {
@@ -1567,11 +1579,12 @@ namespace SuperBMDLib.BMD
                                 break;
                             }
                             j++;
-                        }
+                        }*/
                     }
                 }
             }
         }
+
 
         public void SetTextureNames(TEX1 textures)
         {
@@ -1582,7 +1595,8 @@ namespace SuperBMDLib.BMD
                     if (mat.TextureIndices[i] == -1)
                         continue;
 
-                    mat.TextureNames[i] = textures[mat.TextureIndices[i]].Name;
+                    //mat.TextureNames[i] = textures[mat.TextureIndices[i]].Name;
+                    mat.TextureNames[i] = textures.getTextureInstanceName(mat.TextureIndices[i]);
                 }
             }
         }

@@ -293,6 +293,65 @@ namespace SuperBMDLib.BMD
             }
         }
 
+        public string getTextureInstanceName(int index) {
+            if (Textures == null) {
+                return null;
+            }
+            else {
+                string name = Textures[index].Name;
+
+                int number = 0;
+                for (int i = 0; i < Textures.Count; i++) {
+                    if (i == index) {
+                        break;
+                    }
+                    if (Textures[i].Name == name) {
+                        number += 1;
+                    }
+                }
+                return String.Format("{0}:{1}", name, number);
+            }
+        }
+
+        public int getTextureIndexFromInstanceName(string instanceName) {
+            if (Textures == null) {
+                return -1;
+            }
+            
+            string[] subs = instanceName.Split(new string[] {":" }, 2, StringSplitOptions.None);
+            if (subs.Length == 2) {
+                string texture = subs[0];
+                int instanceNumber;
+                if (!int.TryParse(subs[1], out instanceNumber)) {
+                    texture = instanceName;
+                    instanceNumber = 0;
+                }
+
+                int instancesPassed = 0;
+                for (int i = 0; i < Textures.Count; i++) {
+                    if (Textures[i].Name == instanceName) {
+                        if (instancesPassed == instanceNumber) {
+                            return i;
+                        }
+                        else {
+                            instancesPassed += 1;
+                        }
+                    }
+                }
+                return -1;
+                //throw new Exception(String.Format("Didn't find texture: {0}", instanceName));
+            }
+            else {
+                for (int i = 0; i < Textures.Count; i++) {
+                    if (Textures[i].Name == instanceName) {
+                        return i;
+                    }
+                }
+                return -1;
+                //throw new Exception(String.Format("Didn't find texture: {0}", instanceName));
+            }
+        }
+
         public BinaryTextureImage this[int i]
         {
             get
