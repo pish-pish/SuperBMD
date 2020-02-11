@@ -329,7 +329,7 @@ namespace SuperBMDLib.BMD
 
                 int instancesPassed = 0;
                 for (int i = 0; i < Textures.Count; i++) {
-                    if (Textures[i].Name == instanceName) {
+                    if (Textures[i].Name == texture) {
                         if (instancesPassed == instanceNumber) {
                             return i;
                         }
