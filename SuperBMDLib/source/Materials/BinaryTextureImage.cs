@@ -583,6 +583,7 @@ namespace SuperBMDLib.Materials
 
         public void LoadImageDataFromDisk(string filePath)
         {
+            int mipCount = 1;
             using (Bitmap bitmap = new Bitmap(filePath))
             {
                 Width = (ushort)bitmap.Width;
@@ -592,8 +593,37 @@ namespace SuperBMDLib.Materials
 
                 BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
                 Marshal.Copy(bmpData.Scan0, data, 0, data.Length);
+
                 bitmap.UnlockBits(bmpData);
                 m_rgbaImageData = data;
+
+                mipCount = DetectMipCount(filePath, bitmap);
+                ImageCount = (byte)mipCount;
+            }
+            
+            m_rgbaMipImageData = new List<byte[]>();
+
+            for (uint i = 1; i < mipCount; i++) {
+                int factor = (int)Math.Pow(2.0f, (float)i);
+                ushort mipWidth = (ushort)(Width/factor);
+                ushort mipHeight = (ushort)(Height/factor);
+                byte[] mipmapData = new byte[mipWidth*mipHeight*4];
+
+                string mipPath = GetMipTexture(filePath, i);
+                Bitmap texData = LoadImageFromPath(mipPath);
+                if (texData.Width != mipWidth || texData.Height != mipHeight) {
+                    throw new Exception(String.Format("Mipmap dimension mismatch for texture {5}! For Mip Level {0} expected {1}x{2} but got {3}x{4}!",
+                        i, mipWidth, mipHeight, texData.Width, texData.Height, Name));
+                }
+
+                BitmapData dat = texData.LockBits(new Rectangle(0, 0, mipWidth, mipHeight), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                Marshal.Copy(dat.Scan0, mipmapData, 0, mipmapData.Length);
+
+                texData.UnlockBits(dat);
+
+                texData.Dispose();
+
+                m_rgbaMipImageData.Add(mipmapData);
             }
         }
 
