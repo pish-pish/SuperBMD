@@ -616,7 +616,11 @@ namespace SuperBMDLib.BMD
             for (int vec = 0; vec < mesh.TextureCoordinateChannels[channel].Count; vec++)
             {
                 Vector2 tempCoord = mesh.TextureCoordinateChannels[channel][vec].ToOpenTKVector2();
-                tempList.Add(new Vector2(tempCoord.X, 1.0f - tempCoord.Y));
+                //tempCoord = new Vector2(tempCoord.X, 1.0f - tempCoord.Y);
+                tempCoord.Y = 1.0f - tempCoord.Y;
+                if (!tempList.Contains(tempCoord)) {
+                    tempList.Add(tempCoord);
+                }
             }
 
             if (!Attributes.CheckAttribute(texCoordAttrib))
