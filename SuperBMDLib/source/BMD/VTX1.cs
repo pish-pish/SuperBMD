@@ -78,7 +78,7 @@ namespace SuperBMDLib.BMD
             return false;
         }
 
-        public VTX1(Assimp.Scene scene)
+        public VTX1(Assimp.Scene scene, bool forceFloat32)
         {
             Attributes = new VertexData();
             StorageFormats = new SortedDictionary<GXVertexAttribute, Tuple<GXDataType, byte>>();
@@ -138,10 +138,19 @@ namespace SuperBMDLib.BMD
                         SetAssimpTexCoordAttribute(texCoords, GXVertexAttribute.Tex0 + texCoords, mesh);
                         if (!StorageFormats.ContainsKey(GXVertexAttribute.Tex0 + texCoords))
                         {
-                            bool use_float = use_float_for_texcoords(mesh, texCoords);
+                            bool use_float = false;
+                            if (forceFloat32) {
+                                use_float = true;
+                            }
+                            else {
+                                use_float = use_float_for_texcoords(mesh, texCoords);
+                                if (use_float) {
+                                    Console.WriteLine($"Mesh \"{ mesh.Name }\" ({i}) has big texture coordinate values on channel { texCoords } and will use floats.");
+                                }
+                            }
 
                             if (use_float) {
-                                Console.WriteLine($"Mesh \"{ mesh.Name }\" ({i}) has big texture coordinate values on channel { texCoords } and will use floats.");
+                                
                                 StorageFormats.Add(GXVertexAttribute.Tex0 + texCoords, new Tuple<GXDataType, byte>(GXDataType.Float32, 0));
                             }
                             else {

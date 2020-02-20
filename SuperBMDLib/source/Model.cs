@@ -217,7 +217,7 @@ namespace SuperBMDLib
 
             Console.WriteLine();
             Console.WriteLine("Generating the Vertex Data ->");
-            VertexData = new VTX1(scene);
+            VertexData = new VTX1(scene, args.forceFloat);
             Console.WriteLine();
             Console.Write("Generating the Bone Data");
             Joints = new JNT1(scene, VertexData);
