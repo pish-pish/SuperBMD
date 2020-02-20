@@ -215,6 +215,18 @@ namespace SuperBMDLib
                 Console.WriteLine();
             }
 
+            foreach (Mesh mesh in scene.Meshes) {
+                if (mesh.HasNormals) {
+                    for (int i = 0; i < mesh.Normals.Count; i++) {
+                        Vector3D normal = mesh.Normals[i];
+                        normal.X = (float)Math.Round(normal.X, 4);
+                        normal.Y = (float)Math.Round(normal.Y, 4);
+                        normal.Z = (float)Math.Round(normal.Z, 4);
+                        mesh.Normals[i] = normal;
+                    }
+                }
+            }
+
             Console.WriteLine();
             Console.WriteLine("Generating the Vertex Data ->");
             VertexData = new VTX1(scene, args.forceFloat);
