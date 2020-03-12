@@ -101,7 +101,7 @@ namespace SuperBMDLib.Geometry
             return triindices;
         }
 
-        public void ProcessVerticesWithoutWeights(Mesh mesh, VertexData vertData)
+        public void ProcessVerticesWithoutWeights(Mesh mesh, VertexData vertData, bool degenerateTriangles = false)
         {
             Packet pack = new Packet();
 
@@ -114,6 +114,44 @@ namespace SuperBMDLib.Geometry
             uint[] triindices = MakeTriIndexList(mesh);
             TriStripper stripper = new TriStripper(triindices);
             List<PrimitiveBrawl> primlist = stripper.Strip();
+
+            if (degenerateTriangles) {
+                Console.WriteLine("Converting Triangle Lists into Triangle Strips with degenerate triangles.");
+
+                for (int i = 0; i < primlist.Count; i++) {
+                    PrimitiveBrawl primbrawl = primlist[i];
+                
+                    Enums.GXPrimitiveType primtype = (Enums.GXPrimitiveType)primbrawl.Type;
+
+                    if (primtype == Enums.GXPrimitiveType.Triangles) {
+                        PrimitiveBrawl newprim = new PrimitiveBrawl(PrimType.TriangleStrip);
+                        uint lastVert = 0;
+                        for (int j = 0; j < primbrawl.Indices.Count/3; j++) {
+                            if (j > 0) {
+                                newprim.Indices.Add(lastVert);
+                                newprim.Indices.Add(primbrawl.Indices[(j)*3+0]);
+                            }
+                        
+                            newprim.Indices.Add(primbrawl.Indices[(j)*3+0]);
+
+                            if ( j % 2 == 0) {
+                                newprim.Indices.Add(primbrawl.Indices[(j)*3+1]);
+                                newprim.Indices.Add(primbrawl.Indices[(j)*3+2]);
+
+                                lastVert = primbrawl.Indices[(j)*3+2];
+                            }
+                            else {
+                                newprim.Indices.Add(primbrawl.Indices[(j)*3+2]);
+                                newprim.Indices.Add(primbrawl.Indices[(j)*3+1]);
+                            
+
+                                lastVert = primbrawl.Indices[(j)*3+1];
+                            }
+                        }
+                        primlist[i] = newprim;
+                    }
+                }
+            }
 
             //Console.WriteLine(String.Format("Done, {0} primitives", primlist.Count));
 
@@ -230,7 +268,8 @@ namespace SuperBMDLib.Geometry
             Console.Write("...✓");
         }
 
-        public void ProcessVerticesWithWeights(Mesh mesh, VertexData vertData, Dictionary<string, int> boneNames, EVP1 envelopes, DRW1 partialWeight, bool doStrip = true)
+        public void ProcessVerticesWithWeights(Mesh mesh, VertexData vertData, Dictionary<string, int> boneNames, EVP1 envelopes, DRW1 partialWeight, 
+            bool doStrip = true, bool degenerateTriangles = false)
         {
             Weight[] weights = new Weight[mesh.Vertices.Count];
 
@@ -279,6 +318,45 @@ namespace SuperBMDLib.Geometry
             Packet pack = new Packet();
             List<Weight> packetWeights = new List<Weight>();
             int numMatrices = 0;
+
+            if (degenerateTriangles) {
+                Console.WriteLine("Converting Triangle Lists into Triangle Strips with degenerate triangles.");
+
+                for (int i = 0; i < primlist.Count; i++) {
+                    PrimitiveBrawl primbrawl = primlist[i];
+                
+                    Enums.GXPrimitiveType primtype = (Enums.GXPrimitiveType)primbrawl.Type;
+
+                    if (primtype == Enums.GXPrimitiveType.Triangles) {
+                        PrimitiveBrawl newprim = new PrimitiveBrawl(PrimType.TriangleStrip);
+                        uint lastVert = 0;
+                        for (int j = 0; j < primbrawl.Indices.Count/3; j++) {
+                            if (j > 0) {
+                                newprim.Indices.Add(lastVert);
+                                newprim.Indices.Add(primbrawl.Indices[(j)*3+0]);
+                            }
+                        
+                            newprim.Indices.Add(primbrawl.Indices[(j)*3+0]);
+
+                            if ( j % 2 == 0) {
+                                newprim.Indices.Add(primbrawl.Indices[(j)*3+1]);
+                                newprim.Indices.Add(primbrawl.Indices[(j)*3+2]);
+
+                                lastVert = primbrawl.Indices[(j)*3+2];
+                            }
+                            else {
+                                newprim.Indices.Add(primbrawl.Indices[(j)*3+2]);
+                                newprim.Indices.Add(primbrawl.Indices[(j)*3+1]);
+                            
+
+                                lastVert = primbrawl.Indices[(j)*3+1];
+                            }
+                        }
+                        primlist[i] = newprim;
+                    }
+                }
+            }
+
             foreach (PrimitiveBrawl primbrawl in primlist) {
                 int numNewMatricesForFirstThreeVerts = 0;
                 if (!packetWeights.Contains(weights[primbrawl.Indices[0]]))
@@ -299,6 +377,7 @@ namespace SuperBMDLib.Geometry
 
 
                 Primitive prim = new Primitive((Enums.GXPrimitiveType)primbrawl.Type);
+                //Primitive prim = new Primitive(Enums.GXPrimitiveType.TriangleStrip);
 
                 int currvert = -1;
                 int maxvert = primbrawl.Indices.Count-1;
@@ -712,6 +791,7 @@ namespace SuperBMDLib.Geometry
                         }
                     }
                 }
+                
                 /*
                 if (prim.PrimitiveType == Enums.GXPrimitiveType.TriangleStrip) {
                     Debug.Assert(prim.Vertices.Count >= 3);

@@ -135,7 +135,8 @@ namespace SuperBMDLib.BMD
             reader.BaseStream.Seek(offset + shp1Size, System.IO.SeekOrigin.Begin);
         }
 
-        private SHP1(   Assimp.Scene scene, VertexData vertData, Dictionary<string, int> boneNames, EVP1 envelopes, DRW1 partialWeight, string tristrip_mode = "static")
+        private SHP1(   Assimp.Scene scene, VertexData vertData, Dictionary<string, int> boneNames, EVP1 envelopes, DRW1 partialWeight, 
+            string tristripMode = "static", bool degenerateTriangles = false)
         {
             Shapes = new List<Shape>();
             RemapTable = new List<int>();
@@ -163,10 +164,10 @@ namespace SuperBMDLib.BMD
                 meshShape.SetDescriptorAttributes(mesh, boneNames.Count);
 
                 if (boneNames.Count > 1)
-                    meshShape.ProcessVerticesWithWeights(mesh, vertData, boneNames, envelopes, partialWeight, tristrip_mode == "all");
+                    meshShape.ProcessVerticesWithWeights(mesh, vertData, boneNames, envelopes, partialWeight, tristripMode == "all", degenerateTriangles);
                 else
                 {
-                    meshShape.ProcessVerticesWithoutWeights(mesh, vertData);
+                    meshShape.ProcessVerticesWithoutWeights(mesh, vertData, degenerateTriangles);
                     partialWeight.WeightTypeCheck.Add(false);
                     partialWeight.Indices.Add(0);
                 }
@@ -181,9 +182,10 @@ namespace SuperBMDLib.BMD
             return new SHP1(reader, offset, modelstats);
         }
 
-        public static SHP1 Create(  Scene scene, Dictionary<string, int> boneNames, VertexData vertData, EVP1 evp1, DRW1 drw1, string tristrip_mode = "static")
+        public static SHP1 Create(  Scene scene, Dictionary<string, int> boneNames, VertexData vertData, EVP1 evp1, DRW1 drw1, 
+            string tristrip_mode = "static", bool degenerateTriangles = false)
         {
-            SHP1 shp1 = new SHP1(scene, vertData, boneNames, evp1, drw1, tristrip_mode);
+            SHP1 shp1 = new SHP1(scene, vertData, boneNames, evp1, drw1, tristrip_mode, degenerateTriangles);
 
             return shp1;
         }

@@ -248,7 +248,8 @@ namespace SuperBMDLib
 
             Console.WriteLine();
             Console.WriteLine("Generating the Mesh Data ->");
-            Shapes = SHP1.Create(scene, Joints.BoneNameIndices, VertexData.Attributes, SkinningEnvelopes, PartialWeightData, args.tristrip_mode);
+            Shapes = SHP1.Create(scene, Joints.BoneNameIndices, VertexData.Attributes, SkinningEnvelopes, PartialWeightData, 
+                args.tristrip_mode, args.degenerateTriangles);
 
             Console.WriteLine();
             Console.WriteLine("Generating the Material Data ->");

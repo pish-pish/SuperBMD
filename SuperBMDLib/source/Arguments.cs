@@ -21,6 +21,7 @@ namespace SuperBMDLib
         public bool ensure_one_material_per_mesh;
         public bool export_obj;
         public bool forceFloat;
+        public bool degenerateTriangles;
 
         /// <summary>
         /// Initializes a new Arguments instance from the arguments passed in to SuperBMD.
@@ -41,6 +42,7 @@ namespace SuperBMDLib
             ensure_one_material_per_mesh = false;
             export_obj = false;
             forceFloat = false;
+            degenerateTriangles = false;
             int positional_arguments = 0;
 
             for (int i = 0; i < args.Length; i++)
@@ -100,6 +102,9 @@ namespace SuperBMDLib
                         break;
                     case "--texfloat32":
                         forceFloat = true;
+                        break;
+                    case "--degeneratetri":
+                        degenerateTriangles = true;
                         break;
                     default:
                         if (positional_arguments == 0) {
