@@ -23,7 +23,7 @@ namespace SuperBMDLib
         public MDL3 MatDisplayList    { get; private set; }
         public TEX1 Textures          { get; private set; }
         public BMDInfo ModelStats     { get; private set; }
-        static private string[] characters_to_replace = new string[] { " ", "(", ")", ":" };
+        static private string[] characters_to_replace = new string[] { " ", "(", ")", ":", "-" };
 
         private int packetCount;
         private int vertexCount;
