@@ -360,7 +360,7 @@ namespace SuperBMDLib
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine("Processing Textures ->");
-            Textures.DumpTextures(outDir,true);
+            Textures.DumpTextures(outDir, fileNameNoExt+"_tex_headers.json", true);
 
             Console.WriteLine();
             Console.WriteLine("Removing Duplicate Verticies ->");

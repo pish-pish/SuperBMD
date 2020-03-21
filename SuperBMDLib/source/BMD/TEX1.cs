@@ -163,7 +163,7 @@ namespace SuperBMDLib.BMD
             return "";
         }
 
-        public void DumpTextures(string directory, bool list = false)
+        public void DumpTextures(string directory, string filename, bool list = false)
         {
             if (!System.IO.Directory.Exists(directory) && directory != "")
                 System.IO.Directory.CreateDirectory(directory);
@@ -179,7 +179,7 @@ namespace SuperBMDLib.BMD
             serial.Formatting = Formatting.Indented;
             serial.Converters.Add(new StringEnumConverter());
 
-            using (FileStream strm = new FileStream(Path.Combine(directory, "tex_headers.json"), FileMode.Create, FileAccess.Write))
+            using (FileStream strm = new FileStream(Path.Combine(directory, filename), FileMode.Create, FileAccess.Write))
             {
                 StreamWriter writer = new StreamWriter(strm);
                 writer.AutoFlush = true;
