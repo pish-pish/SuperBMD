@@ -956,7 +956,7 @@ namespace SuperBMDLib.BMD
 
         public void FillScene(Assimp.Scene scene, TEX1 textures, string fileDir)
         {
-            textures.DumpTextures(fileDir);
+            //textures.DumpTextures(fileDir);
 
             foreach (Material mat in m_Materials)
             {
