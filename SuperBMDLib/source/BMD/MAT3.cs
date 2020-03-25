@@ -534,9 +534,8 @@ namespace SuperBMDLib.BMD
                     string sanitized = Model.AssimpMatnamePartSanitize(mat.Name);
                     name = name.Substring(0, name.Length - 9);
                     if (
-                        (name.Length > 2 && name.Substring(2) == sanitized) ||
-                        (name.Length > 3 && name.Substring(3) == sanitized) ||
-                        (name.Length > 4 && name.Substring(4) == sanitized)) {
+                        (name == sanitized)
+                        ) {
                         //Console.WriteLine(String.Format("Matched up {0} with {1} from the json file", name, mat.Name));
                         result = mat.Name;
                         break;
