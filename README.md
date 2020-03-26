@@ -38,17 +38,28 @@ Any model -> BMD/BDL:
 * ``--tristrip none`` generates no triangle strips. ``--tristrip static`` generates triangle strips only for static models (no rig). 
 ``--tristrip all`` generates triangle strips for all models (static and rigged), currently triangle strips on rigged models are buggy though. 
 If omitted, the default mode is generating triangle strips only for static models.
-* ``--rotate`` rotates the model so that Y is up instead of Z. Default is no rotation.
-* ``--bdl`` is necessary for when you want to create a BDL instead of a BMD.
-* If ``--nosort`` is set, disable naturalistic sorting of meshes by name. (Sorting makes sure so that e.g. mesh-0 appears before mesh-1 in the model)
-* If ``--onematpermesh`` is set, ensure that the user uses only one material per mesh. This can be useful for models for which the game needs to access 
-specific meshes in the model for features, e.g. the tropical shirt of Mario in Super Mario Sunshine, as it avoids the creation of additional unintended 
-meshes due to use of multiple materials on a single mesh. (When a mesh uses several materials, Assimp breaks it up into several meshes, one for each material)
+* ``--rotate`` rotates the model so that Y is up instead of Z. Default is no rotation. Doesn't have an effect if model is rigged.
+* ``--bdl`` is necessary for when you want to create a BDL instead of a BMD. 
+BDL supports the same features as BMD but has an additional data section for precompiled display lists.
+* If ``--nosort`` is set, disable naturalistic sorting of meshes by name. (Sorting makes sure so that 
+e.g. mesh-0 appears before mesh-1 in the model)
+* If ``--onematpermesh`` is set, ensure that the user uses only one material per mesh. This can be 
+useful for models for which the game needs to access specific meshes in the model for features, e.g. 
+the tropical shirt of Mario in Super Mario Sunshine, as it avoids the creation of additional unintended 
+meshes due to use of multiple materials on a single mesh. (When a mesh uses several materials, Assimp 
+breaks it up into several meshes, one for each material)
+* If ``--texfloat32`` is set, forces 32 bit float values to be used for UV coordinates. 
+This can be necessary sometimes when 16 bit fixed point isn't enough precision.
+* If ``--degeneratetri`` is set, triangle lists will be written as triangle strips with 
+the use of degenerate triangles. This is less space-efficient than writing triangle lists 
+but can be necessary in rare cases where the game renders triangle strips and refuses to render 
+triangle lists. 
 
 BMD/BDL -> DAE:
 * If --outmat path is set, write the material data to that path, otherwise write it into the same folder as the created dae. 
 * If ``--profile`` is set, then do not do any conversion. Instead, print information about the BMD/BDL such as section sizes, textures 
 and other useful information that tells you more about what is taking up so much space in your model. Useful for optimization.
+* If ``--exportobj`` is set, creates an .obj file instead of a .dae file.
 * None of the other options have an effect.
 
 ## Notes
@@ -57,7 +68,7 @@ and other useful information that tells you more about what is taking up so much
 Most modeling programs define the Z axis as the up axis, but Nintendo games use the Y axis instead. 
 Rotating the model ensures that the model is not sideways when imported into a game. Alternatively, 
 set the --rotate option when calling SuperBMD.exe which will rotate the model appropriately without you having to do it. <br>
-If your model is skinned, then rotation isn't necessary.
+If your model is skinned, then rotation isn't necessary if the skeleton is rotated correctly.
 
 ### Skinning
 * SuperBMD supports both skinned and unskinned models.
@@ -68,7 +79,6 @@ If your model is skinned, then rotation isn't necessary.
 This is recommended for models intended for maps. If your model is skinned but does not have a `skeleton_root` 
 then an error will be thrown.
 
-
 ### Vertex Colors
 * SuperBMD supports vertex colors on two channels.
 
@@ -77,6 +87,18 @@ then an error will be thrown.
 * It is recommended that the model's textures be in the same directory as the model being converted. <b>
 If SuperBMD cannot find the model's textures, it will throw an error message with the path to the texture it couldn't find.</b>
 * Textures must be in BMP, JPG, PNG or TGA format.
+
+### Mipmaps
+* SuperBMD supports extracting and importing mipmaps
+* When converting BMD to DAE, mip textures are created by appending ``_mipN`` to the texture name, where N is the
+mip level starting with 1, if a BMD contains mip textures.
+* When converting from another format into BMD, the maximum mip level of a texture is detected by searching for textures
+with ``_mipN`` at the end, starting with 1. The mip textures are automatically loaded based on that.
+* When using a Texture Header json file, correct MinLOD, MaxLOD and LODBias settings are necessary for mipmaps to be displayed correctly 
+ingame. The LOD refers to the mip level, with 0 being the main, most detailed texture and values > 0 being the mip levels or between two mip levels.
+* The MinFilter (Min stands for Minification) for a texture in the Texture Header json file defines how a texture is filtered when it is far away. 
+A setting of ``LinearMipmapLinear`` is used for linear blending of two mip levels.
+* Each mip level should be half the size of the previous level and the texture size should be a power of two (e.g. 32, 64, 128, 256...).
 
 ### Converting BMD to DAE 
 When you drop a BMD on SuperBMD.exe, it will be converted into DAE. When you import the DAE into 3DS Max,
@@ -111,6 +133,12 @@ for some of the enums (When viewing the source code in VS or other good IDEs, ch
 A recap of all enums and useful info about materials will be available here https://github.com/RenolY2/SuperBMD/wiki when 
 it is added.
 
+* In BMD->DAE conversion materials in the DAE are differently named compared to how they are named in the material json or the BMD.
+Blender will also try to append ``-material`` to the end of the material names when exporting DAE. SuperBMD will try to 
+mitigate this when you use a material json file: When it manages to match up a material from the model with a material in the json, 
+the material will be renamed to the name from the json. This preserves original material names and helps in cases where 
+the game applies e.g. BTK or BRK files that look for a specific material name in the BMD.
+
 ### Material presets
 This release has some bat scripts that apply some included materials.
 * sms-toon: This provides toon shading for Super Mario Sunshine.
@@ -137,6 +165,10 @@ Please note: If you use a texture header file then the file needs to contain the
 Supported texture formats: I4, I8, IA4, IA8, RGB565, RGB5A3, RGBA32, and CMPR. 
 Supported wrap modes: ClampToEdge, Repeat and MirroredRepeat 
 When using I4 or I8, note that intensity equals alpha.
+
+Textures can be specified in the texture header file multiple times. In that case the texture data is stored only once 
+but multiple headers are written. Different instances of the texture are referenced by the material in the material json file.
+Example: ``texture:1`` means that the material references the second instance of a texture named ``texture`` inside the texture header file.
 
 ## Attribution
 Special thanks to Gamma (Sage-of-Mirrors) for creating SuperBMD, to LagoLunatic for the work on their fork that 
