@@ -267,7 +267,7 @@ namespace SuperBMDLib.Materials
             }
         }
 
-        public void Load(Assimp.TextureSlot texture, string modelDirectory)
+        public void Load(Assimp.TextureSlot texture, string modelDirectory, bool readMipmaps)
         {
             Format = TextureFormats.CMPR;
             AlphaSetting = 0;
@@ -308,9 +308,15 @@ namespace SuperBMDLib.Materials
             m_rgbaImageData = new byte[Width * Height * 4];
             BitmapData dat = texData.LockBits(new Rectangle(0, 0, Width, Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
             Marshal.Copy(dat.Scan0, m_rgbaImageData, 0, m_rgbaImageData.Length);
-
-
-            int mipCount = DetectMipCount(texFilePath, texData);
+            
+            int mipCount;
+            if (readMipmaps) {
+                mipCount = DetectMipCount(texFilePath, texData);
+            }
+            else {
+                mipCount = 1; 
+            }
+                
             ImageCount = (byte)mipCount;
             texData.UnlockBits(dat);
 
@@ -581,7 +587,7 @@ namespace SuperBMDLib.Materials
             }
         }
 
-        public void LoadImageDataFromDisk(string filePath)
+        public void LoadImageDataFromDisk(string filePath, bool readMipmaps)
         {
             int mipCount = 1;
             using (Bitmap bitmap = new Bitmap(filePath))
@@ -597,7 +603,13 @@ namespace SuperBMDLib.Materials
                 bitmap.UnlockBits(bmpData);
                 m_rgbaImageData = data;
 
-                mipCount = DetectMipCount(filePath, bitmap);
+                if (readMipmaps) {
+                    mipCount = DetectMipCount(filePath, bitmap);
+                }
+                else {
+                    mipCount = 1;
+                }
+
                 ImageCount = (byte)mipCount;
             }
             

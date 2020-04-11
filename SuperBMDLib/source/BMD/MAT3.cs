@@ -1527,7 +1527,7 @@ namespace SuperBMDLib.BMD
             }
         }
 
-        public void LoadAdditionalTextures(TEX1 tex1, string texpath) {
+        public void LoadAdditionalTextures(TEX1 tex1, string texpath, bool readMipmaps) {
             //string modeldir = Path.GetDirectoryName(modelpath);
             foreach (Material mat in m_Materials) {
                 foreach (string texname in mat.TextureNames) {
@@ -1547,7 +1547,7 @@ namespace SuperBMDLib.BMD
                             }
                             Console.WriteLine();
                             if (path != "") {
-                                tex1.AddTextureFromPath(path);
+                                tex1.AddTextureFromPath(path, readMipmaps);
                                 short texindex = (short)(tex1.Textures.Count - 1);
                                 m_TexRemapBlock.Add(texindex);
                                 Console.WriteLine("----------------------------------------");

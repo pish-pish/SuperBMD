@@ -259,11 +259,11 @@ namespace SuperBMDLib
             Console.WriteLine("Loading the Textures ->");
             if (additionalTexPath == null)
             {
-                Materials.LoadAdditionalTextures(Textures, Path.GetDirectoryName(args.input_path));
+                Materials.LoadAdditionalTextures(Textures, Path.GetDirectoryName(args.input_path), !args.noMipmaps);
             }
             else
             {
-                Materials.LoadAdditionalTextures(Textures, additionalTexPath);
+                Materials.LoadAdditionalTextures(Textures, additionalTexPath, !args.noMipmaps);
             }
 
             Materials.MapTextureNamesToIndices(Textures);
