@@ -163,14 +163,14 @@ namespace SuperBMDLib.BMD
             return "";
         }
 
-        public void DumpTextures(string directory, string filename, bool list = false)
+        public void DumpTextures(string directory, string filename, bool list = false, bool writeMipmaps = false)
         {
             if (!System.IO.Directory.Exists(directory) && directory != "")
                 System.IO.Directory.CreateDirectory(directory);
 
             foreach (BinaryTextureImage tex in Textures)
             {
-                tex.SaveImageToDisk(directory);
+                tex.SaveImageToDisk(directory, writeMipmaps);
                 if (list)
                     Console.WriteLine($"Saved \"{tex.Name}\" to Disk");
             }

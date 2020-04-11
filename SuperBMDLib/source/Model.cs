@@ -334,7 +334,7 @@ namespace SuperBMDLib
             }
         }
 
-        public void ExportAssImp(string fileName, string modelType, ExportSettings settings)
+        public void ExportAssImp(string fileName, string modelType, ExportSettings settings, Arguments cmdargs)
         {
             fileName = Path.GetFullPath(fileName); // Get absolute path instead of relative
             string outDir = Path.GetDirectoryName(fileName);
@@ -360,7 +360,7 @@ namespace SuperBMDLib
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine("Processing Textures ->");
-            Textures.DumpTextures(outDir, fileNameNoExt+"_tex_headers.json", true);
+            Textures.DumpTextures(outDir, fileNameNoExt+"_tex_headers.json", true, cmdargs.noMipmaps);
 
             Console.WriteLine();
             Console.WriteLine("Removing Duplicate Verticies ->");

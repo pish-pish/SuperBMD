@@ -94,10 +94,10 @@ namespace SuperBMDLib
             {
                 Console.WriteLine(string.Format("Converting {0} into {1}...", fi.Extension.ToUpper(), destinationFormat));
                 if (cmd_args.export_obj) {
-                    mod.ExportAssImp(cmd_args.output_path, "obj", new ExportSettings());
+                    mod.ExportAssImp(cmd_args.output_path, "obj", new ExportSettings(), cmd_args);
                 }
                 else {
-                    mod.ExportAssImp(cmd_args.output_path, "dae", new ExportSettings());
+                    mod.ExportAssImp(cmd_args.output_path, "dae", new ExportSettings(), cmd_args);
                 }
             }
             else
