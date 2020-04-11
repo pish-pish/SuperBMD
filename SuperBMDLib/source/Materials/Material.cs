@@ -83,7 +83,7 @@ namespace SuperBMDLib.Materials
             TevOrders = new TevOrder?[16];
             //TevOrders[0] = new TevOrder(TexCoordId.TexCoord0, TexMapId.TexMap0, GXColorChannelId.Color0);
 
-            TevColors = new Color?[16];
+            TevColors = new Color?[4];
             TevColors[0] = new Color(1, 1, 1, 1);
 
             TevStages = new TevStage?[16];

@@ -889,7 +889,7 @@ namespace SuperBMDLib.BMD
                         m_TevOrderBlock.Add(mat.TevOrders[i].Value);
                 }
 
-                for (int i = 0; i < 16; i++)
+                for (int i = 0; i < 4; i++)
                 {
                     if (mat.TevColors[i] == null)
                         break;
