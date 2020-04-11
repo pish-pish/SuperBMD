@@ -259,11 +259,11 @@ namespace SuperBMDLib
             Console.WriteLine("Loading the Textures ->");
             if (additionalTexPath == null)
             {
-                Materials.LoadAdditionalTextures(Textures, Path.GetDirectoryName(args.input_path), !args.noMipmaps);
+                Materials.LoadAdditionalTextures(Textures, Path.GetDirectoryName(args.input_path), args.readMipmaps);
             }
             else
             {
-                Materials.LoadAdditionalTextures(Textures, additionalTexPath, !args.noMipmaps);
+                Materials.LoadAdditionalTextures(Textures, additionalTexPath, args.readMipmaps);
             }
 
             Materials.MapTextureNamesToIndices(Textures);
@@ -360,7 +360,7 @@ namespace SuperBMDLib
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine("Processing Textures ->");
-            Textures.DumpTextures(outDir, fileNameNoExt+"_tex_headers.json", true, cmdargs.noMipmaps);
+            Textures.DumpTextures(outDir, fileNameNoExt+"_tex_headers.json", true, cmdargs.readMipmaps);
 
             Console.WriteLine();
             Console.WriteLine("Removing Duplicate Verticies ->");

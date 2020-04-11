@@ -22,7 +22,7 @@ namespace SuperBMDLib
         public bool export_obj;
         public bool forceFloat;
         public bool degenerateTriangles;
-        public bool noMipmaps;
+        public bool readMipmaps;
 
         /// <summary>
         /// Initializes a new Arguments instance from the arguments passed in to SuperBMD.
@@ -44,7 +44,7 @@ namespace SuperBMDLib
             export_obj = false;
             forceFloat = false;
             degenerateTriangles = false;
-            noMipmaps = false;
+            readMipmaps = true;
 
             int positional_arguments = 0;
 
@@ -110,7 +110,7 @@ namespace SuperBMDLib
                         degenerateTriangles = true;
                         break;
                     case "--nomipmaps":
-                        noMipmaps = true;
+                        readMipmaps = false;
                         break;
                     default:
                         if (positional_arguments == 0) {

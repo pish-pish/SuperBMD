@@ -85,7 +85,7 @@ namespace SuperBMDLib.BMD
                     throw new Exception($"Could not find texture \"{ name_without_ext }\".");
                 }
 
-                tex.LoadImageDataFromDisk(full_img_path, !args.noMipmaps);
+                tex.LoadImageDataFromDisk(full_img_path, args.readMipmaps);
             }
         }
 
@@ -128,7 +128,7 @@ namespace SuperBMDLib.BMD
                         img.Load(mat.TextureDiffuse, embeddedTexture);
                     }
                     else {
-                       img.Load(mat.TextureDiffuse, model_directory, !cmdargs.noMipmaps);
+                       img.Load(mat.TextureDiffuse, model_directory, cmdargs.readMipmaps);
                     }
                     Textures.Add(img);
                 }
@@ -163,7 +163,7 @@ namespace SuperBMDLib.BMD
             return "";
         }
 
-        public void DumpTextures(string directory, string filename, bool list = false, bool writeMipmaps = false)
+        public void DumpTextures(string directory, string filename, bool list = false, bool writeMipmaps = true)
         {
             if (!System.IO.Directory.Exists(directory) && directory != "")
                 System.IO.Directory.CreateDirectory(directory);
