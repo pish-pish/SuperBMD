@@ -90,6 +90,10 @@ namespace SuperBMDLib
             Console.WriteLine(string.Format("Preparing to convert {0} from {1} to {2}", fi.Name.Replace(fi.Extension, ""), fi.Extension.ToUpper(), destinationFormat));
             mod = Model.Load(cmd_args, mat_presets, additionalTexPath);
 
+            if (cmd_args.hierarchyPath != "") {
+                mod.Scenegraph.LoadHierarchyFromJson(cmd_args.hierarchyPath);
+            }
+
             if (cmd_args.input_path.EndsWith(".bmd") || cmd_args.input_path.EndsWith(".bdl"))
             {
                 Console.WriteLine(string.Format("Converting {0} into {1}...", fi.Extension.ToUpper(), destinationFormat));
@@ -99,6 +103,8 @@ namespace SuperBMDLib
                 else {
                     mod.ExportAssImp(cmd_args.output_path, "dae", new ExportSettings(), cmd_args);
                 }
+                
+                
             }
             else
             {

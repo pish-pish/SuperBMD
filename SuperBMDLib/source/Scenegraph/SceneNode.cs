@@ -5,17 +5,27 @@ using System.Text;
 using System.Threading.Tasks;
 using SuperBMDLib.Scenegraph.Enums;
 using GameFormatReader.Common;
+using Newtonsoft.Json;
 
 namespace SuperBMDLib.Scenegraph
 {
     public class SceneNode
     {
-        public SceneNode Parent { get; private set; }
-        public List<SceneNode> Children { get; private set; }
+        [JsonIgnore]
+        public SceneNode Parent { get; set; }
 
-        public NodeType Type { get; private set; }
-        public int Index { get; private set; }
+        public NodeType Type { get; set; }
+        public int Index { get; set; }
+        public List<SceneNode> Children { get; set; }
+        
+        public SceneNode() {
+            Parent = null;
+            Type = NodeType.Joint;
+            Index = 0;
+            Children = new List<SceneNode>();
 
+        }
+        
         public SceneNode(EndianBinaryReader reader, SceneNode parent)
         {
             Children = new List<SceneNode>();
@@ -35,6 +45,10 @@ namespace SuperBMDLib.Scenegraph
                 Parent.Children.Add(this);
 
             Children = new List<SceneNode>();
+        }
+
+        public void SetParent(SceneNode parent) {
+            Parent = parent;
         }
 
         public override string ToString()

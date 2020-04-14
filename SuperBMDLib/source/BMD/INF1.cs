@@ -8,13 +8,22 @@ using SuperBMDLib.Scenegraph.Enums;
 using GameFormatReader.Common;
 using Assimp;
 using SuperBMDLib.Util;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using System.IO;
 
 namespace SuperBMDLib.BMD
 {
     public class INF1
     {
-        public List<SceneNode> FlatNodes { get; private set; }
-        public SceneNode Root { get; private set; }
+        [JsonIgnore]
+        public List<SceneNode> FlatNodes { get; set; }
+        public SceneNode Root { get; set; }
+
+        public INF1() {
+            FlatNodes = new List<SceneNode>();
+            Root = null;
+        }
 
         public INF1(EndianBinaryReader reader, int offset, BMDInfo modelstats=null)
         {
@@ -288,6 +297,61 @@ namespace SuperBMDLib.BMD
             writer.Seek((int)start + 4, System.IO.SeekOrigin.Begin);
             writer.Write((int)length);
             writer.Seek((int)end, System.IO.SeekOrigin.Begin);
+        }
+
+        public void DumpJson(string path) {
+            JsonSerializer serial = new JsonSerializer();
+            serial.Formatting = Formatting.Indented;
+            serial.Converters.Add(new StringEnumConverter());
+
+            foreach (SceneNode node in FlatNodes) {
+                if (node.Parent != null) {
+                    if (!node.Parent.Children.Contains(node)) {
+                        node.Parent.Children.Add(node);
+                    }
+                }
+            }
+
+            using (FileStream strm = new FileStream(path, FileMode.Create, FileAccess.Write))
+            {
+                StreamWriter writer = new StreamWriter(strm);
+                writer.AutoFlush = true;
+                serial.Serialize(writer, this);
+            }
+        }
+
+        public void LoadHierarchyFromJson(string path) {
+            JsonSerializer serializer = new JsonSerializer();
+            INF1 information;
+            serializer.Converters.Add(
+                (new Newtonsoft.Json.Converters.StringEnumConverter())
+            );
+            Console.WriteLine("Reading the Materials...");
+            using (TextReader file = File.OpenText(path)) {
+                using (JsonTextReader reader = new JsonTextReader(file)) {
+                    information = serializer.Deserialize<INF1>(reader);
+                }
+            }
+
+            this.FlatNodes = new List<SceneNode>();
+            this.Root = information.Root;
+            Console.WriteLine("Is null? {0}", this.Root == null);
+            Stack<SceneNode> nodestack = new Stack<SceneNode>();
+            nodestack.Push(information.Root);
+
+            while (nodestack.Count > 0) {
+                SceneNode top = nodestack.Pop();
+                this.FlatNodes.Add(top);
+                Console.WriteLine("Node {0}", top==null);
+                Console.WriteLine("Node Type {0} index {1}", top.Type, top.Index);
+                for (int i = top.Children.Count-1; i >= 0; i--) {
+                    SceneNode node = top.Children[i];
+                    if (node.Parent == null) {
+                        node.Parent = top;
+                    }
+                    nodestack.Push(node);
+                }
+            }
         }
     }
 }

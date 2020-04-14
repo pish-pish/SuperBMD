@@ -23,6 +23,8 @@ namespace SuperBMDLib
         public bool forceFloat;
         public bool degenerateTriangles;
         public bool readMipmaps;
+        public bool dumpHierarchy;
+        public string hierarchyPath;
 
         /// <summary>
         /// Initializes a new Arguments instance from the arguments passed in to SuperBMD.
@@ -45,6 +47,8 @@ namespace SuperBMDLib
             forceFloat = false;
             degenerateTriangles = false;
             readMipmaps = true;
+            dumpHierarchy = false;
+            hierarchyPath = "";
 
             int positional_arguments = 0;
 
@@ -111,6 +115,16 @@ namespace SuperBMDLib
                         break;
                     case "--nomipmaps":
                         readMipmaps = false;
+                        break;
+                    case "--dumphierarchy":
+                        dumpHierarchy = true;
+                        break;
+                    case "--hierarchy":
+                        if (i + 1 >= args.Length)
+                            throw new Exception("The parameters were malformed.");
+
+                        hierarchyPath = args[i + 1];
+                        i++;
                         break;
                     default:
                         if (positional_arguments == 0) {

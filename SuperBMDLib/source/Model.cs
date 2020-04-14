@@ -362,6 +362,9 @@ namespace SuperBMDLib
             Console.WriteLine("Processing Textures ->");
             Textures.DumpTextures(outDir, fileNameNoExt+"_tex_headers.json", true, cmdargs.readMipmaps);
 
+            string infPath = Path.Combine(outDir, fileNameNoExt+"_hierarchy.json");
+            this.Scenegraph.DumpJson(infPath);
+
             Console.WriteLine();
             Console.WriteLine("Removing Duplicate Verticies ->");
             foreach (Mesh mesh in outScene.Meshes)
