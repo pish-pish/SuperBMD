@@ -483,12 +483,10 @@ namespace SuperBMDLib.BMD
         {
             InitLists();
 
-            //if (args.materials_path != "")
-            //    LoadFromJson(scene, textures, shapes, args.materials_path);
-            //else
-            //    
-            LoadFromScene(scene, textures, shapes, mat_presets);
-
+            if (args.materials_path != "")
+                LoadFromJson(scene, textures, shapes, args.materials_path);
+            else
+                LoadFromScene(scene, textures, shapes);
 
             FillMaterialDataBlocks();
         }
@@ -636,7 +634,7 @@ namespace SuperBMDLib.BMD
             if (preset.NBTScale != null) bmdMaterial.NBTScale = preset.NBTScale;
         }
 
-        /*private void LoadFromJson(Assimp.Scene scene, TEX1 textures, SHP1 shapes, string json_path)
+        private void LoadFromJson(Assimp.Scene scene, TEX1 textures, SHP1 shapes, string json_path)
         {
             JsonSerializer serial = new JsonSerializer();
             serial.Formatting = Formatting.Indented;
@@ -703,7 +701,7 @@ namespace SuperBMDLib.BMD
 
                 //m_RemapIndices[i] = scene.Meshes[i].MaterialIndex;
             }
-        }*/
+        }
 
         private void LoadFromScene(Assimp.Scene scene, TEX1 textures, SHP1 shapes, List<Material> mat_presets = null)
         {

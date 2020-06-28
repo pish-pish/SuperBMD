@@ -106,6 +106,12 @@ namespace SuperBMDLib.BMD
             MeshWeights.AddRange(fullyWeighted);
             MeshWeights.AddRange(partiallyWeighted);
 
+            // Nintendo's official tools had an error that caused this data to be written to file twice. While early games
+            // didn't do anything about it, later games decided to explicitly ignore this duplicate data and calculate the *actual*
+            // number of partial weights at runtime. Those games, like Twilight Princess, will break if we don't have this data,
+            // so here we recreate Nintendo's error despite our efforts to fix their mistakes.
+            MeshWeights.AddRange(partiallyWeighted);
+
             foreach (Weight weight in MeshWeights)
             {
                 Console.Write(".");
