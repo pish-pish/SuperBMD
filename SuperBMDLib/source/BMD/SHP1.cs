@@ -11,6 +11,9 @@ using SuperBMDLib.Util;
 using SuperBMDLib.Rigging;
 using OpenTK;
 using SuperBMD.source.Geometry.Enums;
+using Newtonsoft.Json;
+using System.IO;
+using Newtonsoft.Json.Converters;
 
 namespace SuperBMDLib.BMD
 {
@@ -249,11 +252,11 @@ namespace SuperBMDLib.BMD
                 switch (curShape.MatrixType) {
                     case MatrixType.BillboardX:
                         meshname += "_BillX";
-                        Console.Write("Billboarding Detected! ");
+                        Console.Write("X Billboarding Detected! ");
                         break;
                     case MatrixType.BillboardXY:
                         meshname += "_BillXY";
-                        Console.Write("Billboarding Detected! ");
+                        Console.Write("XY Billboarding Detected! ");
                         break;
                     default:
                         break;
@@ -567,6 +570,19 @@ namespace SuperBMDLib.BMD
             }
 
             return outList;
+        }
+        public void DumpJson(string path) {
+            JsonSerializer serial = new JsonSerializer();
+            serial.Formatting = Formatting.Indented;
+            serial.Converters.Add(new StringEnumConverter());
+
+
+            using (FileStream strm = new FileStream(path, FileMode.Create, FileAccess.Write))
+            {
+                StreamWriter writer = new StreamWriter(strm);
+                writer.AutoFlush = true;
+                serial.Serialize(writer, this);
+            }
         }
     }
 }
