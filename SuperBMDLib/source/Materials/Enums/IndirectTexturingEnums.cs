@@ -8,14 +8,15 @@ namespace SuperBMDLib.Materials.Enums
 {
     public enum IndirectFormat
     {
-        ITF_8,
-        ITF_5,
-        ITF_4,
-        ITF_3
+        ITF_8, // 8 bit
+        ITF_5, // 5 bit
+        ITF_4, // 4 bit
+        ITF_3 // 3 bit
     }
 
     public enum IndirectBias
     {
+        None,
         ITB_S,
         ITB_T,
         ITB_ST,
@@ -65,14 +66,14 @@ namespace SuperBMDLib.Materials.Enums
 
     public enum IndirectScale
     {
-        ITS_1,
-        ITS_2,
-        ITS_4,
-        ITS_8,
-        ITS_16,
-        ITS_32,
-        ITS_64,
-        ITS_128,
-        ITS_256
+        ITS_1,      // 1
+        ITS_2,      // 1/2
+        ITS_4,      // 1/4
+        ITS_8,      // 1/8
+        ITS_16,     // 1/16
+        ITS_32,     // 1/32
+        ITS_64,     // 1/64
+        ITS_128,    // 1/128
+        ITS_256     // 1/256
     }
 }
