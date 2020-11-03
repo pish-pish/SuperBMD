@@ -251,6 +251,9 @@ namespace SuperBMDLib
             Shapes = SHP1.Create(scene, Joints.BoneNameIndices, VertexData.Attributes, SkinningEnvelopes, PartialWeightData, 
                 args.tristrip_mode, args.degenerateTriangles);
 
+            //Joints.UpdateBoundingBoxes(VertexData);
+
+
             Console.WriteLine();
             Console.WriteLine("Generating the Material Data ->");
             Materials = new MAT3(scene, Textures, Shapes, args, mat_presets);
@@ -362,8 +365,11 @@ namespace SuperBMDLib
             Console.WriteLine("Processing Textures ->");
             Textures.DumpTextures(outDir, fileNameNoExt+"_tex_headers.json", true, cmdargs.readMipmaps);
 
-            string infPath = Path.Combine(outDir, fileNameNoExt+"_hierarchy.json");
-            this.Scenegraph.DumpJson(infPath);
+            this.Scenegraph.DumpJson(Path.Combine(outDir, fileNameNoExt+"_hierarchy.json"));
+            //this.Joints.DumpJson(Path.Combine(outDir, fileNameNoExt+"_joints.json"));
+            //this.PartialWeightData.DumpJson(Path.Combine(outDir, fileNameNoExt+"_partialweights.json"));
+            //this.Shapes.DumpJson(Path.Combine(outDir, fileNameNoExt+"_shapes.json"));
+
 
             Console.WriteLine();
             Console.WriteLine("Removing Duplicate Verticies ->");
