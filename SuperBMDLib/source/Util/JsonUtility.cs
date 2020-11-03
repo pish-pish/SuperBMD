@@ -79,6 +79,78 @@ namespace SuperBMDLib.Util
     }
 
     /// <summary>
+    /// A JSON converter for OpenTK's Vector4 class.
+    /// </summary>
+    class Vector4Converter : JsonConverter
+    {
+        public override bool CanConvert(Type objectType)
+        {
+            return objectType == typeof(Vector4);
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            var obj = JToken.Load(reader);
+            if (obj.Type == JTokenType.Array)
+            {
+                var arr = (JArray)obj;
+                if (arr.Count == 4)
+                {
+                    return new Vector4(arr[0].Value<float>(), arr[1].Value<float>(), arr[2].Value<float>(), arr[3].Value<float>());
+                }
+            }
+            return null;
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            var vector = (Vector4)value;
+            writer.WriteStartArray();
+            writer.WriteValue(vector.X);
+            writer.WriteValue(vector.Y);
+            writer.WriteValue(vector.Z);
+            writer.WriteValue(vector.W);
+            writer.WriteEndArray();
+        }
+    }
+
+    /// <summary>
+    /// A JSON converter for OpenTK's Quaternion class.
+    /// </summary>
+    class QuaternionConverter : JsonConverter
+    {
+        public override bool CanConvert(Type objectType)
+        {
+            return objectType == typeof(Quaternion);
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            var obj = JToken.Load(reader);
+            if (obj.Type == JTokenType.Array)
+            {
+                var arr = (JArray)obj;
+                if (arr.Count == 4)
+                {
+                    return new Quaternion(arr[0].Value<float>(), arr[1].Value<float>(), arr[2].Value<float>(), arr[3].Value<float>());
+                }
+            }
+            return null;
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            var quaternion = (Quaternion)value;
+            writer.WriteStartArray();
+            writer.WriteValue(quaternion.X);
+            writer.WriteValue(quaternion.Y);
+            writer.WriteValue(quaternion.Z);
+            writer.WriteValue(quaternion.W);
+            writer.WriteEndArray();
+        }
+    }
+
+    /// <summary>
     /// A JSON converter for OpenTK's Matrix4 class.
     /// </summary>
     class Matrix4Converter : JsonConverter
