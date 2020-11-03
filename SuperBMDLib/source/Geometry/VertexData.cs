@@ -119,14 +119,28 @@ namespace SuperBMDLib.Geometry
                 case GXVertexAttribute.Color0:
                     if (data.GetType() != typeof(List<Color>))
                         throw new ArgumentException("color0 data");
-                    else
+                    else {
                         Color_0 = (List<Color>)data;
+                        foreach (Color color in Color_0) {
+                            if (color.A < 1.0) {
+                                Console.WriteLine("BMD has Vertex Alpha on Channel 0");
+                                break;
+                            }
+                        }
+                    }
                     break;
                 case GXVertexAttribute.Color1:
                     if (data.GetType() != typeof(List<Color>))
                         throw new ArgumentException("color1 data");
-                    else
+                    else {
                         Color_1 = (List<Color>)data;
+                        foreach (Color color in Color_1) {
+                            if (color.A < 1.0) {
+                                Console.WriteLine("BMD has Vertex Alpha on Channel 1");
+                                break;
+                            }
+                        }
+                    }
                     break;
                 case GXVertexAttribute.Tex0:
                     if (data.GetType() != typeof(List<Vector2>))
