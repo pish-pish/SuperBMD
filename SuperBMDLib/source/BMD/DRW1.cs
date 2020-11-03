@@ -7,6 +7,9 @@ using GameFormatReader.Common;
 using Assimp;
 using SuperBMDLib.Util;
 using SuperBMDLib.Rigging;
+using Newtonsoft.Json;
+using System.IO;
+using Newtonsoft.Json.Converters;
 
 namespace SuperBMDLib.BMD
 {
@@ -155,6 +158,20 @@ namespace SuperBMDLib.BMD
             writer.Seek((int)start + 4, System.IO.SeekOrigin.Begin);
             writer.Write((int)length);
             writer.Seek((int)end, System.IO.SeekOrigin.Begin);
+        }
+
+        public void DumpJson(string path) {
+            JsonSerializer serial = new JsonSerializer();
+            serial.Formatting = Formatting.Indented;
+            serial.Converters.Add(new StringEnumConverter());
+
+
+            using (FileStream strm = new FileStream(path, FileMode.Create, FileAccess.Write))
+            {
+                StreamWriter writer = new StreamWriter(strm);
+                writer.AutoFlush = true;
+                serial.Serialize(writer, this);
+            }
         }
     }
 }
