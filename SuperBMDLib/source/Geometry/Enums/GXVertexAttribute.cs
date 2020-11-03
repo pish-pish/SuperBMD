@@ -30,6 +30,8 @@ namespace SuperBMDLib.Geometry.Enums
         Tex6 = 19,
         Tex7 = 20,
 
+        NBT = 25,
+
         Null = 255
     }
 }
