@@ -36,6 +36,7 @@ namespace SuperBMDLib.Geometry
 
         public uint PositionMatrixIndex { get; set; }
         public uint NormalMatrixIndex { get; set; }
+        public uint NBTIndex {get; set;}
 
         public Weight VertexWeight { get; private set; }
 
@@ -215,6 +216,9 @@ namespace SuperBMDLib.Geometry
                     break;
                 case GXVertexAttribute.Tex7Mtx:
                     Tex7MtxIndex = index;
+                    break;
+                case GXVertexAttribute.NBT:
+                    NBTIndex = index;
                     break;
                 default:
                     throw new ArgumentException(String.Format("attribute {0}", attribute));
