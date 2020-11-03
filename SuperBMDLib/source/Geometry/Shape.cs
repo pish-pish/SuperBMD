@@ -12,21 +12,25 @@ using SuperBMDLib.Rigging;
 using BrawlLib.Modeling.Triangle_Converter;
 using System.Diagnostics;
 using SuperBMD.source.Geometry.Enums;
+using Newtonsoft.Json;
 
 namespace SuperBMDLib.Geometry
 {
     public class Shape
     {
+        [JsonIgnore]
         public VertexData AttributeData { get; private set; }
+        [JsonIgnore]
         public ShapeVertexDescriptor Descriptor { get; private set; }
 
         public MatrixType MatrixType { get; private set; }
         public BoundingVolume Bounds { get; private set; }
 
         public List<Packet> Packets { get; private set; }
-
-        private Vector4[] m_PositionMatrices;
-        private Vector4[] m_NormalMatrices;
+        [JsonConverter(typeof(Vector4Converter))]
+        public Vector4[] m_PositionMatrices;
+        [JsonConverter(typeof(Vector4Converter))]
+        public Vector4[] m_NormalMatrices;
 
         // The maximum number of unique vertex weights that can be in a single shape packet without causing visual errors.
         private const int MaxMatricesPerPacket = 10;

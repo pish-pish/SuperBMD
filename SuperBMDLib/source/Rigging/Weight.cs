@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using OpenTK;
 using SuperBMDLib.BMD;
+using SuperBMDLib.Util;
 
 namespace SuperBMDLib.Rigging
 {
@@ -13,6 +15,8 @@ namespace SuperBMDLib.Rigging
         public int WeightCount { get; private set; }
         public List<float> Weights { get; private set; }
         public List<int> BoneIndices { get; private set; }
+
+        [JsonConverter(typeof(Matrix4Converter))]
         public Matrix4 FinalTransformation { get; private set; }
 
         public Weight()

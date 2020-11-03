@@ -5,15 +5,18 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
 using GameFormatReader.Common;
+using Newtonsoft.Json;
 
 namespace SuperBMDLib.Util
 {
     public class BoundingVolume
     {
         public float SphereRadius { get; private set; }
+        [JsonConverter(typeof(Vector3Converter))]
         public Vector3 MinBounds { get; private set; }
+        [JsonConverter(typeof(Vector3Converter))]
         public Vector3 MaxBounds { get; private set; }
-
+        [JsonConverter(typeof(Vector3Converter))]
         public Vector3 Center { get; private set; }
 
         public BoundingVolume()

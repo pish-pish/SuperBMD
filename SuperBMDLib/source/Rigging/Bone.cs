@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using OpenTK;
 using GameFormatReader.Common;
 using SuperBMDLib.Util;
+using Newtonsoft.Json;
 
 namespace SuperBMDLib.Rigging
 {
@@ -14,15 +15,21 @@ namespace SuperBMDLib.Rigging
         public string Name { get; private set; }
         public Bone Parent { get; private set; }
         public List<Bone> Children { get; private set; }
-        public Matrix4 InverseBindMatrix { get; private set; }
-        public Matrix4 TransformationMatrix { get; private set; }
-        public BoundingVolume Bounds { get; private set; }
 
-        private short m_MatrixType;
-        private byte m_UnknownIndex;
-        private Vector3 m_Scale;
-        private Quaternion m_Rotation;
-        private Vector3 m_Translation;
+        [JsonConverter(typeof(Matrix4Converter))]
+        public Matrix4 InverseBindMatrix { get; private set; }
+        [JsonConverter(typeof(Matrix4Converter))]
+        public Matrix4 TransformationMatrix { get; private set; }
+        public BoundingVolume Bounds { get; set; }
+
+        public short m_MatrixType;
+        public byte m_UnknownIndex;
+        [JsonConverter(typeof(Vector3Converter))]
+        public Vector3 m_Scale;
+        [JsonConverter(typeof(QuaternionConverter))]
+        public Quaternion m_Rotation;
+        [JsonConverter(typeof(Vector3Converter))]
+        public Vector3 m_Translation;
 
         public Bone(string name)
         {
