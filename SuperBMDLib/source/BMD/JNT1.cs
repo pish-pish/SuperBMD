@@ -8,6 +8,9 @@ using OpenTK;
 using GameFormatReader.Common;
 using SuperBMDLib.Util;
 using Assimp;
+using Newtonsoft.Json;
+using System.IO;
+using Newtonsoft.Json.Converters;
 
 namespace SuperBMDLib.BMD
 {
@@ -105,12 +108,28 @@ namespace SuperBMDLib.BMD
             else
             {
                 SkeletonRoot = AssimpNodesToBonesRecursive(root, null, FlatSkeleton);
+                
+                
 
-                foreach (Rigging.Bone bone in FlatSkeleton)
+                foreach (Rigging.Bone bone in FlatSkeleton) {
+                    //bone.m_MatrixType = 1;
+                    //bone.m_UnknownIndex = 1;
                     BoneNameIndices.Add(bone.Name, FlatSkeleton.IndexOf(bone));
+                }
+
+                //FlatSkeleton[0].m_MatrixType = 0;
+                //FlatSkeleton[0].m_UnknownIndex = 0;
             }
             Console.Write("✓");
             Console.WriteLine();
+        }
+
+        public void UpdateBoundingBoxes(VTX1 vertexData) {
+            FlatSkeleton[0].Bounds.GetBoundsValues(vertexData.Attributes.Positions);
+            for (int i = 1; i < FlatSkeleton.Count; i++) {
+                FlatSkeleton[i].Bounds = FlatSkeleton[0].Bounds;
+            }
+        
         }
 
         private Rigging.Bone AssimpNodesToBonesRecursive(Assimp.Node node, Rigging.Bone parent, List<Rigging.Bone> boneList)
@@ -173,6 +192,20 @@ namespace SuperBMDLib.BMD
             writer.Seek((int)start + 4, System.IO.SeekOrigin.Begin);
             writer.Write((int)length);
             writer.Seek((int)end, System.IO.SeekOrigin.Begin);
+        }
+
+        public void DumpJson(string path) {
+            JsonSerializer serial = new JsonSerializer();
+            serial.Formatting = Formatting.Indented;
+            serial.Converters.Add(new StringEnumConverter());
+
+
+            using (FileStream strm = new FileStream(path, FileMode.Create, FileAccess.Write))
+            {
+                StreamWriter writer = new StreamWriter(strm);
+                writer.AutoFlush = true;
+                serial.Serialize(writer, this);
+            }
         }
     }
 }
