@@ -363,7 +363,7 @@ namespace SuperBMDLib.BMD
         private List<Color> LoadColorData(EndianBinaryReader reader, int count, GXDataType dataType)
         {
             List<Color> colorList = new List<Color>();
-
+            Console.WriteLine("Reading ColorData as {0}", dataType);
             for (int i = 0; i < count; i++)
             {
                 switch (dataType)
@@ -410,7 +410,12 @@ namespace SuperBMDLib.BMD
                         byte ga8 = reader.ReadByte();
                         byte ba8 = reader.ReadByte();
                         byte aa8 = reader.ReadByte();
-                        colorList.Add(new Color((float)ra8 / 255.0f, (float)ga8 / 255.0f, (float)ba8 / 255.0f, (float)aa8 / 255.0f));
+                        
+                        Color tmpcolor = new Color((float)ra8 / 255.0f, (float)ga8 / 255.0f, (float)ba8 / 255.0f, (float)aa8 / 255.0f);
+                        colorList.Add(tmpcolor);
+                        if (aa8 < 255) {
+                            Console.WriteLine("Alpha {0} {1}", aa8, tmpcolor.A);
+                        }
                         break;
                 }
             }
