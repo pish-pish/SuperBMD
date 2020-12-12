@@ -261,17 +261,17 @@ namespace SuperBMDLib.BMD
 
             int highestMatIndex = 0;
 
-            for (int i = 0; i < matCount; i++)
-            {
-                if (m_RemapIndices[i] > highestMatIndex)
-                    highestMatIndex = m_RemapIndices[i];
-            }
+            //for (int i = 0; i < matCount; i++)
+            //{
+            //    if (m_RemapIndices[i] > highestMatIndex)
+            //        highestMatIndex = m_RemapIndices[i];
+            //}
 
             reader.BaseStream.Position = matInitOffset;
             m_Materials = new List<Material>();
-            for (int i = 0; i <= highestMatIndex; i++)
+            for (int i = 0; i < matCount; i++)
             {
-                LoadInitData(reader, m_RemapIndices[i]);
+                LoadInitData(reader, m_RemapIndices[i], i);
             }
 
             reader.BaseStream.Seek(offset + mat3Size, System.IO.SeekOrigin.Begin);
@@ -288,7 +288,7 @@ namespace SuperBMDLib.BMD
             m_Materials = matCopies;
         }
 
-        private void LoadInitData(EndianBinaryReader reader, int matindex)
+        private void LoadInitData(EndianBinaryReader reader, int matindex, int actual_matindex)
         {
             Material mat = new Material();
             mat.Name = m_MaterialNames[matindex];
@@ -299,10 +299,16 @@ namespace SuperBMDLib.BMD
             mat.NumTexGensCount = NumTexGensBlock[reader.ReadByte()];
             mat.NumTevStagesCount = NumTevStagesBlock[reader.ReadByte()];
 
-            if (matindex < m_IndirectTexBlock.Count) {
-                mat.IndTexEntry = m_IndirectTexBlock[matindex];
+            if (m_IndirectTexBlock.Count == 0) {
+                // Don't read any indirect tex data
+            }
+            else if (actual_matindex < m_IndirectTexBlock.Count) {
+                mat.IndTexEntry = m_IndirectTexBlock[actual_matindex];
             }
             else {
+                // This generally means the bmd was created incorrectly
+                // Because if one material has indirect tex data then all of them have
+                // even if they don't need it.
                 Console.WriteLine("Warning: Material {0} referenced an out of range IndirectTexBlock index", mat.Name);
             }
             mat.ZCompLoc = m_zCompLocBlock[reader.ReadByte()];
@@ -792,9 +798,20 @@ namespace SuperBMDLib.BMD
 
         private void FillMaterialDataBlocks()
         {
+            bool indTexEntryIsUsed = false;
             foreach (Material mat in m_Materials)
             {
-                m_IndirectTexBlock.Add(mat.IndTexEntry);
+                if (mat.IndTexEntry.HasLookup) {
+                    indTexEntryIsUsed = true;
+                    break;
+                }
+            }
+
+            foreach (Material mat in m_Materials)
+            {
+                if (indTexEntryIsUsed) {
+                    m_IndirectTexBlock.Add(mat.IndTexEntry);
+                }
 
                 if (!m_CullModeBlock.Contains(mat.CullMode))
                     m_CullModeBlock.Add(mat.CullMode);
