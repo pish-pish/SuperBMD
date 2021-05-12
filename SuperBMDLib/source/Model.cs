@@ -7,6 +7,7 @@ using GameFormatReader.Common;
 using Assimp;
 using System.IO;
 using SuperBMDLib.BMD;
+using SuperBMDLib.Animation;
 using System.Text.RegularExpressions;
 
 namespace SuperBMDLib
@@ -24,6 +25,8 @@ namespace SuperBMDLib
         public TEX1 Textures          { get; private set; }
         public BMDInfo ModelStats     { get; private set; }
         static private string[] characters_to_replace = new string[] { " ", "(", ")", ":", "-" };
+
+        public List<BCK> BCKAnims { get; private set; }
 
         private int packetCount;
         private int vertexCount;
@@ -67,6 +70,7 @@ namespace SuperBMDLib
         public Model(EndianBinaryReader reader, Arguments args)
         {
             ModelStats = new BMDInfo();
+            BCKAnims = new List<BCK>();
 
             int j3d2Magic = reader.ReadInt32();
             int modelMagic = reader.ReadInt32();
@@ -134,6 +138,8 @@ namespace SuperBMDLib
         public Model(Scene scene, Arguments args, List<SuperBMDLib.Materials.Material> mat_presets = null, string additionalTexPath = null)
         {
             ModelStats = new BMDInfo();
+            BCKAnims = new List<BCK>();
+
             if (args.ensure_one_material_per_mesh) {
                 EnsureOneMaterialPerMesh(scene);
             }
@@ -286,6 +292,12 @@ namespace SuperBMDLib
                 packetCount += shape.Packets.Count;
 
             vertexCount = VertexData.Attributes.Positions.Count;
+
+            if (scene.AnimationCount > 0)
+            {
+                foreach (Assimp.Animation anm in scene.Animations)
+                    BCKAnims.Add(new BCK(anm, Joints.FlatSkeleton));
+            }
         }
 
         public void ExportBMD(string fileName, bool isBDL)
@@ -334,6 +346,20 @@ namespace SuperBMDLib
 
                 writer.Seek(8, SeekOrigin.Begin);
                 writer.Write((int)writer.BaseStream.Length);
+            }
+
+            if (BCKAnims.Count > 0)
+            {
+                for (int i = 0; i < BCKAnims.Count; i++)
+                {
+                    string bckName = BCKAnims[i].Name != "" ? Path.Combine(outDir, $"{ BCKAnims[i].Name }.bck") : Path.Combine(outDir, $"anim_{ i }.bck");
+
+                    using (FileStream strm = new FileStream(bckName, FileMode.Create, FileAccess.Write))
+                    {
+                        EndianBinaryWriter bckWriter = new EndianBinaryWriter(strm, Endian.Big);
+                        BCKAnims[i].Write(bckWriter);
+                    }
+                }
             }
         }
 
