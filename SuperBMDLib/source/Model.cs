@@ -293,7 +293,7 @@ namespace SuperBMDLib
 
             vertexCount = VertexData.Attributes.Positions.Count;
 
-            if (scene.AnimationCount > 0)
+            if (args.exportAnims && scene.AnimationCount > 0)
             {
                 foreach (Assimp.Animation anm in scene.Animations)
                     BCKAnims.Add(new BCK(anm, Joints.FlatSkeleton));
@@ -352,7 +352,7 @@ namespace SuperBMDLib
             {
                 for (int i = 0; i < BCKAnims.Count; i++)
                 {
-                    string bckName = BCKAnims[i].Name != "" ? Path.Combine(outDir, $"{ BCKAnims[i].Name }.bck") : Path.Combine(outDir, $"anim_{ i }.bck");
+                    string bckName = Path.Combine(outDir, $"anim_{ i }.bck");
 
                     using (FileStream strm = new FileStream(bckName, FileMode.Create, FileAccess.Write))
                     {
