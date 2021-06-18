@@ -25,6 +25,7 @@ namespace SuperBMDLib
         public bool readMipmaps;
         public bool dumpHierarchy;
         public string hierarchyPath;
+        public bool exportAnims;
 
         /// <summary>
         /// Initializes a new Arguments instance from the arguments passed in to SuperBMD.
@@ -49,6 +50,7 @@ namespace SuperBMDLib
             readMipmaps = true;
             dumpHierarchy = false;
             hierarchyPath = "";
+            exportAnims = false;
 
             int positional_arguments = 0;
 
@@ -125,6 +127,10 @@ namespace SuperBMDLib
 
                         hierarchyPath = args[i + 1];
                         i++;
+                        break;
+                    case "-a":
+                    case "--animation":
+                        exportAnims = true;
                         break;
                     default:
                         if (positional_arguments == 0) {

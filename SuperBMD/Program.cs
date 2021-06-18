@@ -154,6 +154,8 @@ namespace SuperBMDLib
             Console.WriteLine();
             Console.WriteLine("\t-b/--profile\t\t\t\tGenerate a report with information on the .BMD/.BDL (Other formats not supported)");
             Console.WriteLine();
+            Console.WriteLine("\t-a/--animation\t\t\t\tGenerate *.bck files from animation data stored in DAE, if present");
+            Console.WriteLine();
         }
     }
 }
