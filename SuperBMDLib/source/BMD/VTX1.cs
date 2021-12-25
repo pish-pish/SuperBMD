@@ -78,7 +78,7 @@ namespace SuperBMDLib.BMD
             return false;
         }
 
-        public VTX1(Assimp.Scene scene, bool forceFloat32)
+        public VTX1(Assimp.Scene scene, bool forceFloat32, GXDataType postype=GXDataType.Float32, byte fraction=0)
         {
             Attributes = new VertexData();
             StorageFormats = new SortedDictionary<GXVertexAttribute, Tuple<GXDataType, byte>>();
@@ -94,7 +94,7 @@ namespace SuperBMDLib.BMD
                 {
                     SetAssimpPositionAttribute(mesh);
                     if (!StorageFormats.ContainsKey(GXVertexAttribute.Position))
-                        StorageFormats.Add(GXVertexAttribute.Position, new Tuple<GXDataType, byte>(GXDataType.Float32, 0));
+                        StorageFormats.Add(GXVertexAttribute.Position, new Tuple<GXDataType, byte>(postype, fraction));
                 }
                 else
                     throw new Exception($"Mesh \"{ mesh.Name }\" ({i}) has no vertices!");
