@@ -262,7 +262,7 @@ namespace SuperBMDLib.BMD
                         break;
                 }
                 
-                Mesh mesh = new Mesh($"mesh_{ i }", PrimitiveType.Triangle);
+                Mesh mesh = new Mesh(meshname, PrimitiveType.Triangle);
                 mesh.MaterialIndex = i;
 
                 foreach (Packet pack in curShape.Packets)
