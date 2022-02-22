@@ -799,14 +799,14 @@ namespace SuperBMDLib.BMD
 
         private void FillMaterialDataBlocks()
         {
-            bool indTexEntryIsUsed = false;
-            foreach (Material mat in m_Materials)
+            bool indTexEntryIsUsed = true;
+            /*foreach (Material mat in m_Materials)
             {
                 if (mat.IndTexEntry.HasLookup) {
                     indTexEntryIsUsed = true;
                     break;
                 }
-            }
+            }*/
 
             foreach (Material mat in m_Materials)
             {
