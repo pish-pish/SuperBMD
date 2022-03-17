@@ -192,9 +192,7 @@ namespace GameFormatReader.Common
 			}
 
 			// BE to LE or LE to BE
-			float temp = base.ReadSingle();
-
-			byte[] floatBytes = BitConverter.GetBytes(temp);
+			byte[] floatBytes = BitConverter.GetBytes(base.ReadUInt32());
 			Array.Reverse(floatBytes);
 
 			return BitConverter.ToSingle(floatBytes, 0);
@@ -209,11 +207,9 @@ namespace GameFormatReader.Common
 			}
 
 			// BE to LE or LE to BE
-			Vector2 temp = new Vector2(base.ReadSingle(), base.ReadSingle());
-
-			byte[] xBytes = BitConverter.GetBytes(temp.X);
+			byte[] xBytes = BitConverter.GetBytes(base.ReadUInt32());
 			Array.Reverse(xBytes);
-			byte[] yBytes = BitConverter.GetBytes(temp.Y);
+			byte[] yBytes = BitConverter.GetBytes(base.ReadUInt32());
 			Array.Reverse(yBytes);
 
 			return new Vector2(BitConverter.ToSingle(xBytes, 0), BitConverter.ToSingle(yBytes, 0));
@@ -228,13 +224,11 @@ namespace GameFormatReader.Common
 			}
 
 			// BE to LE or LE to BE
-			Vector3 temp = new Vector3(base.ReadSingle(), base.ReadSingle(), base.ReadSingle());
-
-			byte[] xBytes = BitConverter.GetBytes(temp.X);
+			byte[] xBytes = BitConverter.GetBytes(base.ReadUInt32());
 			Array.Reverse(xBytes);
-			byte[] yBytes = BitConverter.GetBytes(temp.Y);
+			byte[] yBytes = BitConverter.GetBytes(base.ReadUInt32());
 			Array.Reverse(yBytes);
-			byte[] zBytes = BitConverter.GetBytes(temp.Z);
+			byte[] zBytes = BitConverter.GetBytes(base.ReadUInt32());
 			Array.Reverse(zBytes);
 
 			return new Vector3(BitConverter.ToSingle(xBytes, 0), BitConverter.ToSingle(yBytes, 0), BitConverter.ToSingle(zBytes, 0));
@@ -249,9 +243,7 @@ namespace GameFormatReader.Common
 			}
 
 			// BE to LE or LE to BE
-			double temp = base.ReadDouble();
-
-			byte[] doubleBytes = BitConverter.GetBytes(temp);
+			byte[] doubleBytes = BitConverter.GetBytes(base.ReadUInt64());
 			Array.Reverse(doubleBytes);
 
 			return BitConverter.ToDouble(doubleBytes, 0);

@@ -167,7 +167,7 @@ namespace GameFormatReader.Common
 				byte[] floatBytes = BitConverter.GetBytes(value);
 				Array.Reverse(floatBytes);
 
-				base.Write(BitConverter.ToSingle(floatBytes, 0));
+				base.Write(floatBytes);
 			}
 		}
 
@@ -186,8 +186,8 @@ namespace GameFormatReader.Common
 				byte[] yBytes = BitConverter.GetBytes(value.Y);
 				Array.Reverse(yBytes);
 
-				base.Write(BitConverter.ToSingle(xBytes, 0));
-				base.Write(BitConverter.ToSingle(yBytes, 0));
+				base.Write(xBytes);
+				base.Write(yBytes);
 			}
 
 		}
@@ -210,9 +210,9 @@ namespace GameFormatReader.Common
 				byte[] zBytes = BitConverter.GetBytes(value.Z);
 				Array.Reverse(zBytes);
 
-				base.Write(BitConverter.ToSingle(xBytes, 0));
-				base.Write(BitConverter.ToSingle(yBytes, 0));
-				base.Write(BitConverter.ToSingle(zBytes, 0));
+				base.Write(xBytes);
+				base.Write(yBytes);
+				base.Write(zBytes);
 			}
 		}
 
@@ -228,7 +228,7 @@ namespace GameFormatReader.Common
 				byte[] doubleBytes = BitConverter.GetBytes(value);
 				Array.Reverse(doubleBytes);
 
-				base.Write(BitConverter.ToDouble(doubleBytes, 0));
+				base.Write(doubleBytes);
 			}
 		}
 
