@@ -164,9 +164,20 @@ namespace SuperBMDLib.BMD
                      meshShape = new Shape(); // Matrix Type 3, normal
                     Console.Write("Normal Mesh");
                 }
-                meshShape.SetDescriptorAttributes(mesh, boneNames.Count);
 
-                if (boneNames.Count > 1)
+                // Force a mesh in an otherwise rigged model to be "unrigged"
+                bool forceUnweighted = mesh.Name.Contains("_NoWeights");
+
+                if (forceUnweighted) { 
+                    Console.WriteLine(String.Format("\nMesh {0} forced to be unweighted.", mesh.Name));
+                    meshShape.SetDescriptorAttributes(mesh, 1);
+                }
+                else
+                {
+                    meshShape.SetDescriptorAttributes(mesh, boneNames.Count);
+                }
+
+                if (boneNames.Count > 1 && !forceUnweighted)
                     meshShape.ProcessVerticesWithWeights(mesh, vertData, boneNames, envelopes, partialWeight, tristripMode == "all", degenerateTriangles);
                 else
                 {
