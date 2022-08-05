@@ -140,7 +140,7 @@ namespace SuperBMDLib
             ModelStats = new BMDInfo();
             BCKAnims = new List<BCK>();
 
-            if (args.ensure_one_material_per_mesh) {
+            if (args.ensure_one_material_per_mesh || args.material_order_strict) {
                 EnsureOneMaterialPerMesh(scene);
             }
 
