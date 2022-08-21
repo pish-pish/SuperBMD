@@ -286,7 +286,7 @@ namespace SuperBMDLib
 
             Console.WriteLine();
             Console.Write("Generating the Joints");
-            Scenegraph = new INF1(scene, Joints);
+            Scenegraph = new INF1(scene, Joints, args.material_order_strict);
 
             foreach (Geometry.Shape shape in Shapes.Shapes)
                 packetCount += shape.Packets.Count;
