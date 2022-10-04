@@ -47,6 +47,7 @@ namespace SuperBMDLib.Materials
         public TevSwapMode?[] SwapModes;
         public TevSwapModeTable?[] SwapTables;
 
+        // The questionmark allows for these fields to be optional 
         public Fog? FogInfo;
         public AlphaCompare? AlphCompare;
         public BlendMode? BMode;
@@ -57,6 +58,7 @@ namespace SuperBMDLib.Materials
         public Material(string name)
         {
             Name = name;
+            Flag = 1;
         }
 
         public Material()
