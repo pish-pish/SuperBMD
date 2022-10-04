@@ -284,6 +284,7 @@ namespace SuperBMDLib.BMD
                 
                 Mesh mesh = new Mesh(meshname, PrimitiveType.Triangle);
                 mesh.MaterialIndex = i;
+                bool[] outOfRangeCoords_detected = {false, false, false, false, false, false, false, false};
 
                 foreach (Packet pack in curShape.Packets)
                 {
@@ -378,28 +379,83 @@ namespace SuperBMDLib.BMD
                                         switch (texCoordNum)
                                         {
                                             case 0:
-                                                texCoord = vertData.TexCoord_0[(int)vert.TexCoord0Index].ToVector2D();
+                                                if (vertData.TexCoord_0.Count <= (int)vert.TexCoord0Index)
+                                                {
+                                                    outOfRangeCoords_detected[0] = true;
+                                                }
+                                                else
+                                                {
+                                                    texCoord = vertData.TexCoord_0[(int)vert.TexCoord0Index].ToVector2D();
+                                                }
                                                 break;
                                             case 1:
-                                                texCoord = vertData.TexCoord_1[(int)vert.TexCoord1Index].ToVector2D();
+                                                if (vertData.TexCoord_1.Count <= (int)vert.TexCoord1Index)
+                                                {
+                                                    outOfRangeCoords_detected[1] = true;
+                                                }
+                                                else
+                                                {
+                                                    texCoord = vertData.TexCoord_1[(int)vert.TexCoord1Index].ToVector2D();
+                                                }
                                                 break;
                                             case 2:
-                                                texCoord = vertData.TexCoord_2[(int)vert.TexCoord2Index].ToVector2D();
+                                                if (vertData.TexCoord_2.Count <= (int)vert.TexCoord2Index)
+                                                {
+                                                    outOfRangeCoords_detected[2] = true;
+                                                }
+                                                else
+                                                {
+                                                    texCoord = vertData.TexCoord_2[(int)vert.TexCoord2Index].ToVector2D();
+                                                }
                                                 break;
                                             case 3:
-                                                texCoord = vertData.TexCoord_3[(int)vert.TexCoord3Index].ToVector2D();
+                                                if (vertData.TexCoord_3.Count <= (int)vert.TexCoord3Index)
+                                                {
+                                                    outOfRangeCoords_detected[3] = true;
+                                                }
+                                                else
+                                                {
+                                                    texCoord = vertData.TexCoord_3[(int)vert.TexCoord3Index].ToVector2D();
+                                                }
                                                 break;
                                             case 4:
-                                                texCoord = vertData.TexCoord_4[(int)vert.TexCoord4Index].ToVector2D();
+                                                if (vertData.TexCoord_4.Count <= (int)vert.TexCoord4Index)
+                                                {
+                                                    outOfRangeCoords_detected[4] = true;
+                                                }
+                                                else
+                                                {
+                                                    texCoord = vertData.TexCoord_4[(int)vert.TexCoord4Index].ToVector2D();
+                                                }
                                                 break;
                                             case 5:
-                                                texCoord = vertData.TexCoord_5[(int)vert.TexCoord5Index].ToVector2D();
+                                                if (vertData.TexCoord_5.Count <= (int)vert.TexCoord5Index)
+                                                {
+                                                    outOfRangeCoords_detected[5] = true;
+                                                }
+                                                else
+                                                {
+                                                    texCoord = vertData.TexCoord_5[(int)vert.TexCoord5Index].ToVector2D();
+                                                }
                                                 break;
                                             case 6:
-                                                texCoord = vertData.TexCoord_6[(int)vert.TexCoord6Index].ToVector2D();
+                                                if (vertData.TexCoord_6.Count <= (int)vert.TexCoord6Index)
+                                                {
+                                                    outOfRangeCoords_detected[6] = true;
+                                                }
+                                                else
+                                                {
+                                                    texCoord = vertData.TexCoord_6[(int)vert.TexCoord6Index].ToVector2D();
+                                                }
                                                 break;
                                             case 7:
-                                                texCoord = vertData.TexCoord_7[(int)vert.TexCoord7Index].ToVector2D();
+                                                if (vertData.TexCoord_7.Count <= (int)vert.TexCoord7Index)
+                                                {
+                                                    outOfRangeCoords_detected[7] = true;
+                                                }
+                                                else { 
+                                                    texCoord = vertData.TexCoord_7[(int)vert.TexCoord7Index].ToVector2D();
+                                                }
                                                 break;
                                         }
 
@@ -413,7 +469,13 @@ namespace SuperBMDLib.BMD
                     }
                     Console.Write("...");
                 }
-
+                for (int j = 0; j < 8; j++)
+                {
+                    if (outOfRangeCoords_detected[j] == true)
+                    {
+                        Console.WriteLine("Warning, out of range Tex Coords detected on channel {0}", j);
+                    }
+                }
                 scene.Meshes.Add(mesh);
                 Console.Write("✓");
                 Console.WriteLine();
