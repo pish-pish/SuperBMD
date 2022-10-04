@@ -626,7 +626,13 @@ namespace SuperBMDLib.BMD
             
                 //if (default_mat != null)
             //    Console.WriteLine(String.Format("Applying __MatDefault to {1}", default_mat.Name, name));
-            return new PresetResult(default_mat, -1);
+            if (default_mat == null)
+            {
+                return null;
+            }
+            else { 
+                return new PresetResult(default_mat, -1);
+            }
         }
 
         private void SetPreset(Material bmdMaterial, Material preset) {
