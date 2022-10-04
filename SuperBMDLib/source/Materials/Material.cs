@@ -47,11 +47,17 @@ namespace SuperBMDLib.Materials
         public TevSwapMode?[] SwapModes;
         public TevSwapModeTable?[] SwapTables;
 
-        public Fog FogInfo;
-        public AlphaCompare AlphCompare;
-        public BlendMode BMode;
-        public ZMode ZMode;
-        public NBTScale NBTScale;
+        public Fog? FogInfo;
+        public AlphaCompare? AlphCompare;
+        public BlendMode? BMode;
+        public ZMode? ZMode;
+        public NBTScale? NBTScale;
+
+        [JsonConstructor]
+        public Material(string name)
+        {
+            Name = name;
+        }
 
         public Material()
         {

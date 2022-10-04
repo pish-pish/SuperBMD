@@ -361,11 +361,11 @@ namespace SuperBMDLib.Materials.Mdl
         {
             BPCommand tev_alphafunc = new BPCommand() { Register = BPRegister.TEV_ALPHAFUNC };
 
-            tev_alphafunc.SetBits(mat.AlphCompare.Reference0, 0, 8);
-            tev_alphafunc.SetBits(mat.AlphCompare.Reference1, 8, 8);
-            tev_alphafunc.SetBits((int)mat.AlphCompare.Comp0, 16, 3);
-            tev_alphafunc.SetBits((int)mat.AlphCompare.Comp1, 19, 3);
-            tev_alphafunc.SetBits((int)mat.AlphCompare.Operation, 22, 2);
+            tev_alphafunc.SetBits(((AlphaCompare)mat.AlphCompare).Reference0, 0, 8);
+            tev_alphafunc.SetBits(((AlphaCompare)mat.AlphCompare).Reference1, 8, 8);
+            tev_alphafunc.SetBits((int)((AlphaCompare)mat.AlphCompare).Comp0, 16, 3);
+            tev_alphafunc.SetBits((int)((AlphaCompare)mat.AlphCompare).Comp1, 19, 3);
+            tev_alphafunc.SetBits((int)((AlphaCompare)mat.AlphCompare).Operation, 22, 2);
 
             BPCommands.Add(tev_alphafunc);
         }
@@ -377,7 +377,7 @@ namespace SuperBMDLib.Materials.Mdl
 
             pe_cmode0_mask.SetBits(0x001FE7, 0, 24);
 
-            switch (mat.BMode.Type)
+            switch (((BlendMode)mat.BMode).Type)
             {
                 case Enums.BlendMode.Blend:
                     pe_cmode0.SetFlag(true, 0);
@@ -391,9 +391,9 @@ namespace SuperBMDLib.Materials.Mdl
                     break;
             }
 
-            pe_cmode0.SetBits((int)mat.BMode.Operation, 12, 4);
-            pe_cmode0.SetBits((int)mat.BMode.DestinationFact, 5, 3);
-            pe_cmode0.SetBits((int)mat.BMode.SourceFact, 8, 3);
+            pe_cmode0.SetBits((int)((BlendMode)mat.BMode).Operation, 12, 4);
+            pe_cmode0.SetBits((int)((BlendMode)mat.BMode).DestinationFact, 5, 3);
+            pe_cmode0.SetBits((int)((BlendMode)mat.BMode).SourceFact, 8, 3);
 
             pe_cmode0.SetFlag(mat.Dither, 2);
 
@@ -404,9 +404,9 @@ namespace SuperBMDLib.Materials.Mdl
         private void GenerateZModeCommand(Material mat)
         {
             BPCommand pe_zmode = new BPCommand() { Register = BPRegister.PE_ZMODE };
-            pe_zmode.SetFlag(mat.ZMode.Enable, 0);
-            pe_zmode.SetBits((byte)mat.ZMode.Function, 1, 3);
-            pe_zmode.SetFlag(mat.ZMode.UpdateEnable, 4);
+            pe_zmode.SetFlag(((ZMode)mat.ZMode).Enable, 0);
+            pe_zmode.SetBits((byte)((ZMode)mat.ZMode).Function, 1, 3);
+            pe_zmode.SetFlag(((ZMode)mat.ZMode).UpdateEnable, 4);
 
             BPCommands.Add(pe_zmode);
         }

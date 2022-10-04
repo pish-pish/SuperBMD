@@ -639,9 +639,9 @@ namespace SuperBMDLib.BMD
             // put data from preset over current material if it exists
 
             bmdMaterial.Flag = preset.Flag;
-            bmdMaterial.ColorChannelControlsCount = preset.ColorChannelControlsCount;
-            bmdMaterial.NumTexGensCount = preset.NumTexGensCount;
-            bmdMaterial.NumTevStagesCount = preset.NumTevStagesCount;
+            //bmdMaterial.ColorChannelControlsCount = preset.ColorChannelControlsCount;
+            //bmdMaterial.NumTexGensCount = preset.NumTexGensCount;
+            //bmdMaterial.NumTevStagesCount = preset.NumTevStagesCount;
             bmdMaterial.CullMode = preset.CullMode;
 
             if (preset.IndTexEntry != null) bmdMaterial.IndTexEntry = preset.IndTexEntry;
@@ -655,7 +655,7 @@ namespace SuperBMDLib.BMD
             if (preset.PostTexCoordGens != null) bmdMaterial.PostTexCoordGens = preset.PostTexCoordGens;
             if (preset.TexMatrix1 != null) bmdMaterial.TexMatrix1 = preset.TexMatrix1;
             if (preset.PostTexMatrix != null) bmdMaterial.PostTexMatrix = preset.PostTexMatrix;
-            bmdMaterial.TextureNames = preset.TextureNames;
+            if (preset.TextureNames != null) bmdMaterial.TextureNames = preset.TextureNames;
 
             if (preset.TevOrders != null) bmdMaterial.TevOrders = preset.TevOrders;
             if (preset.ColorSels != null) bmdMaterial.ColorSels = preset.ColorSels;
@@ -1001,21 +1001,20 @@ namespace SuperBMDLib.BMD
                     if (!m_SwapTableBlock.Contains(mat.SwapTables[i].Value))
                         m_SwapTableBlock.Add(mat.SwapTables[i].Value);
                 }
+                if (!m_FogBlock.Contains((Fog)mat.FogInfo))
+                    m_FogBlock.Add((Fog)mat.FogInfo);
 
-                if (!m_FogBlock.Contains(mat.FogInfo))
-                    m_FogBlock.Add(mat.FogInfo);
+                if (!m_AlphaCompBlock.Contains((AlphaCompare)mat.AlphCompare))
+                    m_AlphaCompBlock.Add((AlphaCompare)mat.AlphCompare);
 
-                if (!m_AlphaCompBlock.Contains(mat.AlphCompare))
-                    m_AlphaCompBlock.Add(mat.AlphCompare);
+                if (!m_blendModeBlock.Contains((Materials.BlendMode)mat.BMode))
+                    m_blendModeBlock.Add((Materials.BlendMode)mat.BMode);
 
-                if (!m_blendModeBlock.Contains(mat.BMode))
-                    m_blendModeBlock.Add(mat.BMode);
+                if (!m_NBTScaleBlock.Contains((NBTScale)mat.NBTScale))
+                    m_NBTScaleBlock.Add((NBTScale)mat.NBTScale);
 
-                if (!m_NBTScaleBlock.Contains(mat.NBTScale))
-                    m_NBTScaleBlock.Add(mat.NBTScale);
-
-                if (!m_zModeBlock.Contains(mat.ZMode))
-                    m_zModeBlock.Add(mat.ZMode);
+                if (!m_zModeBlock.Contains((ZMode)mat.ZMode))
+                    m_zModeBlock.Add((ZMode)mat.ZMode);
 
                 if (!m_zCompLocBlock.Contains(mat.ZCompLoc))
                     m_zCompLocBlock.Add(mat.ZCompLoc);
@@ -1452,7 +1451,7 @@ namespace SuperBMDLib.BMD
             writer.Write((byte)NumTevStagesBlock.IndexOf(mat.NumTevStagesCount));
 
             writer.Write((byte)m_zCompLocBlock.IndexOf(mat.ZCompLoc));
-            writer.Write((byte)m_zModeBlock.IndexOf(mat.ZMode));
+            writer.Write((byte)m_zModeBlock.IndexOf((ZMode)mat.ZMode));
             writer.Write((byte)m_ditherBlock.IndexOf(mat.Dither));
 
             if (mat.MaterialColors[0].HasValue)
@@ -1588,10 +1587,10 @@ namespace SuperBMDLib.BMD
                     writer.Write((short)-1);
             }
 
-            writer.Write((short)m_FogBlock.IndexOf(mat.FogInfo));
-            writer.Write((short)m_AlphaCompBlock.IndexOf(mat.AlphCompare));
-            writer.Write((short)m_blendModeBlock.IndexOf(mat.BMode));
-            writer.Write((short)m_NBTScaleBlock.IndexOf(mat.NBTScale));
+            writer.Write((short)m_FogBlock.IndexOf((Fog)mat.FogInfo));
+            writer.Write((short)m_AlphaCompBlock.IndexOf((AlphaCompare)mat.AlphCompare));
+            writer.Write((short)m_blendModeBlock.IndexOf((Materials.BlendMode)mat.BMode));
+            writer.Write((short)m_NBTScaleBlock.IndexOf((NBTScale)mat.NBTScale));
         }
 
         public void DumpMaterials(string out_path)
