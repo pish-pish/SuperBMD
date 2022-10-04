@@ -164,8 +164,10 @@ namespace SuperBMDLib
 
             Console.WriteLine();
             Console.Write("Searching for the Skeleton Root");
-            Assimp.Node root = null;
-            for (int i = 0; i < scene.RootNode.ChildCount; i++) {
+
+            Assimp.Node root = JNT1.GetRootBone(scene);
+
+            /*for (int i = 0; i < scene.RootNode.ChildCount; i++) {
                 if (scene.RootNode.Children[i].Name.ToLowerInvariant() == "skeleton_root") {
                     if (scene.RootNode.Children[i].ChildCount == 0) {
                         throw new System.Exception("skeleton_root has no children! If you are making a rigged model, make sure skeleton_root contains the root of your skeleton.");
@@ -174,7 +176,7 @@ namespace SuperBMDLib
                     break;
                 }
                 Console.Write(".");
-            }
+            }*/
 
             Console.Write(root == null ? "✓ No Skeleton found" : "✓ Skeleton Found");
             Console.WriteLine();
