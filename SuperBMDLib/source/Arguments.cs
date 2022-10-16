@@ -18,6 +18,7 @@ namespace SuperBMDLib
         public bool output_bdl;
         public bool do_profile;
         public bool sort_meshes;
+        public bool sort_strict;
         public bool ensure_one_material_per_mesh;
         public bool export_obj;
         public bool forceFloat;
@@ -46,6 +47,7 @@ namespace SuperBMDLib
             output_bdl = false;
             do_profile = false;
             sort_meshes = true;
+            sort_strict = false;
             ensure_one_material_per_mesh = false;
             export_obj = false;
             forceFloat = false;
@@ -123,6 +125,9 @@ namespace SuperBMDLib
                         break;
                     case "--nomipmaps":
                         readMipmaps = false;
+                        break;
+                    case "--sort_strict":
+                        sort_strict = true;
                         break;
                     case "--dumphierarchy":
                         dumpHierarchy = true;

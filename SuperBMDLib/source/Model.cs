@@ -146,7 +146,7 @@ namespace SuperBMDLib
 
             Console.WriteLine();
             if (args.sort_meshes) {
-                SortMeshesByObjectNames(scene);
+                SortMeshesByObjectNames(scene, args.sort_strict);
                 Console.WriteLine();
             }
 
@@ -947,7 +947,7 @@ namespace SuperBMDLib
 
             return true;
         }
-        private void SortMeshesByObjectNames(Scene scene)
+        private void SortMeshesByObjectNames(Scene scene, bool strict)
         {
             // Sort meshes by their name instead of keeping the order they're in inside the file.
             // Specifically, natural sorting is used so that mesh-9 comes before mesh-10.
@@ -973,7 +973,13 @@ namespace SuperBMDLib
 
             if (meshNames.Count != scene.Meshes.Count)
             {
-                throw new Exception($"Number of meshes ({scene.Meshes.Count}) is not the same as the number of mesh objects ({meshNames.Count}); cannot sort.\nMesh objects: {String.Join(", ", meshNames)}\nMeshes: {String.Join(", ", scene.Meshes.Select(mesh => mesh.Name))}");
+                if (strict) { 
+                    throw new Exception($"Number of meshes ({scene.Meshes.Count}) is not the same as the number of mesh objects ({meshNames.Count}); cannot sort.\nMesh objects: {String.Join(", ", meshNames)}\nMeshes: {String.Join(", ", scene.Meshes.Select(mesh => mesh.Name))}");
+                } else
+                {
+                    Console.WriteLine($"Number of meshes({ scene.Meshes.Count}) is not the same as the number of mesh objects({ meshNames.Count}); Sorting skipped.");
+                    return;
+                }
             }
 
             // Pad the numbers in mesh names with 0s.
