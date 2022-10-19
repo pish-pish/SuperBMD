@@ -80,62 +80,90 @@ namespace SuperBMDLib.BMD
             }*/
         }
 
-        public static Assimp.Node GetRootBone(Assimp.Scene scene)
+        public static bool IsChildOf(Assimp.Node root, Assimp.Node child)
         {
-            Assimp.Node root = null;
-            List<string> bones = new List<string>();
-
-            foreach (Assimp.Mesh mesh in scene.Meshes) {
-                foreach (Assimp.Bone bone in mesh.Bones)
-                {
-                    bones.Add(bone.Name);
-                }
-            }
-
-            if (bones.Count == 0)
-            {
-                Console.WriteLine("No bones found.");
-                return root;
-            }
-
             Stack<Assimp.Node> nodes_to_visit = new Stack<Assimp.Node>();
-            nodes_to_visit.Push(scene.RootNode);
+            if (root == child)
+            {
+                return true;
+            }
+
+            nodes_to_visit.Push(root);
 
             while (nodes_to_visit.Count > 0)
             {
                 Assimp.Node next = nodes_to_visit.Pop();
+                if (next == child) {
+                    return true;
+                }
 
-                // Check if it is a bone
-                if (bones.Contains(next.Name)) 
+                foreach (Assimp.Node nextchild in next.Children)
                 {
-                    // Check if it is a root bone
-                    if (next.Parent != null && !bones.Contains(next.Parent.Name))
-                    {
-                        Console.WriteLine("Found skeleton root: {0}", next.Name);
-                        if (root != null)
-                        {
-                            throw new Exception(
-                                String.Format("Cannot convert model: Found more than one root bone: {0}, {1}",
-                                    root.Name, next.Name)
-                                );
-                        }
+                    nodes_to_visit.Push(nextchild);
+                }
+            }
+            return false;
+        }
+
+        public static Assimp.Node GetRootBone(Assimp.Scene scene, string root_marker, string root_name)
+        {
+            Assimp.Node root = null;
+
+            for (int i = 0; i < scene.RootNode.ChildCount; i++) {
+                Console.WriteLine(scene.RootNode.Children[i].Name);
+                if (scene.RootNode.Children[i].Name == root_marker) {
+                    if (scene.RootNode.Children[i].ChildCount == 0) {
+                        throw new System.Exception(
+                            String.Format(
+                                "{0} has no children! If you are making a rigged model, make sure {0} contains the root of your skeleton.",
+                                root_marker)
+                            );
+                    }
+                    root = scene.RootNode.Children[i].Children[0];
+                    break;
+                }
+                Console.Write(".");
+            }
+
+            if (root_name == null)
+            {
+                return root;
+            }
+
+            Queue<Assimp.Node> nodes_to_visit = new Queue<Assimp.Node>();
+            nodes_to_visit.Enqueue(scene.RootNode);
+
+            Console.WriteLine("traversing hierarchy to search for {0}", root_name);
+            while (nodes_to_visit.Count > 0)
+            {
+                Assimp.Node next = nodes_to_visit.Dequeue();
+                if (next.Name == root_name)
+                {
+                    if (root == null) { 
                         root = next;
+                        break;
                     }
                 }
                 foreach (Assimp.Node child in next.Children)
                 {
-                    nodes_to_visit.Push(child);
+                    nodes_to_visit.Enqueue(child);
                 }
             }
-
+            if (root != null) { 
+                Console.WriteLine("Choosen root bone: {0}", root.Name);
+            }
+            else
+            {
+                Console.WriteLine("No root chosen.");
+            }
             return root;
         }
 
-        public JNT1(Assimp.Scene scene, VTX1 vertexData)
+        public JNT1(Assimp.Scene scene, VTX1 vertexData, Arguments args)
         {
             BoneNameIndices = new Dictionary<string, int>();
             FlatSkeleton = new List<Rigging.Bone>();
-            Assimp.Node root = GetRootBone(scene);
+            Assimp.Node root = GetRootBone(scene, args.skeleton_root_marker, args.skeleton_root_name);
             
             /*for (int i = 0; i < scene.RootNode.ChildCount; i++)
             {

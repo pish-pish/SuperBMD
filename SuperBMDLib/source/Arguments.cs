@@ -31,6 +31,8 @@ namespace SuperBMDLib
         public byte fraction;
         public bool material_order_strict;
         public bool export_skeleton_root;
+        public string skeleton_root_marker;
+        public string skeleton_root_name;
 
         /// <summary>
         /// Initializes a new Arguments instance from the arguments passed in to SuperBMD.
@@ -61,7 +63,8 @@ namespace SuperBMDLib
             fraction = 0;
             material_order_strict = false;
             export_skeleton_root = true;
-
+            skeleton_root_marker = "skeleton_root";
+            skeleton_root_name = null;
             int positional_arguments = 0;
 
             for (int i = 0; i < args.Length; i++)
@@ -157,6 +160,18 @@ namespace SuperBMDLib
                         break;
                     case "--without_root":
                         export_skeleton_root = false;
+                        break;
+                    case "--root_marker":
+                        if (i + 1 >= args.Length)
+                            throw new Exception("The parameters were malformed.");
+                        skeleton_root_marker = args[i+1];
+                        i++;
+                        break;
+                    case "--root_name":
+                        if (i + 1 >= args.Length)
+                            throw new Exception("The parameters were malformed.");
+                        skeleton_root_name = args[i + 1];
+                        i++;
                         break;
                     default:
                         if (positional_arguments == 0) {

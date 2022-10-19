@@ -165,7 +165,7 @@ namespace SuperBMDLib
             Console.WriteLine();
             Console.Write("Searching for the Skeleton Root");
 
-            Assimp.Node root = JNT1.GetRootBone(scene);
+            Assimp.Node root = JNT1.GetRootBone(scene, args.skeleton_root_marker, args.skeleton_root_name);
 
             /*for (int i = 0; i < scene.RootNode.ChildCount; i++) {
                 if (scene.RootNode.Children[i].Name.ToLowerInvariant() == "skeleton_root") {
@@ -183,7 +183,9 @@ namespace SuperBMDLib
 
             foreach (Mesh mesh in scene.Meshes) {
                 if (mesh.HasBones && root == null) {
-                    throw new System.Exception("Model uses bones but the skeleton root has not been found! Make sure your skeleton is inside a dummy object called 'skeleton_root'.");
+                    throw new System.Exception(
+                        String.Format("Model uses bones but the skeleton root has not been found! Make sure your skeleton is inside a dummy object or armature called '{0}'.",
+                        args.skeleton_root_marker));
                 }
             }
 
@@ -240,7 +242,7 @@ namespace SuperBMDLib
             VertexData = new VTX1(scene, args.forceFloat, args.vertextype, args.fraction);
             Console.WriteLine();
             Console.Write("Generating the Bone Data");
-            Joints = new JNT1(scene, VertexData);
+            Joints = new JNT1(scene, VertexData, args);
             Console.WriteLine();
             Console.WriteLine("Generating the Texture Data -> ");
             Textures = new TEX1(scene, args);
