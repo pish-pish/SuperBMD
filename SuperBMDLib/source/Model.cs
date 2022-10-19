@@ -163,7 +163,7 @@ namespace SuperBMDLib
             }
 
             Console.WriteLine();
-            Console.Write("Searching for the Skeleton Root");
+            Console.WriteLine("Searching for the Skeleton Root");
 
             Assimp.Node root = JNT1.GetRootBone(scene, args.skeleton_root_marker, args.skeleton_root_name, args.skeleton_autodetect);
 
@@ -241,7 +241,7 @@ namespace SuperBMDLib
             Console.WriteLine("Generating the Vertex Data ->");
             VertexData = new VTX1(scene, args.forceFloat, args.vertextype, args.fraction);
             Console.WriteLine();
-            Console.Write("Generating the Bone Data");
+            Console.WriteLine("Generating the Bone Data");
             Joints = new JNT1(scene, VertexData, args);
             Console.WriteLine();
             Console.WriteLine("Generating the Texture Data -> ");

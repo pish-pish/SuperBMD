@@ -158,6 +158,7 @@ namespace SuperBMDLib.BMD
         public static Assimp.Node GetRootBone(Assimp.Scene scene, string root_marker, string root_name, bool auto_detect)
         {
             Assimp.Node root = null;
+            
             if (auto_detect) { 
                 Console.WriteLine("Attempting automated skeleton root detection...");
                 Assimp.Bone bone = null;
@@ -173,11 +174,7 @@ namespace SuperBMDLib.BMD
                     }
                 }
 
-                if (bone == null)
-                {
-                    Console.WriteLine("Model is not rigged to any bone.");
-                    return root;
-                }
+
 
                 Assimp.Node parent = null;
                 foreach (Assimp.Node meshnode in getMeshNodes(scene))
@@ -193,21 +190,53 @@ namespace SuperBMDLib.BMD
                         }
                     }
                 } 
-                foreach (Assimp.Node child in parent.Children)
+                if (bone != null)
                 {
-                    if (!child.HasMeshes)
+                    foreach (Assimp.Node child in parent.Children)
                     {
-                        if (IsChildOf(child, bone.Name))
+                        if (!child.HasMeshes)
                         {
-                            Console.WriteLine("Detected {0} as root bone.", child.Name);
-                            root = child;
+                            if (IsChildOf(child, bone.Name))
+                            {
+                                Console.WriteLine("Detected {0} as root bone.", child.Name);
+                                root = child;
+                                break;
+                            }
                         }
                     }
-                    
                 }
-                if (bone == null)
+                else
                 {
+                    Assimp.Node candidate = null;
+                    bool more_than_one = false;
+                    foreach (Assimp.Node child in parent.Children)
+                    {
+                        if (!child.HasMeshes)
+                        {
+                            if (candidate == null) { 
+                                candidate = child;
+                            }
+                            else
+                            {
+                                more_than_one = false;
+                                Console.WriteLine("Cannot auto-detect, there are at least two skeleton root candidates {0}, {1}", candidate.Name, child.Name);
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!more_than_one) {
+                        root = candidate;
+                    }
+                }
+                if (root != null)
+                {
+                    Console.WriteLine("Detected {0} as root bone.", root.Name);
                     return root;
+                }
+                else
+                {
+                    Console.WriteLine("Auto-detection failed. Falling back onto searching for skeleton root object.");
                 }
             }
 
