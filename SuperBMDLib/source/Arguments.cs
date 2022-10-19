@@ -30,6 +30,7 @@ namespace SuperBMDLib
         public Geometry.Enums.GXDataType vertextype;
         public byte fraction;
         public bool material_order_strict;
+        public bool export_skeleton_root;
 
         /// <summary>
         /// Initializes a new Arguments instance from the arguments passed in to SuperBMD.
@@ -59,6 +60,7 @@ namespace SuperBMDLib
             vertextype = Geometry.Enums.GXDataType.Float32;
             fraction = 0;
             material_order_strict = false;
+            export_skeleton_root = true;
 
             int positional_arguments = 0;
 
@@ -152,6 +154,9 @@ namespace SuperBMDLib
                         break;
                     case "--mat_strict":
                         material_order_strict = true;
+                        break;
+                    case "--without_root":
+                        export_skeleton_root = false;
                         break;
                     default:
                         if (positional_arguments == 0) {

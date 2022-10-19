@@ -97,11 +97,14 @@ namespace SuperBMDLib
             if (cmd_args.input_path.EndsWith(".bmd") || cmd_args.input_path.EndsWith(".bdl"))
             {
                 Console.WriteLine(string.Format("Converting {0} into {1}...", fi.Extension.ToUpper(), destinationFormat));
+
+                ExportSettings settings = new ExportSettings(cmd_args.export_skeleton_root);
+
                 if (cmd_args.export_obj) {
-                    mod.ExportAssImp(cmd_args.output_path, "obj", new ExportSettings(), cmd_args);
+                    mod.ExportAssImp(cmd_args.output_path, "obj", settings, cmd_args);
                 }
                 else {
-                    mod.ExportAssImp(cmd_args.output_path, "dae", new ExportSettings(), cmd_args);
+                    mod.ExportAssImp(cmd_args.output_path, "dae", settings, cmd_args);
                 }
                 
                 

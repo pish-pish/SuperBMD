@@ -10,9 +10,9 @@ namespace SuperBMDLib
     {
         public bool UseSkeletonRoot;
 
-        public ExportSettings()
+        public ExportSettings(bool export_skeleton_root)
         {
-            UseSkeletonRoot = true;
+            UseSkeletonRoot = export_skeleton_root;
         }
     }
 }
