@@ -105,10 +105,113 @@ namespace SuperBMDLib.BMD
             return false;
         }
 
-        public static Assimp.Node GetRootBone(Assimp.Scene scene, string root_marker, string root_name)
+        public static bool IsChildOf(Assimp.Node root, string bonename)
+        {
+            Stack<Assimp.Node> nodes_to_visit = new Stack<Assimp.Node>();
+            if (root.Name == bonename)
+            {
+                return true;
+            }
+
+            nodes_to_visit.Push(root);
+
+            while (nodes_to_visit.Count > 0)
+            {
+                Assimp.Node next = nodes_to_visit.Pop();
+                if (next.Name == bonename)
+                {
+                    return true;
+                }
+
+                foreach (Assimp.Node nextchild in next.Children)
+                {
+                    nodes_to_visit.Push(nextchild);
+                }
+            }
+            return false;
+        }
+
+        public static List<Assimp.Node> getMeshNodes(Assimp.Scene scene)
+        {
+            Stack<Assimp.Node> nodes_to_visit = new Stack<Assimp.Node>();
+            nodes_to_visit.Push(scene.RootNode);
+            List<Assimp.Node> meshnodes = new List<Assimp.Node>();
+
+            while (nodes_to_visit.Count > 0)
+            {
+                Assimp.Node next = nodes_to_visit.Pop();
+                if (next.HasMeshes)
+                {
+                    meshnodes.Add(next);
+                }
+
+                foreach (Assimp.Node nextchild in next.Children)
+                {
+                    nodes_to_visit.Push(nextchild);
+                }
+            }
+
+            return meshnodes;
+        }
+
+
+        public static Assimp.Node GetRootBone(Assimp.Scene scene, string root_marker, string root_name, bool auto_detect)
         {
             Assimp.Node root = null;
+            if (auto_detect) { 
+                Console.WriteLine("Attempting automated skeleton root detection...");
+                Assimp.Bone bone = null;
+                Assimp.Node meshparent = null;
+                foreach (Assimp.Mesh mesh in scene.Meshes)
+                {
+                    if (bone != null) { 
+                        foreach (Assimp.Bone meshbone in mesh.Bones)
+                        {
+                            bone = meshbone;
+                            break;
+                        }
+                    }
+                }
 
+                if (bone == null)
+                {
+                    Console.WriteLine("Model is not rigged to any bone.");
+                    return root;
+                }
+
+                Assimp.Node parent = null;
+                foreach (Assimp.Node meshnode in getMeshNodes(scene))
+                {
+                    if (parent == null) { 
+                        parent = meshnode.Parent;
+                    }
+                    else if (parent != meshnode.Parent)
+                    {
+                        if (!IsChildOf(parent, meshnode))
+                        {
+                            Console.WriteLine("Warning, node {0} is not child of detected skeleton root {1}", meshnode.Name, parent.Name);
+                        }
+                    }
+                } 
+                foreach (Assimp.Node child in parent.Children)
+                {
+                    if (!child.HasMeshes)
+                    {
+                        if (IsChildOf(child, bone.Name))
+                        {
+                            Console.WriteLine("Detected {0} as root bone.", child.Name);
+                            root = child;
+                        }
+                    }
+                    
+                }
+                if (bone == null)
+                {
+                    return root;
+                }
+            }
+
+            // Search for skeleton root marker
             for (int i = 0; i < scene.RootNode.ChildCount; i++) {
                 Console.WriteLine(scene.RootNode.Children[i].Name);
                 if (scene.RootNode.Children[i].Name == root_marker) {
@@ -130,6 +233,7 @@ namespace SuperBMDLib.BMD
                 return root;
             }
 
+            // Search for skeleton root bone
             Queue<Assimp.Node> nodes_to_visit = new Queue<Assimp.Node>();
             nodes_to_visit.Enqueue(scene.RootNode);
 
@@ -163,7 +267,7 @@ namespace SuperBMDLib.BMD
         {
             BoneNameIndices = new Dictionary<string, int>();
             FlatSkeleton = new List<Rigging.Bone>();
-            Assimp.Node root = GetRootBone(scene, args.skeleton_root_marker, args.skeleton_root_name);
+            Assimp.Node root = GetRootBone(scene, args.skeleton_root_marker, args.skeleton_root_name, args.skeleton_autodetect);
             
             /*for (int i = 0; i < scene.RootNode.ChildCount; i++)
             {

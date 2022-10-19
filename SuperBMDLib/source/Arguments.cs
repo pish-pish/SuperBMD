@@ -33,6 +33,7 @@ namespace SuperBMDLib
         public bool export_skeleton_root;
         public string skeleton_root_marker;
         public string skeleton_root_name;
+        public bool skeleton_autodetect;
 
         /// <summary>
         /// Initializes a new Arguments instance from the arguments passed in to SuperBMD.
@@ -65,6 +66,7 @@ namespace SuperBMDLib
             export_skeleton_root = true;
             skeleton_root_marker = "skeleton_root";
             skeleton_root_name = null;
+            skeleton_autodetect = false;
             int positional_arguments = 0;
 
             for (int i = 0; i < args.Length; i++)
@@ -172,6 +174,9 @@ namespace SuperBMDLib
                             throw new Exception("The parameters were malformed.");
                         skeleton_root_name = args[i + 1];
                         i++;
+                        break;
+                    case "--root_autodetect":
+                        skeleton_autodetect = true;
                         break;
                     default:
                         if (positional_arguments == 0) {

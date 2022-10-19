@@ -165,7 +165,7 @@ namespace SuperBMDLib
             Console.WriteLine();
             Console.Write("Searching for the Skeleton Root");
 
-            Assimp.Node root = JNT1.GetRootBone(scene, args.skeleton_root_marker, args.skeleton_root_name);
+            Assimp.Node root = JNT1.GetRootBone(scene, args.skeleton_root_marker, args.skeleton_root_name, args.skeleton_autodetect);
 
             /*for (int i = 0; i < scene.RootNode.ChildCount; i++) {
                 if (scene.RootNode.Children[i].Name.ToLowerInvariant() == "skeleton_root") {
