@@ -14,13 +14,19 @@ using Newtonsoft.Json.Converters;
 namespace SuperBMDLib.BMD
 {
     struct PresetResult {
-        public PresetResult(Material mat, int i)
+        public PresetResult(Material mat, int i, string newname)
         {
             preset = mat;
             index = i;
+            name = newname;
+        }
+        public bool DoNameChange()
+        {
+            return name != null;
         }
         public Material preset;
         public int index;
+        public string name;
     }
 
     public class MAT3
@@ -609,16 +615,22 @@ namespace SuperBMDLib.BMD
 
                 if (mat.Name == name) {
                     //Console.WriteLine(String.Format("Applying material preset to {1}", default_mat.Name, name));
-                    return new PresetResult(mat, i);
+                    return new PresetResult(mat, i, null);
                 }
+
+                if (name.EndsWith("-material") && name.StartsWith(mat.Name)) {
+                    Console.WriteLine(String.Format("Matched up {0} with {1} from the json file and renamed", name, mat.Name));
+                    return new PresetResult(mat, i, mat.Name);
+                }
+
                 if (name.StartsWith("m")) {
                     string sanitized = Model.AssimpMatnamePartSanitize(mat.Name);
                     if (
                         (name.Length > 2 && name.Substring(2) == sanitized) ||
                         (name.Length > 3 && name.Substring(3) == sanitized) ||
                         (name.Length > 4 && name.Substring(4) == sanitized)) {
-                        Console.WriteLine(String.Format("Matched up {0} with {1} from the json file", name, mat.Name));
-                        return new PresetResult(mat, i);
+                        Console.WriteLine(String.Format("Matched up {0} with {1} from the json file and renamed", name, mat.Name));
+                        return new PresetResult(mat, i, mat.Name);
                     }
                 }
                 i++;
@@ -631,7 +643,7 @@ namespace SuperBMDLib.BMD
                 return null;
             }
             else { 
-                return new PresetResult(default_mat, -1);
+                return new PresetResult(default_mat, -1, null);
             }
         }
 
@@ -783,6 +795,13 @@ namespace SuperBMDLib.BMD
                         string substring = "_"+subs[1];
                         bmdMaterial.Name = bmdMaterial.Name.Replace(substring, "");
                     }
+
+                    if (((PresetResult)result).DoNameChange())
+                    {
+                        Console.WriteLine("Renamed {0} to {1}", bmdMaterial.Name, ((PresetResult)result).name);
+                        bmdMaterial.Name = ((PresetResult)result).name;
+                    }
+
                     Console.Write(string.Format("Applying material preset for {0}...", meshMat.Name));
                     SetPreset(bmdMaterial, preset);
                 }
