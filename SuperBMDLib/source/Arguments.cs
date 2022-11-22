@@ -34,6 +34,7 @@ namespace SuperBMDLib
         public string skeleton_root_marker;
         public string skeleton_root_name;
         public bool skeleton_autodetect;
+        public bool include_normals;
 
         /// <summary>
         /// Initializes a new Arguments instance from the arguments passed in to SuperBMD.
@@ -67,6 +68,7 @@ namespace SuperBMDLib
             skeleton_root_marker = "skeleton_root";
             skeleton_root_name = null;
             skeleton_autodetect = false;
+            include_normals = true;
             int positional_arguments = 0;
 
             for (int i = 0; i < args.Length; i++)
@@ -177,6 +179,9 @@ namespace SuperBMDLib
                         break;
                     case "--root_autodetect":
                         skeleton_autodetect = true;
+                        break;
+                    case "--no_normals":
+                        include_normals = false;
                         break;
                     default:
                         if (positional_arguments == 0) {
