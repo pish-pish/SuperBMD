@@ -59,7 +59,7 @@ namespace SuperBMDLib.Geometry
             MatrixType = matrixType;
         }
 
-        public void SetDescriptorAttributes(Mesh mesh, int jointCount)
+        public void SetDescriptorAttributes(Mesh mesh, int jointCount, bool include_normals)
         {
             int indexOffset = 0;
 
@@ -68,7 +68,7 @@ namespace SuperBMDLib.Geometry
 
             if (mesh.HasVertices)
                 Descriptor.SetAttribute(Enums.GXVertexAttribute.Position, Enums.VertexInputType.Index16, indexOffset++);
-            if (mesh.HasNormals)
+            if (mesh.HasNormals && include_normals)
                 Descriptor.SetAttribute(Enums.GXVertexAttribute.Normal, Enums.VertexInputType.Index16, indexOffset++);
             for (int i = 0; i < 2; i++)
             {
