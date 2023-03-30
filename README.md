@@ -114,8 +114,8 @@ above on how to extract and apply material files. Writing bat files is recommend
 names are exactly the name of the materials of the model when exported from a 3D modelling program. 
 You do not have to cover every material, SuperBMD will generate material data for the rest. You can 
 also use a default material setup for every material in the model by naming the material in the JSON ``__MatDefault``. 
-You can define a default material for a category of materials: If a material entry in the json is named ``__MatDefault::Category``, 
-then every material in your model that contains the word ``Category`` will have that material applied to it.
+You can define a default material for a category of materials: If a material entry in the json is named ``__MatDefault:Category``, 
+then every material in your model that contains the word ``_Category`` (note the underscore) will have that material applied to it.
 
 * The ``TextureNames`` section contains the names of the textures used by the material. Usually the 
 first texture is the main texture, the rest are used for graphics effects. When using a ``__MatDefault`` 
