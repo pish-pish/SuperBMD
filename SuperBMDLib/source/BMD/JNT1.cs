@@ -244,14 +244,36 @@ namespace SuperBMDLib.BMD
             for (int i = 0; i < scene.RootNode.ChildCount; i++) {
                 Console.WriteLine(scene.RootNode.Children[i].Name);
                 if (scene.RootNode.Children[i].Name == root_marker) {
-                    if (scene.RootNode.Children[i].ChildCount == 0) {
+                    if (scene.RootNode.Children[i].ChildCount == 0)
+                    {
                         throw new System.Exception(
                             String.Format(
                                 "{0} has no children! If you are making a rigged model, make sure {0} contains the root of your skeleton.",
                                 root_marker)
                             );
                     }
-                    root = scene.RootNode.Children[i].Children[0];
+                    Assimp.NodeCollection skeleton_root_children = scene.RootNode.Children[i].Children;
+                    root = skeleton_root_children[0];
+                    if (root.HasMeshes)
+                    {
+                        Console.WriteLine("Detected root bone {0} has meshes so probably isn't a root bone. Continuing search.", root.Name);
+                        bool success = false;
+                        for (int j = 1; j < skeleton_root_children.Count; j++)
+                        {
+                            if (!skeleton_root_children[j].HasMeshes)
+                            {
+                                root = skeleton_root_children[j];
+                                Console.WriteLine("Chosen {0} as root bone.", root.Name);
+                                success = true;
+                                break;
+                            }
+                        }
+                        if (!success)
+                        {
+                            throw new Exception("Failed to detect non-mesh object that could be a root bone, cannot continue.");
+                        }
+
+                    }
                     break;
                 }
                 Console.Write(".");
