@@ -142,10 +142,12 @@ namespace SuperBMDLib.BMD
             writer.Write((short)-1);
 
             writer.Write(20); // Offset to weight type bools, always 20
-            writer.Write(20 + WeightTypeCheck.Count); // Offset to indices, always 20 + number of weight type bools
+            writer.Write(20 + WeightTypeCheck.Count + WeightTypeCheck.Count % 2); // Offset to indices, always 20 + number of weight type bools + pad
 
             foreach (bool bol in WeightTypeCheck)
                 writer.Write(bol);
+
+            StreamUtility.PadStreamWithString(writer, 2);
 
             foreach (int inte in Indices)
                 writer.Write((short)inte);
