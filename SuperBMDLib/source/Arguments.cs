@@ -37,6 +37,7 @@ namespace SuperBMDLib
         public bool include_normals;
         public string material_folder;
         public string texture_path;
+        public string output_material_folder;
         public bool file_name_as_mat_name;
 
         /// <summary>
@@ -75,6 +76,7 @@ namespace SuperBMDLib
             material_folder = "";
             texture_path = "";
             file_name_as_mat_name = false;
+            output_material_folder = "";
             int positional_arguments = 0;
 
             for (int i = 0; i < args.Length; i++)
@@ -111,6 +113,13 @@ namespace SuperBMDLib
                             throw new Exception("The parameters were malformed.");
 
                         output_materials_path = args[i + 1];
+                        i++;
+                        break;
+                    case "--outmatfolder":
+                        if (i + 1 >= args.Length)
+                            throw new Exception("The parameters were malformed.");
+
+                        output_material_folder = args[i + 1];
                         i++;
                         break;
                     case "-x":

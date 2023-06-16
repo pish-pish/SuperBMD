@@ -129,6 +129,11 @@ namespace SuperBMDLib
 
             }
 
+            if (args.output_material_folder != "")
+            {
+                Materials.DumpMaterialsFolder(args.output_material_folder);
+            }
+
             foreach (Geometry.Shape shape in Shapes.Shapes)
                 packetCount += shape.Packets.Count;
 

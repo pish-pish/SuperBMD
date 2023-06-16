@@ -1626,6 +1626,26 @@ namespace SuperBMDLib.BMD
             }
         }
 
+        public void DumpMaterialsFolder(string out_path)
+        {
+            JsonSerializer serial = new JsonSerializer();
+            serial.Formatting = Formatting.Indented;
+            serial.Converters.Add(new StringEnumConverter());
+            System.IO.Directory.CreateDirectory(out_path);
+            foreach (Material mat in m_Materials) { 
+                string fname = mat.Name+".json";
+                string out_fpath = System.IO.Path.Combine(out_path, fname);
+
+                using (FileStream strm = new FileStream(out_fpath, FileMode.Create, FileAccess.Write))
+                {
+                    StreamWriter writer = new StreamWriter(strm);
+                    writer.AutoFlush = true;
+                    //var matlist = 
+                    serial.Serialize(writer, new List<Material>() { mat });
+                }
+            }
+        }
+
         public void LoadAdditionalTextures(TEX1 tex1, string texpath, bool readMipmaps) {
             //string modeldir = Path.GetDirectoryName(modelpath);
             foreach (Material mat in m_Materials) {
