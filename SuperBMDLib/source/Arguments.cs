@@ -35,6 +35,9 @@ namespace SuperBMDLib
         public string skeleton_root_name;
         public bool skeleton_autodetect;
         public bool include_normals;
+        public string material_folder;
+        public string texture_path;
+        public bool file_name_as_mat_name;
 
         /// <summary>
         /// Initializes a new Arguments instance from the arguments passed in to SuperBMD.
@@ -69,6 +72,9 @@ namespace SuperBMDLib
             skeleton_root_name = null;
             skeleton_autodetect = false;
             include_normals = true;
+            material_folder = "";
+            texture_path = "";
+            file_name_as_mat_name = false;
             int positional_arguments = 0;
 
             for (int i = 0; i < args.Length; i++)
@@ -81,6 +87,23 @@ namespace SuperBMDLib
                             throw new Exception("The parameters were malformed.");
 
                         materials_path = args[i + 1];
+                        i++;
+                        break;
+                    case "--matfolder":
+                        if (i + 1 >= args.Length)
+                            throw new Exception("The parameters were malformed.");
+
+                        material_folder = args[i + 1];
+                        i++;
+                        break;
+                    case "--fname_is_matname":
+                        file_name_as_mat_name = true;
+                        break;
+                    case "--texfolder":
+                        if (i + 1 >= args.Length)
+                            throw new Exception("The parameters were malformed.");
+
+                        texture_path = args[i + 1];
                         i++;
                         break;
                     case "--outmat":

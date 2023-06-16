@@ -50,35 +50,71 @@ namespace SuperBMDLib
 
             }
 
-            if (cmd_args.materials_path != "") {
+            if (cmd_args.materials_path != "" || cmd_args.material_folder != "") {
+                var mats = new List<string>();
+
+                if (cmd_args.materials_path != "")
+                {
+                    mats.Add(cmd_args.materials_path);
+                }
+
+                if (cmd_args.material_folder != "")
+                {
+                    mats.Clear();
+                    foreach (string fpath in Directory.GetFiles(cmd_args.material_folder)) {
+                        FileInfo fpathinfo = new FileInfo(fpath);
+                        if (fpathinfo.Extension.ToLower() == ".json")
+                        {
+                            mats.Add(fpath);
+                        }
+                    }
+                }
+
                 JsonSerializer serializer = new JsonSerializer();
 
                 serializer.Converters.Add(
                     (new Newtonsoft.Json.Converters.StringEnumConverter())
                 );
                 Console.WriteLine("Reading the Materials...");
-                using (TextReader file = File.OpenText(cmd_args.materials_path)) {
-                    using (JsonTextReader reader = new JsonTextReader(file)) {
-                        try {
-                            mat_presets = serializer.Deserialize<List<Material>>(reader);
-                        }
-                        catch (Newtonsoft.Json.JsonReaderException e) {
-                            Console.WriteLine(String.Format("Error encountered while reading {0}", cmd_args.materials_path));
-                            Console.WriteLine(String.Format("JsonReaderException: {0}", e.Message));
-                            return;
-                        }
-                        catch (Newtonsoft.Json.JsonSerializationException e) {
-                            Console.WriteLine(String.Format("Error encountered while reading {0}", cmd_args.materials_path));
-                            Console.WriteLine(String.Format("JsonSerializationException: {0}", e.Message));
-                            return;
+                mat_presets = new List<Material>();
+
+                foreach (string jsonpath in mats) { 
+                    using (TextReader file = File.OpenText(jsonpath)) {
+                        using (JsonTextReader reader = new JsonTextReader(file)) {
+                            try {
+                                var preset = serializer.Deserialize<List<Material>>(reader);
+
+                                if (cmd_args.file_name_as_mat_name && preset.Count == 1){
+                                    FileInfo fpathinfo = new FileInfo(jsonpath);
+                                    Material mat = preset[0];
+                                    mat.Name = fpathinfo.Name.Substring(0, fpathinfo.Name.Length-fpathinfo.Extension.Length);
+                                }
+                                mat_presets.AddRange(preset);
+                            }
+                            catch (Newtonsoft.Json.JsonReaderException e) {
+                                Console.WriteLine(String.Format("Error encountered while reading {0}", jsonpath));
+                                Console.WriteLine(String.Format("JsonReaderException: {0}", e.Message));
+                                return;
+                            }
+                            catch (Newtonsoft.Json.JsonSerializationException e) {
+                                Console.WriteLine(String.Format("Error encountered while reading {0}", jsonpath));
+                                Console.WriteLine(String.Format("JsonSerializationException: {0}", e.Message));
+                                return;
+                            }
                         }
                     }
                 }
             }
-
             string additionalTexPath = null;
             if (cmd_args.materials_path != "") {
                 additionalTexPath = Path.GetDirectoryName(cmd_args.materials_path);
+            }
+            if (cmd_args.material_folder != "")
+            {
+                additionalTexPath = Path.GetDirectoryName(cmd_args.material_folder);
+            }
+            if (cmd_args.texture_path != "") {
+                additionalTexPath = cmd_args.texture_path;
             }
             FileInfo fi = new FileInfo(cmd_args.input_path);
             string destinationFormat = (fi.Extension == ".bmd" || fi.Extension == ".bdl") ? ".DAE" : (cmd_args.output_bdl ? ".BDL" : ".BMD");
