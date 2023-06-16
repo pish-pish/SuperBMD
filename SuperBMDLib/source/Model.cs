@@ -9,6 +9,7 @@ using System.IO;
 using SuperBMDLib.BMD;
 using SuperBMDLib.Animation;
 using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace SuperBMDLib
 {
@@ -47,7 +48,7 @@ namespace SuperBMDLib
             else
             {
                 Assimp.AssimpContext cont = new Assimp.AssimpContext();
-
+                
                 // AssImp adds dummy nodes for pivots from FBX, so we'll force them off
                 cont.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
 
@@ -58,7 +59,16 @@ namespace SuperBMDLib
                     // effectively disabling tri stripping
                     postprocess = Assimp.PostProcessSteps.Triangulate; 
                 }
+
+                
+                
                 Assimp.Scene aiScene = cont.ImportFile(args.input_path, postprocess);
+
+                if (Path.GetExtension(args.input_path).ToLower() == ".dae")
+                {
+                    Model.RenameMat(aiScene, args.input_path);
+                }
+
 
                 output = new Model(aiScene, args, mat_presets, additionalTexPath);
             }
@@ -1016,6 +1026,36 @@ namespace SuperBMDLib
                 }
             }
         }
+    
+        private static void RenameMat(Assimp.Scene scene, string colladafile)
+        {
+            var reader = new XmlTextReader(colladafile);
+            reader.Namespaces = false;
+            XmlDocument doc = new XmlDocument();
+            doc.Load(reader);
+            reader.Close();
+            XmlNodeList result = doc.SelectNodes("//COLLADA/library_materials/material[@id and @name]");
+
+            var materialmap = new Dictionary<String, String>();
+
+            foreach (XmlNode xmlnode in result)
+            {
+                var id = xmlnode.Attributes["id"].Value;
+                var name = xmlnode.Attributes["name"].Value;
+                if (id != null && name != null) { 
+                    materialmap[id] = name; 
+                }
+            }
+
+            foreach (Assimp.Material mat in scene.Materials)
+            {
+                if (mat.Name.EndsWith("-material") && materialmap.ContainsKey(mat.Name))
+                {
+                    mat.Name = materialmap[mat.Name];
+                }
+            }
+
+        }    
     }
 
 
