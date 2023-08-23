@@ -1076,7 +1076,7 @@ namespace SuperBMDLib
         public int MAT3Size; //{ get; private set; }
         public int MDL3Size; //{ get; private set; }
         public int TEX1Size; //{ get; private set; }
-
+        public List<Tuple<int, int>> PacketInfo;
         public BMDInfo() {
             TotalSize = 0;
             INF1Size = 0;
@@ -1088,6 +1088,7 @@ namespace SuperBMDLib
             MAT3Size = 0;
             MDL3Size = 0;
             TEX1Size = 0;
+            PacketInfo = new List<Tuple<int, int>>();
         }
 
         public void DisplayInfo() {
