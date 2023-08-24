@@ -105,7 +105,7 @@ namespace SuperBMDLib.Geometry
             return triindices;
         }
 
-        public void ProcessVerticesWithoutWeights(Mesh mesh, VertexData vertData, bool degenerateTriangles = false)
+        public void ProcessVerticesWithoutWeights(Mesh mesh, VertexData vertData, EVP1 envelopes, bool degenerateTriangles = false, int jointindex=0, int mtxindex=0, bool transformverts=false)
         {
             Packet pack = new Packet();
 
@@ -169,7 +169,7 @@ namespace SuperBMDLib.Geometry
                     Vertex vert = new Vertex();
 
                     Weight rootWeight = new Weight();
-                    rootWeight.AddWeight(1.0f, 0);
+                    rootWeight.AddWeight(1.0f, jointindex);
 
                     vert.SetWeight(rootWeight);
                     //int vertIndex = face.Indices[i];
@@ -179,6 +179,11 @@ namespace SuperBMDLib.Geometry
                             case Enums.GXVertexAttribute.Position:
                                 List<Vector3> posData = (List<Vector3>)vertData.GetAttributeData(Enums.GXVertexAttribute.Position);
                                 Vector3 vertPos = mesh.Vertices[vertIndex].ToOpenTKVector3();
+                                if (transformverts) { 
+                                    Matrix4 ibm = envelopes.InverseBindMatrices[jointindex];
+
+                                    vertPos = Vector3.TransformPosition(vertPos, ibm);
+                                }
 
                                 if (!posData.Contains(vertPos))
                                     posData.Add(vertPos);
@@ -189,6 +194,12 @@ namespace SuperBMDLib.Geometry
                             case Enums.GXVertexAttribute.Normal:
                                 List<Vector3> normData = (List<Vector3>)vertData.GetAttributeData(Enums.GXVertexAttribute.Normal);
                                 Vector3 vertNrm = mesh.Normals[vertIndex].ToOpenTKVector3();
+                                if (transformverts)
+                                {
+                                    Matrix4 ibm = envelopes.InverseBindMatrices[jointindex];
+
+                                    vertNrm = Vector3.TransformNormal(vertNrm, ibm);
+                                }
 
                                 if (!normData.Contains(vertNrm))
                                     normData.Add(vertNrm);
@@ -265,7 +276,7 @@ namespace SuperBMDLib.Geometry
             }
 
             
-            pack.MatrixIndices.Add(0);
+            pack.MatrixIndices.Add(mtxindex);
             Packets.Add(pack);
 
             Bounds.GetBoundsValues(AttributeData.Positions);

@@ -112,7 +112,7 @@ namespace SuperBMDLib.BMD
                 BoundingVolume shapeVol = new BoundingVolume(reader);
 
                 long curOffset = reader.BaseStream.Position;
-
+                int totalPacketSize = 0;
                 ShapeVertexDescriptor descriptor = new ShapeVertexDescriptor(reader, offset + attributeDataOffset + shapeAttributeOffset);
 
                 List<Packet> shapePackets = new List<Packet>();
@@ -120,7 +120,7 @@ namespace SuperBMDLib.BMD
                 {
                     int packetSize = packetData[j + firstPacketIndex].Item1;
                     int packetOffset = packetData[j + firstPacketIndex].Item2;
-
+                    totalPacketSize += packetSize;
                     Packet pack;
                     if (j + firstPacketIndex < matrixIndices.Count)
                     {
@@ -190,9 +190,32 @@ namespace SuperBMDLib.BMD
                     meshShape.ProcessVerticesWithWeights(mesh, vertData, boneNames, envelopes, partialWeight, tristripMode == "all", degenerateTriangles);
                 else
                 {
-                    meshShape.ProcessVerticesWithoutWeights(mesh, vertData, degenerateTriangles);
+                    
+
+                    var jointindex = 0;
+                    var transformVerts = false;
+                    if (mesh.Name.Contains("_NoWeights_"))
+                    {
+                        string[] result = mesh.Name.Split(new string[] {"_NoWeights_" }, StringSplitOptions.None);
+                        if (result.Length == 1)
+                        {
+                            throw new Exception(String.Format("Missing Bone Name after _NoWeights_: {0}", mesh.Name));
+                        }
+                        else if (!boneNames.ContainsKey(result[1]))
+                        {
+                            throw new Exception(String.Format("No such bone name: {0}", result[1]));
+                        }
+                        jointindex = boneNames[result[1]];
+                        transformVerts = true;
+                    }
+
                     partialWeight.WeightTypeCheck.Add(false);
-                    partialWeight.Indices.Add(0);
+                    partialWeight.Indices.Add(jointindex);
+
+                    meshShape.ProcessVerticesWithoutWeights(mesh, vertData, envelopes, degenerateTriangles, jointindex, partialWeight.Indices.Count-1, transformVerts);
+                    
+                    Console.WriteLine("Assigned joint index {0} to {1}", jointindex, mesh.Name);
+                    
                 }
 
                 Shapes.Add(meshShape);
@@ -285,6 +308,7 @@ namespace SuperBMDLib.BMD
                 Mesh mesh = new Mesh(meshname, PrimitiveType.Triangle);
                 mesh.MaterialIndex = i;
                 bool[] outOfRangeCoords_detected = {false, false, false, false, false, false, false, false};
+                List<String> usedbones = new List<String>();
 
                 foreach (Packet pack in curShape.Packets)
                 {
@@ -304,7 +328,10 @@ namespace SuperBMDLib.BMD
                                 for (int j = 0; j < vert.VertexWeight.WeightCount; j++)
                                 {
                                     Rigging.Bone curWeightBone = flatSkeleton[vert.VertexWeight.BoneIndices[j]];
-
+                                    if (!usedbones.Contains(String.Format("{0}-{1}", curWeightBone.Name, vert.VertexWeight.BoneIndices[j])))
+                                    {
+                                        usedbones.Add(String.Format("{0}-{1}", curWeightBone.Name, vert.VertexWeight.BoneIndices[j]));
+                                    }
                                     int assBoneIndex = mesh.Bones.FindIndex(x => x.Name == curWeightBone.Name);
 
                                     if (assBoneIndex == -1)
@@ -478,6 +505,13 @@ namespace SuperBMDLib.BMD
                 }
                 scene.Meshes.Add(mesh);
                 Console.Write("✓");
+                Console.WriteLine();
+                Console.WriteLine("Used bones by {0}:", mesh.Name);
+                foreach( string name in usedbones)
+                {
+                    Console.Write(name);
+                    Console.Write(",");
+                }
                 Console.WriteLine();
             }
         }
