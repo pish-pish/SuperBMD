@@ -169,7 +169,7 @@ namespace SuperBMDLib
             Console.WriteLine("Made possible with help from arookas, LordNed, xDaniel, and many others.");
             Console.WriteLine("Visit https://github.com/Sage-of-Mirrors/SuperBMD/wiki for more information.");
             Console.WriteLine();
-            Console.WriteLine("Usage: SuperBMD.exe (inputfilepath) [outputfilepath] [-m/mat filepath]\n" +
+            Console.WriteLine("Usage: SuperBMD.exe (inputfilepath) [outputfilepath] [-m/--mat filepath]\n" +
                               "       [-x/--texheader filepath] [-t/--tristrip mode] [-r/--rotate] [-b/--bdl]");
             Console.WriteLine();
             Console.WriteLine("Parameters:");
@@ -182,16 +182,22 @@ namespace SuperBMDLib
             Console.WriteLine("\t\tstatic: Only generate tristrips for static (unrigged) meshes.");
             Console.WriteLine("\t\tall:    Generate tristrips for all meshes.");
             Console.WriteLine("\t\tnone:   Do not generate tristrips.");
+            Console.WriteLine("\t--transform_mode        mode\t\tTransform mode for bone animation transforms.");
+            Console.WriteLine("\t\tBasic");
+            Console.WriteLine("\t\tXsi");
+            Console.WriteLine("\t\tMaya");
+            Console.WriteLine("\t\tMask");
             Console.WriteLine();
             Console.WriteLine("\t-r/--rotate\t\t\t\tRotate the model from Z-up to Y-up orientation.");
             Console.WriteLine("\t-b/--bdl\t\t\t\tGenerate a BDL instead of a BMD.");
-            Console.WriteLine("\t-b/--nosort\t\t\t\tDisable naturalistic sorting of meshes by name.");
-            Console.WriteLine("\t-b/--onematpermesh\t\t\tEnsure one material per mesh.");
-            Console.WriteLine("\t-b/--exportobj\t\t\t\tIf input is BMD/BDL, export the model as Wavefront OBJ instead of Collada (.DAE).");
-            Console.WriteLine("\t-b/--texfloat32\t\t\t\tOn conversion into BMD, always store texture UV coordinates as 32 bit floats.");
-            Console.WriteLine("\t-b/--degeneratetri\t\t\tOn conversion into BMD, write triangle lists as triangle strips using degenerate triangles.");
+            Console.WriteLine("\t--nosort\t\t\t\tDisable naturalistic sorting of meshes by name.");
+            Console.WriteLine("\t--onematpermesh\t\t\tEnsure one material per mesh.");
+            Console.WriteLine("\t--exportobj\t\t\t\tIf input is BMD/BDL, export the model as Wavefront OBJ instead of Collada (.DAE).");
+            Console.WriteLine("\t--texfloat32\t\t\t\tOn conversion into BMD, always store texture UV coordinates as 32 bit floats.");
+            Console.WriteLine("\t--degeneratetri\t\t\tOn conversion into BMD, write triangle lists as triangle strips using degenerate triangles.");
+            Console.WriteLine("\t--envtex_attribute\t\t\tOn conversion into BMD, create a TexMtxIdx attribute for every mesh with an environment mapped texture.");
             Console.WriteLine();
-            Console.WriteLine("\t-b/--profile\t\t\t\tGenerate a report with information on the .BMD/.BDL (Other formats not supported)");
+            Console.WriteLine("\t--profile\t\t\t\tGenerate a report with information on the .BMD/.BDL (Other formats not supported)");
             Console.WriteLine();
             Console.WriteLine("\t-a/--animation\t\t\t\tGenerate *.bck files from animation data stored in DAE, if present");
             Console.WriteLine();
