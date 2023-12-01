@@ -223,6 +223,7 @@ namespace SuperBMDLib
                         if (i + 1 >= args.Length)
                             throw new Exception("The parameters were malformed.");
                         transform_mode = (Scenegraph.Enums.TransformMode)Enum.Parse(typeof(Scenegraph.Enums.TransformMode), args[i + 1]);
+                        i++;
                         break;
                     case "--add_envtex_attribute":
                         add_envtex_attribute = true;
