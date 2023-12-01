@@ -13,7 +13,7 @@ using Newtonsoft.Json.Converters;
 
 namespace SuperBMDLib.BMD
 {
-    struct PresetResult {
+    public struct PresetResult {
         public PresetResult(Material mat, int i, string newname)
         {
             preset = mat;
@@ -65,7 +65,7 @@ namespace SuperBMDLib.BMD
         private List<byte> NumTexGensBlock;
         private List<byte> NumTevStagesBlock;
 
-        private string[] delimiter = new string[] {":" };
+        private static string[] delimiter = new string[] {":" };
 
         public MAT3(EndianBinaryReader reader, int offset, BMDInfo modelstats=null)
         {
@@ -568,7 +568,7 @@ namespace SuperBMDLib.BMD
             return mat_presets.IndexOf(mat);
         }
 
-        private PresetResult? FindMatPreset(string name, List<Material> mat_presets, bool mat_strict) {
+        public static PresetResult? FindMatPreset(string name, List<Material> mat_presets, bool mat_strict) {
             if (mat_presets == null) {
                 return null;
             } 

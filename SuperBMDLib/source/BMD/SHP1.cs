@@ -148,7 +148,7 @@ namespace SuperBMDLib.BMD
         }
 
         private SHP1(Assimp.Scene scene, VertexData vertData, Dictionary<string, int> boneNames, EVP1 envelopes, DRW1 partialWeight,
-            string tristripMode = "static", bool include_normals = false, bool degenerateTriangles = false)
+            string tristripMode = "static", bool include_normals = false, bool degenerateTriangles = false, bool addEnvAttrib = false, List<Materials.Material> mat_presets = null)
         {
             Shapes = new List<Shape>();
             RemapTable = new List<int>();
@@ -157,6 +157,7 @@ namespace SuperBMDLib.BMD
             {
                 Console.Write(mesh.Name+": ");
                 Shape meshShape;
+                string matName = scene.Materials[mesh.MaterialIndex].Name;
 
                 /*if (mesh.Name.Contains("Bill0")) {
                     meshShape = new Shape(0); // Matrix Type 0, unknown
@@ -179,11 +180,11 @@ namespace SuperBMDLib.BMD
 
                 if (forceUnweighted) { 
                     Console.WriteLine(String.Format("\nMesh {0} forced to be unweighted.", mesh.Name));
-                    meshShape.SetDescriptorAttributes(mesh, 1, include_normals);
+                    meshShape.SetDescriptorAttributes(mesh, 1, include_normals, addEnvAttrib, matName, mat_presets);
                 }
                 else
                 {
-                    meshShape.SetDescriptorAttributes(mesh, boneNames.Count, include_normals);
+                    meshShape.SetDescriptorAttributes(mesh, boneNames.Count, include_normals, addEnvAttrib, matName, mat_presets);
                 }
 
                 if (boneNames.Count > 1 && !forceUnweighted)
@@ -229,9 +230,9 @@ namespace SuperBMDLib.BMD
         }
 
         public static SHP1 Create(Scene scene, Dictionary<string, int> boneNames, VertexData vertData, EVP1 evp1, DRW1 drw1,
-            string tristrip_mode = "static", bool include_normals = false, bool degenerateTriangles = false)
+            string tristrip_mode = "static", bool include_normals = false, bool degenerateTriangles = false, bool addEnvAttrib = false, List<Materials.Material> mat_presets = null)
         {
-            SHP1 shp1 = new SHP1(scene, vertData, boneNames, evp1, drw1, tristrip_mode, include_normals, degenerateTriangles);
+            SHP1 shp1 = new SHP1(scene, vertData, boneNames, evp1, drw1, tristrip_mode, include_normals, degenerateTriangles, addEnvAttrib, mat_presets);
 
             return shp1;
         }

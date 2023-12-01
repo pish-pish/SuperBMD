@@ -274,7 +274,7 @@ namespace SuperBMDLib
             Console.WriteLine();
             Console.WriteLine("Generating the Mesh Data ->");
             Shapes = SHP1.Create(scene, Joints.BoneNameIndices, VertexData.Attributes, SkinningEnvelopes, PartialWeightData, 
-                args.tristrip_mode, args.include_normals, args.degenerateTriangles);
+                args.tristrip_mode, args.include_normals, args.degenerateTriangles, args.add_envtex_attribute, mat_presets);
 
             //Joints.UpdateBoundingBoxes(VertexData);
 
@@ -305,7 +305,7 @@ namespace SuperBMDLib
 
             Console.WriteLine();
             Console.Write("Generating the Joints");
-            Scenegraph = new INF1(scene, Joints, args.material_order_strict);
+            Scenegraph = new INF1(scene, Joints, args.material_order_strict, args.transform_mode);
 
             foreach (Geometry.Shape shape in Shapes.Shapes)
                 packetCount += shape.Packets.Count;

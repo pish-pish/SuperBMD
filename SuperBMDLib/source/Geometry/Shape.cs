@@ -13,6 +13,7 @@ using BrawlLib.Modeling.Triangle_Converter;
 using System.Diagnostics;
 using SuperBMD.source.Geometry.Enums;
 using Newtonsoft.Json;
+using SuperBMDLib.Materials;
 
 namespace SuperBMDLib.Geometry
 {
@@ -59,12 +60,17 @@ namespace SuperBMDLib.Geometry
             MatrixType = matrixType;
         }
 
-        public void SetDescriptorAttributes(Mesh mesh, int jointCount, bool include_normals)
+        public void SetDescriptorAttributes(Mesh mesh, int jointCount, bool include_normals, bool addEnvAttrib, string matName, List<Materials.Material> mat_presets = null)
         {
             int indexOffset = 0;
 
             if (jointCount > 1)
+            {
                 Descriptor.SetAttribute(Enums.GXVertexAttribute.PositionMatrixIdx, Enums.VertexInputType.Direct, indexOffset++);
+
+                if (addEnvAttrib)
+                    SetEnvTexMtxIdxAttribute(indexOffset++, matName, mat_presets);
+            }
 
             if (mesh.HasVertices)
                 Descriptor.SetAttribute(Enums.GXVertexAttribute.Position, Enums.VertexInputType.Index16, indexOffset++);
@@ -82,6 +88,26 @@ namespace SuperBMDLib.Geometry
                     Descriptor.SetAttribute(Enums.GXVertexAttribute.Tex0 + i, Enums.VertexInputType.Index16, indexOffset++);
             }
             Console.Write(".");
+        }
+
+        private void SetEnvTexMtxIdxAttribute(int index, string matName, List<Materials.Material> mat_presets = null)
+        {
+            PresetResult? result = MAT3.FindMatPreset(matName, mat_presets, false);
+            if (result == null)
+                return;
+
+            Materials.Material mat = ((PresetResult)result).preset;
+            for (int i = 0; i < mat.TexCoord1Gens.Length; i++)
+            {
+                if (mat.TexCoord1Gens[i] == null)
+                    continue;
+                TexCoordGen texGen = mat.TexCoord1Gens[i].Value;
+
+                if (texGen.Source == Materials.Enums.TexGenSrc.Normal)
+                {
+                    Descriptor.SetAttribute(Enums.GXVertexAttribute.Tex0Mtx + i, Enums.VertexInputType.Direct, index);
+                }
+            }
         }
 
         uint[] MakeTriIndexList(Mesh mesh) {
