@@ -239,42 +239,42 @@ namespace SuperBMDLib.Geometry
 
             if (desc.CheckAttribute(GXVertexAttribute.Tex0Mtx))
             {
-                WriteAttributeIndex(writer, 30 + PositionMatrixIDxIndex * 3, desc.Attributes[GXVertexAttribute.Tex0Mtx].Item1);
+                WriteAttributeIndex(writer, 30 + Tex0MtxIndex * 3, desc.Attributes[GXVertexAttribute.Tex0Mtx].Item1);
             }
 
             if (desc.CheckAttribute(GXVertexAttribute.Tex1Mtx))
             {
-                WriteAttributeIndex(writer, 30 + PositionMatrixIDxIndex * 3, desc.Attributes[GXVertexAttribute.Tex1Mtx].Item1);
+                WriteAttributeIndex(writer, 30 + Tex1MtxIndex * 3, desc.Attributes[GXVertexAttribute.Tex1Mtx].Item1);
             }
 
             if (desc.CheckAttribute(GXVertexAttribute.Tex2Mtx))
             {
-                WriteAttributeIndex(writer, 30 + PositionMatrixIDxIndex * 3, desc.Attributes[GXVertexAttribute.Tex2Mtx].Item1);
+                WriteAttributeIndex(writer, 30 + Tex2MtxIndex * 3, desc.Attributes[GXVertexAttribute.Tex2Mtx].Item1);
             }
 
             if (desc.CheckAttribute(GXVertexAttribute.Tex3Mtx))
             {
-                WriteAttributeIndex(writer, 30 + PositionMatrixIDxIndex * 3, desc.Attributes[GXVertexAttribute.Tex3Mtx].Item1);
+                WriteAttributeIndex(writer, 30 + Tex3MtxIndex * 3, desc.Attributes[GXVertexAttribute.Tex3Mtx].Item1);
             }
 
             if (desc.CheckAttribute(GXVertexAttribute.Tex4Mtx))
             {
-                WriteAttributeIndex(writer, 30 + PositionMatrixIDxIndex * 3, desc.Attributes[GXVertexAttribute.Tex4Mtx].Item1);
+                WriteAttributeIndex(writer, 30 + Tex4MtxIndex * 3, desc.Attributes[GXVertexAttribute.Tex4Mtx].Item1);
             }
 
             if (desc.CheckAttribute(GXVertexAttribute.Tex5Mtx))
             {
-                WriteAttributeIndex(writer, 30 + PositionMatrixIDxIndex * 3, desc.Attributes[GXVertexAttribute.Tex5Mtx].Item1);
+                WriteAttributeIndex(writer, 30 + Tex5MtxIndex * 3, desc.Attributes[GXVertexAttribute.Tex5Mtx].Item1);
             }
 
             if (desc.CheckAttribute(GXVertexAttribute.Tex6Mtx))
             {
-                WriteAttributeIndex(writer, 30 + PositionMatrixIDxIndex * 3, desc.Attributes[GXVertexAttribute.Tex6Mtx].Item1);
+                WriteAttributeIndex(writer, 30 + Tex6MtxIndex * 3, desc.Attributes[GXVertexAttribute.Tex6Mtx].Item1);
             }
 
             if (desc.CheckAttribute(GXVertexAttribute.Tex7Mtx))
             {
-                WriteAttributeIndex(writer, 30 + PositionMatrixIDxIndex * 3, desc.Attributes[GXVertexAttribute.Tex7Mtx].Item1);
+                WriteAttributeIndex(writer, 30 + Tex7MtxIndex * 3, desc.Attributes[GXVertexAttribute.Tex7Mtx].Item1);
             }
 
             if (desc.CheckAttribute(GXVertexAttribute.Position))

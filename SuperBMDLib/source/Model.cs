@@ -1192,6 +1192,7 @@ namespace SuperBMDLib
                 {
                     Console.WriteLine($"\t{attrib}");
                 }
+                i++;
             }
         }
 
