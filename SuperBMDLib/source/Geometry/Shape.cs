@@ -64,12 +64,11 @@ namespace SuperBMDLib.Geometry
         {
             int indexOffset = 0;
 
-            if (jointCount > 1)
-            {
+            if (jointCount > 1) {
                 Descriptor.SetAttribute(Enums.GXVertexAttribute.PositionMatrixIdx, Enums.VertexInputType.Direct, indexOffset++);
 
                 if (addEnvAttrib)
-                    SetEnvTexMtxIdxAttribute(indexOffset++, matName, mat_presets);
+                    SetEnvTexMtxIdxAttribute(ref indexOffset, matName, mat_presets);
             }
 
             if (mesh.HasVertices)
@@ -90,11 +89,12 @@ namespace SuperBMDLib.Geometry
             Console.Write(".");
         }
 
-        private void SetEnvTexMtxIdxAttribute(int index, string matName, List<Materials.Material> mat_presets = null)
+        private void SetEnvTexMtxIdxAttribute(ref int index, string matName, List<Materials.Material> mat_presets = null)
         {
             PresetResult? result = MAT3.FindMatPreset(matName, mat_presets, false);
             if (result == null)
                 return;
+
 
             Materials.Material mat = ((PresetResult)result).preset;
             for (int i = 0; i < mat.TexCoord1Gens.Length; i++)
@@ -105,7 +105,7 @@ namespace SuperBMDLib.Geometry
 
                 if (texGen.Source == Materials.Enums.TexGenSrc.Normal)
                 {
-                    Descriptor.SetAttribute(Enums.GXVertexAttribute.Tex0Mtx + i, Enums.VertexInputType.Direct, index);
+                    Descriptor.SetAttribute(Enums.GXVertexAttribute.Tex0Mtx + i, Enums.VertexInputType.Direct, index++);
                 }
             }
         }
@@ -131,11 +131,11 @@ namespace SuperBMDLib.Geometry
             return triindices;
         }
 
-        public void ProcessVerticesWithoutWeights(Mesh mesh, VertexData vertData, EVP1 envelopes, bool degenerateTriangles = false, int jointindex=0, int mtxindex=0, bool transformverts=false)
+        public void ProcessVerticesWithoutWeights(Mesh mesh, VertexData vertData, EVP1 envelopes, bool degenerateTriangles = false, int jointindex = 0, int mtxindex = 0, bool transformverts = false)
         {
             Packet pack = new Packet();
 
-            
+
             List<Enums.GXVertexAttribute> activeAttribs = Descriptor.GetActiveAttributes();
             AttributeData.SetAttributesFromList(activeAttribs);
 
@@ -145,37 +145,44 @@ namespace SuperBMDLib.Geometry
             TriStripper stripper = new TriStripper(triindices);
             List<PrimitiveBrawl> primlist = stripper.Strip();
 
-            if (degenerateTriangles) {
+            if (degenerateTriangles)
+            {
                 Console.WriteLine("Converting Triangle Lists into Triangle Strips with degenerate triangles.");
 
-                for (int i = 0; i < primlist.Count; i++) {
+                for (int i = 0; i < primlist.Count; i++)
+                {
                     PrimitiveBrawl primbrawl = primlist[i];
-                
+
                     Enums.GXPrimitiveType primtype = (Enums.GXPrimitiveType)primbrawl.Type;
 
-                    if (primtype == Enums.GXPrimitiveType.Triangles) {
+                    if (primtype == Enums.GXPrimitiveType.Triangles)
+                    {
                         PrimitiveBrawl newprim = new PrimitiveBrawl(PrimType.TriangleStrip);
                         uint lastVert = 0;
-                        for (int j = 0; j < primbrawl.Indices.Count/3; j++) {
-                            if (j > 0) {
+                        for (int j = 0; j < primbrawl.Indices.Count / 3; j++)
+                        {
+                            if (j > 0)
+                            {
                                 newprim.Indices.Add(lastVert);
-                                newprim.Indices.Add(primbrawl.Indices[(j)*3+0]);
+                                newprim.Indices.Add(primbrawl.Indices[(j) * 3 + 0]);
                             }
-                        
-                            newprim.Indices.Add(primbrawl.Indices[(j)*3+0]);
 
-                            if ( j % 2 == 0) {
-                                newprim.Indices.Add(primbrawl.Indices[(j)*3+1]);
-                                newprim.Indices.Add(primbrawl.Indices[(j)*3+2]);
+                            newprim.Indices.Add(primbrawl.Indices[(j) * 3 + 0]);
 
-                                lastVert = primbrawl.Indices[(j)*3+2];
+                            if (j % 2 == 0)
+                            {
+                                newprim.Indices.Add(primbrawl.Indices[(j) * 3 + 1]);
+                                newprim.Indices.Add(primbrawl.Indices[(j) * 3 + 2]);
+
+                                lastVert = primbrawl.Indices[(j) * 3 + 2];
                             }
-                            else {
-                                newprim.Indices.Add(primbrawl.Indices[(j)*3+2]);
-                                newprim.Indices.Add(primbrawl.Indices[(j)*3+1]);
-                            
+                            else
+                            {
+                                newprim.Indices.Add(primbrawl.Indices[(j) * 3 + 2]);
+                                newprim.Indices.Add(primbrawl.Indices[(j) * 3 + 1]);
 
-                                lastVert = primbrawl.Indices[(j)*3+1];
+
+                                lastVert = primbrawl.Indices[(j) * 3 + 1];
                             }
                         }
                         primlist[i] = newprim;
@@ -200,12 +207,15 @@ namespace SuperBMDLib.Geometry
                     vert.SetWeight(rootWeight);
                     //int vertIndex = face.Indices[i];
 
-                    foreach (Enums.GXVertexAttribute attrib in activeAttribs) {
-                        switch (attrib) {
+                    foreach (Enums.GXVertexAttribute attrib in activeAttribs)
+                    {
+                        switch (attrib)
+                        {
                             case Enums.GXVertexAttribute.Position:
                                 List<Vector3> posData = (List<Vector3>)vertData.GetAttributeData(Enums.GXVertexAttribute.Position);
                                 Vector3 vertPos = mesh.Vertices[vertIndex].ToOpenTKVector3();
-                                if (transformverts) { 
+                                if (transformverts)
+                                {
                                     Matrix4 ibm = envelopes.InverseBindMatrices[jointindex];
 
                                     vertPos = Vector3.TransformPosition(vertPos, ibm);
@@ -239,12 +249,12 @@ namespace SuperBMDLib.Geometry
                                 List<Color> colData = (List<Color>)vertData.GetAttributeData(Enums.GXVertexAttribute.Color0 + colNo);
                                 Color vertCol = mesh.VertexColorChannels[colNo][vertIndex].ToSuperBMDColorRGBA();
 
-                                
+
                                 if (colNo == 0)
                                     AttributeData.Color_0.Add(vertCol);
                                 else
                                     AttributeData.Color_1.Add(vertCol);
-                                
+
 
                                 vert.SetAttributeIndex(Enums.GXVertexAttribute.Color0 + colNo, (uint)colData.IndexOf(vertCol));
                                 break;
@@ -261,8 +271,9 @@ namespace SuperBMDLib.Geometry
                                 Vector2 vertTexCoord = mesh.TextureCoordinateChannels[texNo][vertIndex].ToOpenTKVector2();
                                 vertTexCoord = new Vector2(vertTexCoord.X, 1.0f - vertTexCoord.Y);
 
- 
-                                switch (texNo) {
+
+                                switch (texNo)
+                                {
                                     case 0:
                                         AttributeData.TexCoord_0.Add(vertTexCoord);
                                         break;
@@ -301,7 +312,7 @@ namespace SuperBMDLib.Geometry
                 pack.Primitives.Add(prim);
             }
 
-            
+
             pack.MatrixIndices.Add(mtxindex);
             Packets.Add(pack);
 

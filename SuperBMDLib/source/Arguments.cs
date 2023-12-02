@@ -225,7 +225,7 @@ namespace SuperBMDLib
                         transform_mode = (Scenegraph.Enums.TransformMode)Enum.Parse(typeof(Scenegraph.Enums.TransformMode), args[i + 1]);
                         i++;
                         break;
-                    case "--add_envtex_attribute":
+                    case "--envtex_attribute":
                         add_envtex_attribute = true;
                         break;
                     default:
