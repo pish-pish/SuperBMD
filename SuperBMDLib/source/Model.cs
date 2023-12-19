@@ -10,6 +10,8 @@ using SuperBMDLib.BMD;
 using SuperBMDLib.Animation;
 using System.Text.RegularExpressions;
 using System.Xml;
+using System.Reflection;
+
 
 namespace SuperBMDLib
 {
@@ -254,7 +256,7 @@ namespace SuperBMDLib
 
             Console.WriteLine();
             Console.WriteLine("Generating the Vertex Data ->");
-            VertexData = new VTX1(scene, args.forceFloat, args.vertextype, args.fraction);
+            VertexData = new VTX1(scene, args.forceFloat, args.vertextype, args.fraction, args.texfraction);
             Console.WriteLine();
             Console.WriteLine("Generating the Bone Data");
             Joints = new JNT1(scene, VertexData, args);
@@ -319,7 +321,7 @@ namespace SuperBMDLib
             }
         }
 
-        public void ExportBMD(string fileName, bool isBDL)
+        public void ExportBMD(string fileName, bool isBDL, string headerString)
         {
             string outDir = Path.GetDirectoryName(fileName);
             string fileNameNoExt = Path.GetFileNameWithoutExtension(fileName);
@@ -331,6 +333,8 @@ namespace SuperBMDLib
             {
                 fileName = Path.Combine(outDir, fileNameNoExt + ".bmd");
             }
+
+            
 
             using (FileStream stream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
             {
@@ -348,7 +352,12 @@ namespace SuperBMDLib
                 else
                     writer.Write(8);
 
-                writer.Write("SuperBMD - Gamma".ToCharArray());
+                char[] headerCharArray = headerString.ToCharArray();
+                if (headerCharArray.Length != 16)
+                {
+                    throw new System.Exception("Header Char Array is not 16 bytes!");
+                }
+                writer.Write(headerCharArray);
 
                 Scenegraph.Write(writer, packetCount, vertexCount);
                 VertexData.Write(writer);

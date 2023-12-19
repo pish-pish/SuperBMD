@@ -8,16 +8,24 @@ using System.Reflection;
 
 namespace SuperBMDLib
 {
-    class Program
+    class ProgramStart
     {
         static void Main(string[] args)
         {
             Console.Title = "SuperBMD Console";
-            Assembly thisAssem = typeof(Program).Assembly;
+            Assembly thisAssem = typeof(ProgramStart).Assembly;
             AssemblyName thisAssemName = thisAssem.GetName();
             Version ver = thisAssemName.Version;
             Console.WriteLine("SuperBMD v" + ver);
             Console.WriteLine();
+
+            String headerString = ("SuperBMDv" + ver).PadRight(16);
+            Console.WriteLine(headerString);
+            if (headerString.Length != 16)
+            {
+                throw new System.Exception("Header Version String is not 16 bytes!");
+            }
+
             // Prevents floats being written to the .dae with commas instead of periods on European systems.
             CultureInfo.CurrentCulture = new CultureInfo("", false);
 
@@ -148,7 +156,7 @@ namespace SuperBMDLib
             else
             {
                 Console.Write("Finishing the Job...");
-                mod.ExportBMD(cmd_args.output_path, cmd_args.output_bdl);
+                mod.ExportBMD(cmd_args.output_path, cmd_args.output_bdl, headerString);
                 Console.WriteLine("✓");
             }
 
