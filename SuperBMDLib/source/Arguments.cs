@@ -39,7 +39,7 @@ namespace SuperBMDLib
         public string texture_path;
         public string output_material_folder;
         public bool file_name_as_mat_name;
-
+        public byte texfraction;
         /// <summary>
         /// Initializes a new Arguments instance from the arguments passed in to SuperBMD.
         /// </summary>
@@ -77,6 +77,7 @@ namespace SuperBMDLib
             texture_path = "";
             file_name_as_mat_name = false;
             output_material_folder = "";
+            texfraction = 8;
             int positional_arguments = 0;
 
             for (int i = 0; i < args.Length; i++)
@@ -190,6 +191,13 @@ namespace SuperBMDLib
                         vertextype = (Geometry.Enums.GXDataType)Enum.Parse(typeof(Geometry.Enums.GXDataType), args[i+1]);
                         fraction = byte.Parse(args[i+2]);
                         i+=2;
+                        break;
+                    case "--texfraction":
+                        if (i + 1 >= args.Length)
+                            throw new Exception("The parameters were malformed.");
+
+                        texfraction = fraction = byte.Parse(args[i + 1]);
+                        i++;
                         break;
                     case "--mat_strict":
                         material_order_strict = true;
