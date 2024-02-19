@@ -592,11 +592,21 @@ namespace SuperBMDLib.BMD
         {
             List<Color> tempList = new List<Color>();
             Color color;
+            bool capped = false;
+
             for (int col = 0; col < mesh.VertexColorChannels[channel].Count; col++) {
                 color = mesh.VertexColorChannels[channel][col].ToSuperBMDColorRGBA();
+                if (color.R > 1.0) { capped = true; }
+                if (color.G > 1.0) { capped = true; }
+                if (color.B > 1.0) { capped = true; }
+                if (color.A > 1.0) { capped = true; }
                 if (!tempList.Contains(color)) {
                     tempList.Add(color);
                 }
+            }
+            if (capped)
+            {
+                System.Console.WriteLine("\nAt least one color component exceeded value limits and will be capped to 1.0(255).");
             }
             if (!Attributes.CheckAttribute(colorAttrib))
                 Attributes.SetAttributeData(colorAttrib, tempList);
