@@ -40,6 +40,9 @@ namespace SuperBMDLib
         public string output_material_folder;
         public bool file_name_as_mat_name;
         public byte texfraction;
+        public Scenegraph.Enums.TransformMode transform_mode;
+        public bool add_envtex_attribute;
+
         /// <summary>
         /// Initializes a new Arguments instance from the arguments passed in to SuperBMD.
         /// </summary>
@@ -78,6 +81,8 @@ namespace SuperBMDLib
             file_name_as_mat_name = false;
             output_material_folder = "";
             texfraction = 8;
+            transform_mode = Scenegraph.Enums.TransformMode.Xsi;
+            add_envtex_attribute = false;
             int positional_arguments = 0;
 
             for (int i = 0; i < args.Length; i++)
@@ -222,6 +227,15 @@ namespace SuperBMDLib
                         break;
                     case "--no_normals":
                         include_normals = false;
+                        break;
+                    case "--transform_mode":
+                        if (i + 1 >= args.Length)
+                            throw new Exception("The parameters were malformed.");
+                        transform_mode = (Scenegraph.Enums.TransformMode)Enum.Parse(typeof(Scenegraph.Enums.TransformMode), args[i + 1]);
+                        i++;
+                        break;
+                    case "--envtex_attribute":
+                        add_envtex_attribute = true;
                         break;
                     default:
                         if (positional_arguments == 0) {

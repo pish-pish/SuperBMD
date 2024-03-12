@@ -20,6 +20,8 @@ namespace SuperBMDLib.BMD
         public List<SceneNode> FlatNodes { get; set; }
         public SceneNode Root { get; set; }
 
+        private TransformMode transformMode;
+
         public INF1() {
             FlatNodes = new List<SceneNode>();
             Root = null;
@@ -70,11 +72,12 @@ namespace SuperBMDLib.BMD
             reader.BaseStream.Seek(offset + inf1Size, System.IO.SeekOrigin.Begin);
         }
 
-        public INF1(Scene scene, JNT1 skeleton, bool mat_strict)
+        public INF1(Scene scene, JNT1 skeleton, bool mat_strict, TransformMode mode)
         {
             FlatNodes = new List<SceneNode>();
             Root = new SceneNode(NodeType.Joint, 0, null);
             FlatNodes.Add(Root);
+            transformMode = mode;
 
             int downNodeCount = 0;
 
@@ -299,7 +302,7 @@ namespace SuperBMDLib.BMD
 
             writer.Write("INF1".ToCharArray());
             writer.Write(0); // Placeholder for section size
-            writer.Write((short)1);
+            writer.Write((short)transformMode);
             writer.Write((short)-1);
 
             writer.Write(packetCount); // Number of packets

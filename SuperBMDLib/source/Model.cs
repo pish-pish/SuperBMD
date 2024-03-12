@@ -12,6 +12,8 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using System.Reflection;
 
+using SuperBMDLib.Geometry;
+using SuperBMDLib.Geometry.Enums;
 
 namespace SuperBMDLib
 {
@@ -276,7 +278,7 @@ namespace SuperBMDLib
             Console.WriteLine();
             Console.WriteLine("Generating the Mesh Data ->");
             Shapes = SHP1.Create(scene, Joints.BoneNameIndices, VertexData.Attributes, SkinningEnvelopes, PartialWeightData, 
-                args.tristrip_mode, args.include_normals, args.degenerateTriangles);
+                args.tristrip_mode, args.include_normals, args.degenerateTriangles, args.add_envtex_attribute, mat_presets);
 
             //Joints.UpdateBoundingBoxes(VertexData);
 
@@ -307,7 +309,7 @@ namespace SuperBMDLib
 
             Console.WriteLine();
             Console.Write("Generating the Joints");
-            Scenegraph = new INF1(scene, Joints, args.material_order_strict);
+            Scenegraph = new INF1(scene, Joints, args.material_order_strict, args.transform_mode);
 
             foreach (Geometry.Shape shape in Shapes.Shapes)
                 packetCount += shape.Packets.Count;
@@ -1118,6 +1120,7 @@ namespace SuperBMDLib
         }
         public void DisplayModelInfo(Model mod) {
             DisplayVertexAttributeInfo(mod.VertexData);
+            DisplayShapeDescriptorInfo(mod.Shapes);
             Console.WriteLine("INF: {0} scene nodes", mod.Scenegraph.FlatNodes.Count);
             Console.WriteLine("EVP1: {0} weights", mod.SkinningEnvelopes.Weights.Count);
             Console.WriteLine("EVP1: {0} inverse bind matrices", mod.SkinningEnvelopes.InverseBindMatrices.Count);
@@ -1187,6 +1190,21 @@ namespace SuperBMDLib
                 DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Tex7);
             }
         }
+
+        private void DisplayShapeDescriptorInfo(SHP1 shapeData)
+        {
+            int i = 0;
+            foreach (Shape shape in shapeData.Shapes)
+            {
+                Console.WriteLine($"Shape {i} has descriptor attributes:");
+                foreach (GXVertexAttribute attrib in shape.Descriptor.Attributes.Keys)
+                {
+                    Console.WriteLine($"\t{attrib}");
+                }
+                i++;
+            }
+        }
+
         private void DisplayAttributeFormat(VTX1 vertexData, Geometry.Enums.GXVertexAttribute attr) {
             if (vertexData.StorageFormats.ContainsKey(attr)) {
                 Tuple<Geometry.Enums.GXDataType, byte> tuple;
