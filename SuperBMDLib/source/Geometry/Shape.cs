@@ -14,6 +14,7 @@ using System.Diagnostics;
 using SuperBMD.source.Geometry.Enums;
 using Newtonsoft.Json;
 using SuperBMDLib.Materials;
+using SuperBMDLib.Geometry.Enums;
 
 namespace SuperBMDLib.Geometry
 {
@@ -64,10 +65,10 @@ namespace SuperBMDLib.Geometry
         {
             int indexOffset = 0;
 
-            if (jointCount > 1) {
+            if (jointCount > 1 && mesh.BoneCount > 1) {
                 Descriptor.SetAttribute(Enums.GXVertexAttribute.PositionMatrixIdx, Enums.VertexInputType.Direct, indexOffset++);
 
-                if (addEnvAttrib)
+                if (addEnvAttrib) { }
                     SetEnvTexMtxIdxAttribute(ref indexOffset, matName, mat_presets);
             }
 
@@ -518,35 +519,36 @@ namespace SuperBMDLib.Geometry
 
                         vert.SetWeight(curWeight);
 
+                        int newMatrixIndex = -1;
+
+                        if (curWeight.WeightCount == 1)
+                        {
+                            newMatrixIndex = partialWeight.MeshWeights.IndexOf(curWeight);
+                        }
+                        else
+                        {
+                            if (!envelopes.Weights.Contains(curWeight))
+                                envelopes.Weights.Add(curWeight);
+
+                            int envIndex = envelopes.Weights.IndexOf(curWeight);
+                            int drwIndex = partialWeight.MeshWeights.IndexOf(curWeight);
+
+                            if (drwIndex == -1)
+                            {
+                                throw new System.Exception($"Model has unweighted vertices in mesh \"{mesh.Name}\". Please weight all vertices to at least one bone.");
+                            }
+
+                            newMatrixIndex = drwIndex;
+                            partialWeight.Indices[drwIndex] = envIndex;
+                        }
+
+                        if (!pack.MatrixIndices.Contains(newMatrixIndex))
+                            pack.MatrixIndices.Add(newMatrixIndex);
+
+                        vert.SetAttributeIndex(Enums.GXVertexAttribute.PositionMatrixIdx, (uint)pack.MatrixIndices.IndexOf(newMatrixIndex));
+
                         foreach (Enums.GXVertexAttribute attrib in activeAttribs) {
                             switch (attrib) {
-                                case Enums.GXVertexAttribute.PositionMatrixIdx:
-                                    int newMatrixIndex = -1;
-
-                                    if (curWeight.WeightCount == 1) {
-                                        newMatrixIndex = partialWeight.MeshWeights.IndexOf(curWeight);
-                                    }
-                                    else {
-                                        if (!envelopes.Weights.Contains(curWeight))
-                                            envelopes.Weights.Add(curWeight);
-
-                                        int envIndex = envelopes.Weights.IndexOf(curWeight);
-                                        int drwIndex = partialWeight.MeshWeights.IndexOf(curWeight);
-
-                                        if (drwIndex == -1)
-                                        {
-                                            throw new System.Exception($"Model has unweighted vertices in mesh \"{mesh.Name}\". Please weight all vertices to at least one bone.");
-                                        }
-
-                                        newMatrixIndex = drwIndex;
-                                        partialWeight.Indices[drwIndex] = envIndex;
-                                    }
-
-                                    if (!pack.MatrixIndices.Contains(newMatrixIndex))
-                                        pack.MatrixIndices.Add(newMatrixIndex);
-
-                                    vert.SetAttributeIndex(Enums.GXVertexAttribute.PositionMatrixIdx, (uint)pack.MatrixIndices.IndexOf(newMatrixIndex));
-                                    break;
                                 case Enums.GXVertexAttribute.Tex0Mtx:
                                 case Enums.GXVertexAttribute.Tex1Mtx:
                                 case Enums.GXVertexAttribute.Tex2Mtx:
@@ -752,35 +754,36 @@ namespace SuperBMDLib.Geometry
 
                             vert.SetWeight(curWeight);
 
+                            int newMatrixIndex = -1;
+
+                            if (curWeight.WeightCount == 1)
+                            {
+                                newMatrixIndex = partialWeight.MeshWeights.IndexOf(curWeight);
+                            }
+                            else
+                            {
+                                if (!envelopes.Weights.Contains(curWeight))
+                                    envelopes.Weights.Add(curWeight);
+
+                                int envIndex = envelopes.Weights.IndexOf(curWeight);
+                                int drwIndex = partialWeight.MeshWeights.IndexOf(curWeight);
+
+                                if (drwIndex == -1)
+                                {
+                                    throw new System.Exception($"Model has unweighted vertices in mesh \"{mesh.Name}\". Please weight all vertices to at least one bone.");
+                                }
+
+                                newMatrixIndex = drwIndex;
+                                partialWeight.Indices[drwIndex] = envIndex;
+                            }
+
+                            if (!pack.MatrixIndices.Contains(newMatrixIndex))
+                                pack.MatrixIndices.Add(newMatrixIndex);
+
+                            vert.SetAttributeIndex(Enums.GXVertexAttribute.PositionMatrixIdx, (uint)pack.MatrixIndices.IndexOf(newMatrixIndex));
+
                             foreach (Enums.GXVertexAttribute attrib in activeAttribs) {
                                 switch (attrib) {
-                                    case Enums.GXVertexAttribute.PositionMatrixIdx:
-                                        int newMatrixIndex = -1;
-
-                                        if (curWeight.WeightCount == 1) {
-                                            newMatrixIndex = partialWeight.MeshWeights.IndexOf(curWeight);
-                                        }
-                                        else {
-                                            if (!envelopes.Weights.Contains(curWeight))
-                                                envelopes.Weights.Add(curWeight);
-
-                                            int envIndex = envelopes.Weights.IndexOf(curWeight);
-                                            int drwIndex = partialWeight.MeshWeights.IndexOf(curWeight);
-
-                                            if (drwIndex == -1)
-                                            {
-                                                throw new System.Exception($"Model has unweighted vertices in mesh \"{mesh.Name}\". Please weight all vertices to at least one bone.");
-                                            }
-
-                                            newMatrixIndex = drwIndex;
-                                            partialWeight.Indices[drwIndex] = envIndex;
-                                        }
-
-                                        if (!pack.MatrixIndices.Contains(newMatrixIndex))
-                                            pack.MatrixIndices.Add(newMatrixIndex);
-
-                                        vert.SetAttributeIndex(Enums.GXVertexAttribute.PositionMatrixIdx, (uint)pack.MatrixIndices.IndexOf(newMatrixIndex));
-                                        break;
                                     case Enums.GXVertexAttribute.Tex0Mtx:
                                     case Enums.GXVertexAttribute.Tex1Mtx:
                                     case Enums.GXVertexAttribute.Tex2Mtx:
