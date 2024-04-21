@@ -71,10 +71,10 @@ namespace SuperBMDLib.Util
 
         public static void Write(this EndianBinaryWriter writer, Color color)
         {
-            writer.Write((byte)(color.R * 255));
-            writer.Write((byte)(color.G * 255));
-            writer.Write((byte)(color.B * 255));
-            writer.Write((byte)(color.A * 255));
+            writer.Write((byte)(Math.Min(color.R * 255, 255)));
+            writer.Write((byte)(Math.Min(color.G * 255, 255)));
+            writer.Write((byte)(Math.Min(color.B * 255, 255)));
+            writer.Write((byte)(Math.Min(color.A * 255, 255)));
         }
 
         public static void Write(this EndianBinaryWriter writer, Matrix3x4 mat)

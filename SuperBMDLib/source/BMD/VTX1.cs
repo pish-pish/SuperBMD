@@ -78,7 +78,7 @@ namespace SuperBMDLib.BMD
             return false;
         }
 
-        public VTX1(Assimp.Scene scene, bool forceFloat32, GXDataType postype=GXDataType.Float32, byte fraction=0)
+        public VTX1(Assimp.Scene scene, bool forceFloat32, GXDataType postype=GXDataType.Float32, byte fraction=0, byte texfraction=8)
         {
             Attributes = new VertexData();
             StorageFormats = new SortedDictionary<GXVertexAttribute, Tuple<GXDataType, byte>>();
@@ -154,7 +154,7 @@ namespace SuperBMDLib.BMD
                                 StorageFormats.Add(GXVertexAttribute.Tex0 + texCoords, new Tuple<GXDataType, byte>(GXDataType.Float32, 0));
                             }
                             else {
-                                StorageFormats.Add(GXVertexAttribute.Tex0 + texCoords, new Tuple<GXDataType, byte>(GXDataType.Signed16, 8));
+                                StorageFormats.Add(GXVertexAttribute.Tex0 + texCoords, new Tuple<GXDataType, byte>(GXDataType.Signed16, texfraction));
                             }
                         }
                     }
@@ -592,11 +592,21 @@ namespace SuperBMDLib.BMD
         {
             List<Color> tempList = new List<Color>();
             Color color;
+            bool capped = false;
+
             for (int col = 0; col < mesh.VertexColorChannels[channel].Count; col++) {
                 color = mesh.VertexColorChannels[channel][col].ToSuperBMDColorRGBA();
+                if (color.R > 1.0) { capped = true; }
+                if (color.G > 1.0) { capped = true; }
+                if (color.B > 1.0) { capped = true; }
+                if (color.A > 1.0) { capped = true; }
                 if (!tempList.Contains(color)) {
                     tempList.Add(color);
                 }
+            }
+            if (capped)
+            {
+                System.Console.WriteLine("\nAt least one color component exceeded value limits and will be capped to 1.0(255).");
             }
             if (!Attributes.CheckAttribute(colorAttrib))
                 Attributes.SetAttributeData(colorAttrib, tempList);
@@ -833,23 +843,32 @@ namespace SuperBMDLib.BMD
 
                         foreach (Vector2 texVec in (List<Vector2>)Attributes.GetAttributeData(attrib))
                         {
+                            var tempX = (texVec.X * ((1 << StorageFormats[attrib].Item2)));
+                            var tempY = (texVec.Y * ((1 << StorageFormats[attrib].Item2)));
+
+                            //tempX += tempX < 0 ? +1 : -1;
+                            //tempY += tempY < 0 ? +1 : -1;
+
+                            var texX = Math.Round(tempX);
+                            var texY = Math.Round(tempY);
+
                             switch (StorageFormats[attrib].Item1)
                             {
                                 case GXDataType.Unsigned8:
-                                    writer.Write((byte)Math.Round(texVec.X * (1 << StorageFormats[attrib].Item2)));
-                                    writer.Write((byte)Math.Round(texVec.Y * (1 << StorageFormats[attrib].Item2)));
+                                    writer.Write((byte)texX);
+                                    writer.Write((byte)texY);
                                     break;
                                 case GXDataType.Signed8:
-                                    writer.Write((sbyte)Math.Round(texVec.X * (1 << StorageFormats[attrib].Item2)));
-                                    writer.Write((sbyte)Math.Round(texVec.Y * (1 << StorageFormats[attrib].Item2)));
+                                    writer.Write((sbyte)texX);
+                                    writer.Write((sbyte)texY);
                                     break;
                                 case GXDataType.Unsigned16:
-                                    writer.Write((ushort)Math.Round(texVec.X * (1 << StorageFormats[attrib].Item2)));
-                                    writer.Write((ushort)Math.Round(texVec.Y * (1 << StorageFormats[attrib].Item2)));
+                                    writer.Write((ushort)texX);
+                                    writer.Write((ushort)texY);
                                     break;
                                 case GXDataType.Signed16:
-                                    writer.Write((short)Math.Round(texVec.X * (1 << StorageFormats[attrib].Item2)));
-                                    writer.Write((short)Math.Round(texVec.Y * (1 << StorageFormats[attrib].Item2)));
+                                    writer.Write((short)texX);
+                                    writer.Write((short)texY);
                                     break;
                                 case GXDataType.Float32:
                                     writer.Write(texVec);
