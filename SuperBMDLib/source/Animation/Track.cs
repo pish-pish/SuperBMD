@@ -17,9 +17,9 @@ namespace SuperBMDLib.Animation
     public struct Keyframe
     {
         public float Time;
+        public float Key;
         public float InTangent;
         public float OutTangent;
-        public float Key;
     }
 
     public struct Track

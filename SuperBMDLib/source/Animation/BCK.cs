@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using GameFormatReader.Common;
-using SuperBMDLib.BMD;
 using SuperBMDLib.Rigging;
 using OpenTK;
 using SuperBMD.Util;
@@ -12,15 +8,6 @@ using System.IO;
 
 namespace SuperBMDLib.Animation
 {
-    public enum LoopMode
-    {
-        Once,
-        OnceReset,
-        Loop,
-        MirroredOnce,
-        MirroredLoop
-    }
-
     public class BCK
     {
         public string Name { get; private set; }
@@ -30,7 +17,7 @@ namespace SuperBMDLib.Animation
 
         public Track[] Tracks;
 
-        public BCK(Assimp.Animation src_anim, List<Rigging.Bone> bone_list)
+        public BCK(Assimp.Animation src_anim, List<Bone> bone_list)
         {
             Name = src_anim.Name;
             LoopMode = LoopMode.Loop;

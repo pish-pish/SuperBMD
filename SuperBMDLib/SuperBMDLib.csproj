@@ -78,7 +78,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="source\Animation\BCK\BCK.cs" />
+    <Compile Include="source\Animation\BCK.cs" />
+    <Compile Include="source\Animation\J3DJointAnimation.cs" />
     <Compile Include="source\Animation\Track.cs" />
     <Compile Include="source\Arguments.cs" />
     <Compile Include="source\BMD\DRW1.cs" />
