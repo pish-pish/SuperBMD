@@ -26,6 +26,20 @@ namespace SuperBMDLib.Util
             }
         }
 
+        public static void PadStreamWithString(EndianBinaryWriter writer, string padString, int padValue)
+        {
+            // Pad up to a 32 byte alignment
+            // Formula: (x + (n-1)) & ~(n-1)
+            long nextAligned = (writer.BaseStream.Length + (padValue - 1)) & ~(padValue - 1);
+
+            long delta = nextAligned - writer.BaseStream.Length;
+            writer.BaseStream.Position = writer.BaseStream.Length;
+            for (int i = 0; i < delta; i++)
+            {
+                writer.Write(padString[i]);
+            }
+        }
+
         public static void PadStreamWithStringByOffset(EndianBinaryWriter writer, int offset, int padValue)
         {
             string padding = "Model made with SuperBMD by Gamma.";

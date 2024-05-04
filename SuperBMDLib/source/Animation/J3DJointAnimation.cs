@@ -4,12 +4,11 @@ using SuperBMD.Util;
 using SuperBMDLib.Rigging;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
+using System.IO;
 
 namespace SuperBMDLib.Animation
-{
+{ 
     public enum LoopMode
     {
         Once,
@@ -23,10 +22,11 @@ namespace SuperBMDLib.Animation
     {
         public string Name { get; private set; }
         public LoopMode LoopMode;
-        public byte RotationScale;
-        public short Duration;
+        public float RotationScale;
+        public ushort Duration;
 
-        protected string Magic;
+        protected string FileMagic;
+        protected string SectionMagic;
 
         public Track[] Tracks;
 
@@ -34,8 +34,8 @@ namespace SuperBMDLib.Animation
         {
             Name = src_anim.Name;
             LoopMode = LoopMode.Loop;
-            RotationFrac = 0;
-            Duration = (short)(src_anim.DurationInTicks * 30.0f);
+            RotationScale = 180.0f / 32768.0f;
+            Duration = (ushort)(src_anim.DurationInTicks * 30.0f);
 
             Tracks = new Track[bone_list.Count];
 
@@ -61,11 +61,28 @@ namespace SuperBMDLib.Animation
 
         public J3DJointAnimation(EndianBinaryReader reader) 
         {
-            Magic = new string(reader.ReadChars(8));
-            reader.ReadInt32(); // filesize
-            reader.ReadInt32(); // section count
-            reader.Skip(16); 
+            string magic = new string(reader.ReadChars(FileMagic.Length));
+            Debug.Assert(magic.Equals(FileMagic), "File Magic is invalid.");
+
+            reader.ReadUInt32(); // filesize
+
+            uint sectionCount = reader.ReadUInt32();
+            Debug.Assert(sectionCount == 1);
+
+            reader.Skip(16); // skip svn/svr data and sound section offset
+
+            ReadSection(reader);
         }
+
+        protected virtual Keyframe[] ReadFloatChannel(EndianBinaryReader reader, float[] data) { return new Keyframe[] {}; }
+
+        protected virtual Keyframe[] ReadShortChannel(EndianBinaryReader reader, short[] data) { return new Keyframe[] {}; }
+
+        protected virtual void WriteFloatChannel(EndianBinaryWriter writer, Keyframe[] keys, List<float> data) { }
+
+        protected virtual void WriteShortChannel(EndianBinaryWriter writer, Keyframe[] keys, List<short> data) { }
+
+        protected virtual sbyte GetAngleFraction() { return -1; }
 
         private Axis GenerateTrack(List<Assimp.VectorKey> keys, Bone bone)
         {
@@ -121,5 +138,212 @@ namespace SuperBMDLib.Animation
 
             return axis;
         }
+
+        #region Reading
+        private void ReadSection(EndianBinaryReader reader)
+        {
+            // section header
+            string magic = new string(reader.ReadChars(SectionMagic.Length));
+            Debug.Assert(magic.Equals(SectionMagic), "Data section Magic is invalid.");
+            reader.ReadUInt32(); // section size
+
+            LoopMode = (LoopMode)reader.ReadByte();
+
+            sbyte angleFrac = reader.ReadSByte();
+            if (angleFrac == -1)
+            {
+                angleFrac = 0;
+            }
+            RotationScale = (float)Math.Pow(2.0f, angleFrac) * (180.0f / 32768.0f);
+
+            Duration = reader.ReadUInt16();
+
+            // counts for tracks and component data
+            ushort trackCount       = reader.ReadUInt16();
+            ushort scaleCount       = reader.ReadUInt16();
+            ushort rotationCount    = reader.ReadUInt16();
+            ushort translationCount = reader.ReadUInt16();
+
+            // data offsets with an extra 4 bytes added to skip padding between sections
+            uint tracksOffset       = reader.ReadUInt32() + 32;
+            uint scalesOffset       = reader.ReadUInt32() + 32;
+            uint rotationsOffset    = reader.ReadUInt32() + 32;
+            uint translationsOffset = reader.ReadUInt32() + 32;
+
+            float[] scaleData       = ReadFloatTable(scalesOffset, scaleCount, reader);
+            short[] rotationData    = ReadShortTable(rotationsOffset, rotationCount, reader);
+            float[] translationData = ReadFloatTable(translationsOffset, translationCount, reader);
+
+            Tracks = new Track[trackCount];
+            reader.BaseStream.Seek(tracksOffset, SeekOrigin.Begin);
+
+            for (int i = 0; i < trackCount; i++)
+            {
+                Tracks[i].Scale.X       = ReadFloatChannel(reader, scaleData);
+                Tracks[i].Rotation.X    = ReadShortChannel(reader, rotationData);
+                Tracks[i].Translation.X = ReadFloatChannel(reader, translationData);
+
+                Tracks[i].Scale.Y       = ReadFloatChannel(reader, scaleData);
+                Tracks[i].Rotation.Y    = ReadShortChannel(reader, rotationData);
+                Tracks[i].Translation.Y = ReadFloatChannel(reader, translationData);
+
+                Tracks[i].Scale.Z       = ReadFloatChannel(reader, scaleData);
+                Tracks[i].Rotation.Z    = ReadShortChannel(reader, rotationData);
+                Tracks[i].Translation.Z = ReadFloatChannel(reader, translationData);
+            }
+        }
+
+        private float[] ReadFloatTable(uint offset, ushort count, EndianBinaryReader reader)
+        {
+            float[] floats = new float[count];
+
+            reader.BaseStream.Seek(offset, SeekOrigin.Begin);
+
+            for (int i = 0; i < count; i++)
+            {
+                floats[i] = reader.ReadSingle();
+            }
+
+            return floats;
+        }
+
+        private short[] ReadShortTable(uint offset, ushort count, EndianBinaryReader reader)
+        {
+            short[] shorts = new short[count];
+
+            reader.BaseStream.Seek(offset, SeekOrigin.Begin);
+
+            for (int i = 0; i < count; i++)
+            {
+                shorts[i] = reader.ReadInt16();
+            }
+
+            return shorts;
+        }
+
+        #endregion
+
+        #region Writing
+
+        public void Write(EndianBinaryWriter writer)
+        {
+            writer.Write(FileMagic.ToCharArray()); // magic
+
+            long sizeOffset = writer.BaseStream.Position;
+            writer.Write(0); // placeholder for filesize
+
+            writer.Write(1); // section count-- only ever 1
+
+            // These are placeholder for SVN that were never used
+            writer.Write(-1);
+            writer.Write(-1);
+            writer.Write(-1);
+
+            // This spot, however, was used for hacking sound data into the animation.
+            // It's the offset to the start of the sound data. Unsupported for now.
+            writer.Write(-1);
+
+            WriteSection(writer);
+
+            writer.BaseStream.Seek(sizeOffset, SeekOrigin.Begin);
+            writer.Write((int)writer.BaseStream.Length); // total filesize
+            writer.BaseStream.Seek(0, SeekOrigin.End);
+        }
+
+        private void WriteSection(EndianBinaryWriter writer)
+        {
+            long sectionStart = writer.BaseStream.Position;
+
+            const int tracksOffset = 0x40; // known placement of tracks offset
+
+            byte[] keyframeData = WriteKeyframeData(tracksOffset, out int scaleCount, out int rotCount, out int transCount, 
+                out int scaleOffset, out int rotOffset, out int transOffset);
+
+            writer.Write(SectionMagic.ToCharArray()); // magic
+
+            long sizeOffset = writer.BaseStream.Position;
+            writer.Write(0); // placeholder for section size
+
+            writer.Write((byte)LoopMode);
+            writer.Write(GetAngleFraction());
+            writer.Write(Duration);
+
+            writer.Write((ushort)Tracks.Length);
+            writer.Write((ushort)scaleCount);
+            writer.Write((ushort)rotCount);
+            writer.Write((ushort)transCount);
+
+            writer.Write(tracksOffset);
+            writer.Write(scaleOffset);
+            writer.Write(rotOffset);
+            writer.Write(transOffset);
+
+            Util.StreamUtility.PadStreamWithString(writer, "Animation made with love and care :)", 32);
+
+            writer.Write(keyframeData);
+
+            Util.StreamUtility.PadStreamWithString(writer, "Animation made with love and care :)", 32);
+
+            writer.BaseStream.Seek(sizeOffset, SeekOrigin.Begin);
+            writer.Write((int)writer.BaseStream.Length - sectionStart);
+            writer.BaseStream.Seek(0, SeekOrigin.End);
+        }
+
+        private byte[] WriteKeyframeData(int tracksOffset, out int scaleCount, out int rotCount, out int transCount, 
+            out int scaleOffset, out int rotOffset, out int transOffset)
+        {
+            List<float> scaleData       = new List<float>();
+            List<short> rotationData    = new List<short>();
+            List<float> translationData = new List<float>();
+            byte[] keyframeData;
+
+            using (MemoryStream stream = new MemoryStream())
+            {
+                EndianBinaryWriter writer = new EndianBinaryWriter(stream, Endian.Big);
+
+                foreach (Track track in Tracks)
+                {
+                    WriteFloatChannel(writer, track.Scale.X, scaleData);
+                    WriteShortChannel(writer, track.Rotation.X, rotationData);
+                    WriteFloatChannel(writer, track.Translation.X, translationData);
+
+                    WriteFloatChannel(writer, track.Scale.Y, scaleData);
+                    WriteShortChannel(writer, track.Rotation.Y, rotationData);
+                    WriteFloatChannel(writer, track.Translation.Y, translationData);
+
+                    WriteFloatChannel(writer, track.Scale.Z, scaleData);
+                    WriteShortChannel(writer, track.Rotation.Z, rotationData);
+                    WriteFloatChannel(writer, track.Translation.Z, translationData);
+                }
+
+                Util.StreamUtility.PadStreamWithString(writer, "Animation made with love and care :)", 32);
+
+                scaleOffset = (int)(writer.BaseStream.Position + tracksOffset);
+                foreach (float f in scaleData)
+                    writer.Write(f);
+
+                Util.StreamUtility.PadStreamWithString(writer, "Animation made with love and care :)", 32);
+
+                rotOffset = (int)(writer.BaseStream.Position + tracksOffset);
+                foreach (short s in rotationData)
+                    writer.Write(s);
+
+                Util.StreamUtility.PadStreamWithString(writer, "Animation made with love and care :)", 32);
+
+                transOffset = (int)(writer.BaseStream.Position + tracksOffset);
+                foreach (float f in translationData)
+                    writer.Write(f);
+
+                keyframeData = stream.ToArray();
+            }
+
+            scaleCount = scaleData.Count;
+            rotCount   = rotationData.Count;
+            transCount = translationData.Count;
+
+            return keyframeData;
+        }
+
+        #endregion
     }
 }
