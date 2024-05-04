@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using GameFormatReader.Common;
-using OpenTK.Audio.OpenAL;
 
 namespace SuperBMDLib.Animation
 {
@@ -122,19 +120,19 @@ namespace SuperBMDLib.Animation
             TangentMode tangentMode = GetTangentMode(keys);
 
             List<float> channelSequence = new List<float>();
-            for (int i = 0; i < keys.Length; i++)
+            foreach (Keyframe key in keys)
             {
-                channelSequence.Append(keys[i].Time);
-                channelSequence.Append(keys[i].Value);
+                channelSequence.Add(key.Time);
+                channelSequence.Add(key.Value);
 
-                if (keys[i].InTangent != null)
+                if (key.InTangent != null)
                 {
-                    channelSequence.Append((float)keys[i].InTangent);
+                    channelSequence.Add((float)key.InTangent);
                 }
 
-                if (keys[i].OutTangent != null && tangentMode == TangentMode.Piecewise)
+                if (key.OutTangent != null && tangentMode == TangentMode.Piecewise)
                 {
-                    channelSequence.Append((float)keys[i].OutTangent);
+                    channelSequence.Add((float)key.OutTangent);
                 }
             }
 
@@ -156,19 +154,19 @@ namespace SuperBMDLib.Animation
             TangentMode tangentMode = GetTangentMode(keys);
 
             List<short> channelSequence = new List<short>();
-            for (int i = 0; i < keys.Length; i++)
+            foreach (Keyframe key in keys)
             {
-                channelSequence.Append((short)keys[i].Time);
-                channelSequence.Append((short)(keys[i].Value / RotationScale));
+                channelSequence.Add((short)key.Time);
+                channelSequence.Add((short)(key.Value / RotationScale));
 
-                if (keys[i].InTangent != null)
+                if (key.InTangent != null)
                 {
-                    channelSequence.Append((short)(keys[i].InTangent / RotationScale));
+                    channelSequence.Add((short)(key.InTangent / RotationScale));
                 }
 
-                if (keys[i].OutTangent != null && tangentMode == TangentMode.Piecewise)
+                if (key.OutTangent != null && tangentMode == TangentMode.Piecewise)
                 {
-                    channelSequence.Append((short)(keys[i].OutTangent / RotationScale));
+                    channelSequence.Add((short)(key.OutTangent / RotationScale));
                 }
             }
 
