@@ -31,7 +31,7 @@ namespace SuperBMDLib
         public BMDInfo ModelStats     { get; private set; }
         static private string[] characters_to_replace = new string[] { " ", "(", ")", ":", "-" };
 
-        public List<BCK> BCKAnims { get; private set; }
+        public List<J3DJointAnimation> JointAnims { get; private set; }
 
         private int packetCount;
         private int vertexCount;
@@ -84,7 +84,7 @@ namespace SuperBMDLib
         public Model(EndianBinaryReader reader, Arguments args)
         {
             ModelStats = new BMDInfo();
-            BCKAnims = new List<BCK>();
+            JointAnims = new List<J3DJointAnimation>();
 
             int j3d2Magic = reader.ReadInt32();
             int modelMagic = reader.ReadInt32();
@@ -157,7 +157,7 @@ namespace SuperBMDLib
         public Model(Scene scene, Arguments args, List<SuperBMDLib.Materials.Material> mat_presets = null, string additionalTexPath = null)
         {
             ModelStats = new BMDInfo();
-            BCKAnims = new List<BCK>();
+            JointAnims = new List<J3DJointAnimation>();
 
             if (args.ensure_one_material_per_mesh || args.material_order_strict) {
                 EnsureOneMaterialPerMesh(scene);
@@ -316,10 +316,19 @@ namespace SuperBMDLib
 
             vertexCount = VertexData.Attributes.Positions.Count;
 
-            if (args.exportAnims && scene.AnimationCount > 0)
+            if (scene.AnimationCount > 0)
             {
                 foreach (Assimp.Animation anm in scene.Animations)
-                    BCKAnims.Add(new BCK(anm, Joints.FlatSkeleton));
+                {
+                    if (args.exportAnims == Animation.Enums.AnimType.BCA)
+                    {
+                        JointAnims.Add(new BCA(anm, Joints.FlatSkeleton));
+                    } 
+                    else if (args.exportAnims == Animation.Enums.AnimType.BCK)
+                    {
+                        JointAnims.Add(new BCK(anm, Joints.FlatSkeleton));
+                    }
+                }
             }
         }
 
@@ -379,17 +388,14 @@ namespace SuperBMDLib
                 writer.Write((int)writer.BaseStream.Length);
             }
 
-            if (BCKAnims.Count > 0)
-            {
-                for (int i = 0; i < BCKAnims.Count; i++)
-                {
-                    string bckName = Path.Combine(outDir, $"anim_{ i }.bck");
+            foreach (J3DJointAnimation anim in JointAnims) {
+                string extension = anim.GetType().Name.ToLower();
+                string bckName = Path.Combine(outDir, $"{anim.Name}.{extension}");
 
-                    using (FileStream strm = new FileStream(bckName, FileMode.Create, FileAccess.Write))
-                    {
-                        EndianBinaryWriter bckWriter = new EndianBinaryWriter(strm, Endian.Big);
-                        BCKAnims[i].Write(bckWriter);
-                    }
+                using (FileStream strm = new FileStream(bckName, FileMode.Create, FileAccess.Write))
+                {
+                    EndianBinaryWriter bckWriter = new EndianBinaryWriter(strm, Endian.Big);
+                    anim.Write(bckWriter);
                 }
             }
         }

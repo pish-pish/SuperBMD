@@ -3,12 +3,6 @@ using SuperBMD.Util;
 
 namespace SuperBMDLib.Animation
 {
-    public enum TangentMode
-    {
-        Symmetric,
-        Piecewise
-    }
-
     public struct Keyframe
     {
         public float Time;

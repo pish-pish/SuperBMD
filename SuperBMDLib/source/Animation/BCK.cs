@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using GameFormatReader.Common;
+using SuperBMDLib.Animation.Enums;
 
 namespace SuperBMDLib.Animation
 {

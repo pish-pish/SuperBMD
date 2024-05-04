@@ -1,6 +1,7 @@
 ﻿using GameFormatReader.Common;
 using OpenTK;
 using SuperBMD.Util;
+using SuperBMDLib.Animation.Enums;
 using SuperBMDLib.Rigging;
 using System;
 using System.Collections.Generic;
@@ -9,15 +10,6 @@ using System.IO;
 
 namespace SuperBMDLib.Animation
 { 
-    public enum LoopMode
-    {
-        Once,
-        OnceReset,
-        Loop,
-        MirroredOnce,
-        MirroredLoop
-    }
-
     public class J3DJointAnimation
     {
         public string Name { get; private set; }
