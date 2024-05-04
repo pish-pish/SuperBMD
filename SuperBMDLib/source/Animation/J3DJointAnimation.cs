@@ -98,14 +98,14 @@ namespace SuperBMDLib.Animation
                 Assimp.VectorKey current_key = keys[i];
                 Vector3 value = new Vector3(current_key.Value.X, current_key.Value.Y, current_key.Value.Z);
 
-                axis.X[i].Key  = value.X;
-                axis.X[i].Time = (float)current_key.Time;
+                axis.X[i].Time  = (float)current_key.Time;
+                axis.X[i].Value = value.X;
 
-                axis.Y[i].Key  = value.Y;
-                axis.Y[i].Time = (float)current_key.Time;
+                axis.Y[i].Time  = (float)current_key.Time;
+                axis.Y[i].Value = value.Y;
 
-                axis.Z[i].Key  = value.Z;
-                axis.Z[i].Time = (float)current_key.Time;
+                axis.Z[i].Time  = (float)current_key.Time;
+                axis.Z[i].Value = value.Z;
             }
 
             return axis;
@@ -126,14 +126,14 @@ namespace SuperBMDLib.Animation
                 Quaternion value = new Quaternion(current_key.Value.X, current_key.Value.Y, current_key.Value.Z, current_key.Value.W);
                 Vector3 quat_as_vec = QuaternionExtensions.ToEulerAngles(value);
 
-                axis.X[i].Key  = quat_as_vec.X;
-                axis.X[i].Time = (float)current_key.Time;
+                axis.X[i].Time  = (float)current_key.Time;
+                axis.X[i].Value = quat_as_vec.X;
 
-                axis.Y[i].Key  = quat_as_vec.Y;
-                axis.Y[i].Time = (float)current_key.Time;
+                axis.Y[i].Time  = (float)current_key.Time;
+                axis.Y[i].Value = quat_as_vec.Y;
 
-                axis.Z[i].Key  = quat_as_vec.Z;
-                axis.Z[i].Time = (float)current_key.Time;
+                axis.Z[i].Time  = (float)current_key.Time;
+                axis.Z[i].Value = quat_as_vec.Z;
             }
 
             return axis;
@@ -172,6 +172,7 @@ namespace SuperBMDLib.Animation
         }
 
         #region Reading
+
         private void ReadSection(EndianBinaryReader reader)
         {
             // section header
@@ -211,17 +212,17 @@ namespace SuperBMDLib.Animation
 
             for (int i = 0; i < trackCount; i++)
             {
-                Tracks[i].Scale.X       = ReadFloatChannel(reader, scaleData);
-                Tracks[i].Rotation.X    = ReadShortChannel(reader, rotationData);
-                Tracks[i].Translation.X = ReadFloatChannel(reader, translationData);
+                Tracks[i].Scale.X       = ReadChannel(reader, scaleData);
+                Tracks[i].Rotation.X    = ReadChannel(reader, rotationData);
+                Tracks[i].Translation.X = ReadChannel(reader, translationData);
 
-                Tracks[i].Scale.Y       = ReadFloatChannel(reader, scaleData);
-                Tracks[i].Rotation.Y    = ReadShortChannel(reader, rotationData);
-                Tracks[i].Translation.Y = ReadFloatChannel(reader, translationData);
+                Tracks[i].Scale.Y       = ReadChannel(reader, scaleData);
+                Tracks[i].Rotation.Y    = ReadChannel(reader, rotationData);
+                Tracks[i].Translation.Y = ReadChannel(reader, translationData);
 
-                Tracks[i].Scale.Z       = ReadFloatChannel(reader, scaleData);
-                Tracks[i].Rotation.Z    = ReadShortChannel(reader, rotationData);
-                Tracks[i].Translation.Z = ReadFloatChannel(reader, translationData);
+                Tracks[i].Scale.Z       = ReadChannel(reader, scaleData);
+                Tracks[i].Rotation.Z    = ReadChannel(reader, rotationData);
+                Tracks[i].Translation.Z = ReadChannel(reader, translationData);
             }
         }
 
@@ -335,17 +336,17 @@ namespace SuperBMDLib.Animation
 
                 foreach (Track track in Tracks)
                 {
-                    WriteFloatChannel(writer, track.Scale.X, scaleData);
-                    WriteShortChannel(writer, track.Rotation.X, rotationData);
-                    WriteFloatChannel(writer, track.Translation.X, translationData);
+                    WriteChannel(writer, track.Scale.X, scaleData);
+                    WriteChannel(writer, track.Rotation.X, rotationData);
+                    WriteChannel(writer, track.Translation.X, translationData);
 
-                    WriteFloatChannel(writer, track.Scale.Y, scaleData);
-                    WriteShortChannel(writer, track.Rotation.Y, rotationData);
-                    WriteFloatChannel(writer, track.Translation.Y, translationData);
+                    WriteChannel(writer, track.Scale.Y, scaleData);
+                    WriteChannel(writer, track.Rotation.Y, rotationData);
+                    WriteChannel(writer, track.Translation.Y, translationData);
 
-                    WriteFloatChannel(writer, track.Scale.Z, scaleData);
-                    WriteShortChannel(writer, track.Rotation.Z, rotationData);
-                    WriteFloatChannel(writer, track.Translation.Z, translationData);
+                    WriteChannel(writer, track.Scale.Z, scaleData);
+                    WriteChannel(writer, track.Rotation.Z, rotationData);
+                    WriteChannel(writer, track.Translation.Z, translationData);
                 }
 
                 Util.StreamUtility.PadStreamWithString(writer, "Animation made with love and care :)", 32);
