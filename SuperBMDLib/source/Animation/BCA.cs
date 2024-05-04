@@ -21,22 +21,22 @@ namespace SuperBMDLib.Animation
             SectionMagic = "ANF1";
         }
 
-        protected override Keyframe[] ReadFloatChannel(EndianBinaryReader reader, float[] data) 
+        protected override Keyframe[] ReadChannel(EndianBinaryReader reader, float[] data) 
         { 
             return new Keyframe[] { }; 
         }
 
-        protected override Keyframe[] ReadShortChannel(EndianBinaryReader reader, short[] data) 
+        protected override Keyframe[] ReadChannel(EndianBinaryReader reader, short[] data) 
         { 
             return new Keyframe[] { }; 
         }
 
-        protected override void WriteFloatChannel(EndianBinaryWriter writer, Keyframe[] keys, List<float> data) 
+        protected override void WriteChannel(EndianBinaryWriter writer, Keyframe[] keys, List<float> data) 
         {
 
         }
 
-        protected override void WriteShortChannel(EndianBinaryWriter writer, Keyframe[] keys, List<short> data) 
+        protected override void WriteChannel(EndianBinaryWriter writer, Keyframe[] keys, List<short> data) 
         {
 
         }

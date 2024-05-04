@@ -74,13 +74,13 @@ namespace SuperBMDLib.Animation
             ReadSection(reader);
         }
 
-        protected virtual Keyframe[] ReadFloatChannel(EndianBinaryReader reader, float[] data) { return new Keyframe[] {}; }
+        protected virtual Keyframe[] ReadChannel(EndianBinaryReader reader, float[] data) { return new Keyframe[] {}; }
 
-        protected virtual Keyframe[] ReadShortChannel(EndianBinaryReader reader, short[] data) { return new Keyframe[] {}; }
+        protected virtual Keyframe[] ReadChannel(EndianBinaryReader reader, short[] data) { return new Keyframe[] {}; }
 
-        protected virtual void WriteFloatChannel(EndianBinaryWriter writer, Keyframe[] keys, List<float> data) { }
+        protected virtual void WriteChannel(EndianBinaryWriter writer, Keyframe[] keys, List<float> data) { }
 
-        protected virtual void WriteShortChannel(EndianBinaryWriter writer, Keyframe[] keys, List<short> data) { }
+        protected virtual void WriteChannel(EndianBinaryWriter writer, Keyframe[] keys, List<short> data) { }
 
         protected virtual sbyte GetAngleFraction() { return -1; }
 
@@ -137,6 +137,38 @@ namespace SuperBMDLib.Animation
             }
 
             return axis;
+        }
+
+        public static int FindSequenceIndex<T>(List<T> dataList, List<T> sequenceList)
+        {
+            int matchup = 0, start = -1;
+
+            bool started = false;
+
+            for (int i = 0; i < dataList.Count; i++)
+            {
+                if (!dataList[i].Equals(sequenceList[matchup]))
+                {
+                    matchup = 0;
+                    start = -1;
+                    started = false;
+                    continue;
+                }
+
+                if (!started)
+                {
+                    start = i;
+                    started = true;
+                }
+
+                matchup++;
+                if (matchup == sequenceList.Count)
+                {
+                    return start;
+                }
+            }
+
+            return dataList.Count;
         }
 
         #region Reading
@@ -256,8 +288,8 @@ namespace SuperBMDLib.Animation
 
             const int tracksOffset = 0x40; // known placement of tracks offset
 
-            byte[] keyframeData = WriteKeyframeData(tracksOffset, out int scaleCount, out int rotCount, out int transCount, 
-                out int scaleOffset, out int rotOffset, out int transOffset);
+            byte[] keyframeData = WriteKeyframeData(tracksOffset, out int scaleCount, out int rotCount, 
+                out int transCount, out int scaleOffset, out int rotOffset, out int transOffset);
 
             writer.Write(SectionMagic.ToCharArray()); // magic
 
@@ -289,8 +321,8 @@ namespace SuperBMDLib.Animation
             writer.BaseStream.Seek(0, SeekOrigin.End);
         }
 
-        private byte[] WriteKeyframeData(int tracksOffset, out int scaleCount, out int rotCount, out int transCount, 
-            out int scaleOffset, out int rotOffset, out int transOffset)
+        private byte[] WriteKeyframeData(int tracksOffset, out int scaleCount, out int rotCount, 
+                out int transCount, out int scaleOffset, out int rotOffset, out int transOffset)
         {
             List<float> scaleData       = new List<float>();
             List<short> rotationData    = new List<short>();

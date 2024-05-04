@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
@@ -17,9 +19,10 @@ namespace SuperBMDLib.Animation
     public struct Keyframe
     {
         public float Time;
-        public float Key;
-        public float InTangent;
-        public float OutTangent;
+        public float Value;
+
+        public float? InTangent;
+        public float? OutTangent;
     }
 
     public struct Axis
@@ -47,9 +50,9 @@ namespace SuperBMDLib.Animation
 
             ident_track.Translation = new Axis()
             {
-                X = new Keyframe[] { new Keyframe() { InTangent = 0, Key = Translation.X, OutTangent = 0 } },
-                Y = new Keyframe[] { new Keyframe() { InTangent = 0, Key = Translation.Y, OutTangent = 0, Time = 0} },
-                Z = new Keyframe[] { new Keyframe() { InTangent = 0, Key = Translation.Z, OutTangent = 0, Time = 0} },
+                X = new Keyframe[] { new Keyframe() { InTangent = 0, Value = Translation.X, OutTangent = 0 } },
+                Y = new Keyframe[] { new Keyframe() { InTangent = 0, Value = Translation.Y, OutTangent = 0, Time = 0} },
+                Z = new Keyframe[] { new Keyframe() { InTangent = 0, Value = Translation.Z, OutTangent = 0, Time = 0} },
             };
 
             Quaternion Rotation = Transform.ExtractRotation();
@@ -57,18 +60,18 @@ namespace SuperBMDLib.Animation
 
             ident_track.Rotation = new Axis()
             {
-                X = new Keyframe[] { new Keyframe() { InTangent = 0, Key = Rot_Vec.X, OutTangent = 0, Time = 0} },
-                Y = new Keyframe[] { new Keyframe() { InTangent = 0, Key = Rot_Vec.Y, OutTangent = 0, Time = 0} },
-                Z = new Keyframe[] { new Keyframe() { InTangent = 0, Key = Rot_Vec.Z, OutTangent = 0, Time = 0} },
+                X = new Keyframe[] { new Keyframe() { InTangent = 0, Value = Rot_Vec.X, OutTangent = 0, Time = 0} },
+                Y = new Keyframe[] { new Keyframe() { InTangent = 0, Value = Rot_Vec.Y, OutTangent = 0, Time = 0} },
+                Z = new Keyframe[] { new Keyframe() { InTangent = 0, Value = Rot_Vec.Z, OutTangent = 0, Time = 0} },
             };
 
             Vector3 Scale = Transform.ExtractScale();
 
             ident_track.Scale = new Axis()
             {
-                X = new Keyframe[] { new Keyframe() { InTangent = 0, Key = 1, OutTangent = 0, Time = 0} },
-                Y = new Keyframe[] { new Keyframe() { InTangent = 0, Key = 1, OutTangent = 0, Time = 0} },
-                Z = new Keyframe[] { new Keyframe() { InTangent = 0, Key = 1, OutTangent = 0, Time = 0} },
+                X = new Keyframe[] { new Keyframe() { InTangent = 0, Value = 1, OutTangent = 0, Time = 0} },
+                Y = new Keyframe[] { new Keyframe() { InTangent = 0, Value = 1, OutTangent = 0, Time = 0} },
+                Z = new Keyframe[] { new Keyframe() { InTangent = 0, Value = 1, OutTangent = 0, Time = 0} },
             };
 
             return ident_track;
