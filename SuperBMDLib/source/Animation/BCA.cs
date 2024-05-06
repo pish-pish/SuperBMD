@@ -56,10 +56,9 @@ namespace SuperBMDLib.Animation
             }
 
             int dataIndex = FindSequenceIndex(data, channelSequence);
-            data.AddRange(channelSequence);
 
-            writer.Write((ushort)data.Count);
-            writer.Write((ushort)dataIndex);
+            writer.Write((short)data.Count);
+            writer.Write((short)dataIndex);
         }
 
         protected override void WriteChannel(EndianBinaryWriter writer, Keyframe[] keys, List<short> data) 
@@ -67,14 +66,13 @@ namespace SuperBMDLib.Animation
             List<short> channelSequence = new List<short>();
             foreach (Keyframe key in keys)
             {
-                channelSequence.Add((short)(key.Value * RotationScale));
+                channelSequence.Add((short)(key.Value / RotationScale));
             }
 
             int dataIndex = FindSequenceIndex(data, channelSequence);
-            data.AddRange(channelSequence);
 
-            writer.Write((ushort)data.Count);
-            writer.Write((ushort)dataIndex);
+            writer.Write((short)data.Count);
+            writer.Write((short)dataIndex);
         }
     }
 }

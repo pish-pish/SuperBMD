@@ -80,6 +80,7 @@
     </Compile>
     <Compile Include="source\Animation\BCA.cs" />
     <Compile Include="source\Animation\BCK.cs" />
+    <Compile Include="source\Animation\Enums.cs" />
     <Compile Include="source\Animation\J3DJointAnimation.cs" />
     <Compile Include="source\Animation\Track.cs" />
     <Compile Include="source\Arguments.cs" />

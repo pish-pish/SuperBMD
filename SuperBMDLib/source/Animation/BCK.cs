@@ -20,7 +20,7 @@ namespace SuperBMDLib.Animation
             SectionMagic = "ANK1";
         }
 
-        protected override sbyte GetAngleFraction()
+        protected override byte GetAngleFraction()
         {
             float maxValue = 0.0f;
             foreach (Track track in Tracks)
@@ -35,7 +35,7 @@ namespace SuperBMDLib.Animation
                 return 0;
             }
 
-            return (sbyte)(maxValue / 180);
+            return (byte)(maxValue / 180);
         }
 
         protected override Keyframe[] ReadChannel(EndianBinaryReader reader, float[] data)
@@ -143,11 +143,10 @@ namespace SuperBMDLib.Animation
             }
 
             int dataIndex = FindSequenceIndex(data, channelSequence);
-            data.AddRange(channelSequence);
 
-            writer.Write((ushort)data.Count);
-            writer.Write((ushort)dataIndex);
-            writer.Write((ushort)tangentMode);
+            writer.Write((short)data.Count);
+            writer.Write((short)dataIndex);
+            writer.Write((short)tangentMode);
         }
 
         protected override void WriteChannel(EndianBinaryWriter writer, Keyframe[] keys, List<short> data)
@@ -177,11 +176,10 @@ namespace SuperBMDLib.Animation
             }
 
             int dataIndex = FindSequenceIndex(data, channelSequence);
-            data.AddRange(channelSequence);
 
-            writer.Write((ushort)data.Count);
-            writer.Write((ushort)dataIndex);
-            writer.Write((ushort)tangentMode);
+            writer.Write((short)data.Count);
+            writer.Write((short)dataIndex);
+            writer.Write((short)tangentMode);
         }
 
         private TangentMode GetTangentMode(Keyframe[] keys)
