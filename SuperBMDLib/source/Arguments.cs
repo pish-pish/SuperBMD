@@ -194,6 +194,7 @@ namespace SuperBMDLib
                         if (i + 1 >= args.Length)
                             break;
                         animType = (Animation.Enums.AnimType)Enum.Parse(typeof(Animation.Enums.AnimType), args[i+1]);
+                        i++;
                         break;
                     case "--vtxpos":
                         if (i + 2 >= args.Length)
