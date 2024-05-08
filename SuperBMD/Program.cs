@@ -143,21 +143,14 @@ namespace SuperBMDLib
                 {
                     EndianBinaryReader reader = new EndianBinaryReader(stream, Endian.Big);
 
-                    if ((AnimType)Enum.Parse(typeof(AnimType), fi.Extension.Replace(".", "").ToUpper()) == AnimType.BCA)
+                    if (fi.Extension == ".bca")
                     {
                         anim = new BCA(reader);
                     }
-                    else if ((AnimType)Enum.Parse(typeof(AnimType), fi.Extension.Replace(".", "").ToUpper()) == AnimType.BCK)
+                    else if (fi.Extension == ".bck")
                     {
                         anim = new BCK(reader);
                     }
-                }
-
-                Console.WriteLine($"\nWriting {fi.Extension.ToUpper()}...");
-                using (FileStream stream = new FileStream(fi.Directory + $"\\test{fi.Extension}", FileMode.Create, FileAccess.Write))
-                {
-                    EndianBinaryWriter writer = new EndianBinaryWriter(stream, Endian.Big);
-                    anim.Write(writer);
                 }
             }
 

@@ -318,6 +318,7 @@ namespace SuperBMDLib
 
             if (scene.AnimationCount > 0)
             {
+                Console.WriteLine($"\nFound {scene.AnimationCount} animations...");
                 foreach (Assimp.Animation anm in scene.Animations)
                 {
                     if (args.exportAnims == Animation.Enums.AnimType.BCA)
