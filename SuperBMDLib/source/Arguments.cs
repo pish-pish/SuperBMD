@@ -26,7 +26,8 @@ namespace SuperBMDLib
         public bool readMipmaps;
         public bool dumpHierarchy;
         public string hierarchyPath;
-        public Animation.Enums.AnimType exportAnims;
+        public bool exportAnims;
+        public Animation.Enums.AnimType animType;
         public Geometry.Enums.GXDataType vertextype;
         public byte fraction;
         public bool material_order_strict;
@@ -67,7 +68,8 @@ namespace SuperBMDLib
             readMipmaps = true;
             dumpHierarchy = false;
             hierarchyPath = "";
-            exportAnims = Animation.Enums.AnimType.BCA;
+            exportAnims = true;
+            animType = Animation.Enums.AnimType.BCA;
             vertextype = Geometry.Enums.GXDataType.Float32;
             fraction = 0;
             material_order_strict = false;
@@ -188,9 +190,10 @@ namespace SuperBMDLib
                         break;
                     case "-a":
                     case "--animation":
+                        exportAnims = true;
                         if (i + 1 >= args.Length)
-                            throw new Exception("The parameters were malformed.");
-                        exportAnims = (Animation.Enums.AnimType)Enum.Parse(typeof(Animation.Enums.AnimType), args[i+1]);
+                            break;
+                        animType = (Animation.Enums.AnimType)Enum.Parse(typeof(Animation.Enums.AnimType), args[i+1]);
                         break;
                     case "--vtxpos":
                         if (i + 2 >= args.Length)

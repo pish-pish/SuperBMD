@@ -316,18 +316,22 @@ namespace SuperBMDLib
 
             vertexCount = VertexData.Attributes.Positions.Count;
 
-            if (scene.AnimationCount > 0)
+            if (scene.AnimationCount > 0 && args.exportAnims)
             {
                 Console.WriteLine($"\nFound {scene.AnimationCount} animations...");
                 foreach (Assimp.Animation anm in scene.Animations)
                 {
-                    if (args.exportAnims == Animation.Enums.AnimType.BCA)
+                    if (args.animType == Animation.Enums.AnimType.BCA)
                     {
+                        Console.WriteLine("Generating new BCA\n");
                         JointAnims.Add(new BCA(anm, Joints.FlatSkeleton));
+                        Console.WriteLine();
                     } 
-                    else if (args.exportAnims == Animation.Enums.AnimType.BCK)
+                    else if (args.animType == Animation.Enums.AnimType.BCK)
                     {
+                        Console.WriteLine("Generating new BCK\n");
                         JointAnims.Add(new BCK(anm, Joints.FlatSkeleton));
+                        Console.WriteLine();
                     }
                 }
             }

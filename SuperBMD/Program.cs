@@ -211,6 +211,7 @@ namespace SuperBMDLib
             Console.WriteLine("\t\tstatic: Only generate tristrips for static (unrigged) meshes.");
             Console.WriteLine("\t\tall:    Generate tristrips for all meshes.");
             Console.WriteLine("\t\tnone:   Do not generate tristrips.");
+            Console.WriteLine();
             Console.WriteLine("\t--transform_mode        mode\t\tTransform mode for bone animation transforms.");
             Console.WriteLine("\t\tBasic");
             Console.WriteLine("\t\tXsi");
@@ -228,7 +229,9 @@ namespace SuperBMDLib
             Console.WriteLine();
             Console.WriteLine("\t--profile\t\t\t\tGenerate a report with information on the .BMD/.BDL (Other formats not supported)");
             Console.WriteLine();
-            Console.WriteLine("\t-a/--animation\t\t\t\tGenerate *.bck files from animation data stored in DAE, if present");
+            Console.WriteLine("\t-a/--animation\t\ttype\t\tGenerate *.bck/*.bca files from animation data stored in DAE/FBX, if present");
+            Console.WriteLine("\t\tBCA");
+            Console.WriteLine("\t\tBCK");
             Console.WriteLine();
         }
     }
