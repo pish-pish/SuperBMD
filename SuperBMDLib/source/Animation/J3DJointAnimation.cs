@@ -95,17 +95,17 @@ namespace SuperBMDLib.Animation
 
             for (int i = 0; i < keys.Count; i++)
             {
-                Assimp.VectorKey current_key = keys[i];
-                Vector3 value = new Vector3(current_key.Value.X, current_key.Value.Y, current_key.Value.Z);
+                axis.X[i].Time      = (float)keys[i].Time;
+                axis.X[i].Value     = keys[i].Value.X;
+                axis.X[i].InTangent = 0;
 
-                axis.X[i].Time  = (float)current_key.Time;
-                axis.X[i].Value = value.X;
+                axis.Y[i].Time      = (float)keys[i].Time;
+                axis.Y[i].Value     = keys[i].Value.Y;
+                axis.Y[i].InTangent = 0;
 
-                axis.Y[i].Time  = (float)current_key.Time;
-                axis.Y[i].Value = value.Y;
-
-                axis.Z[i].Time  = (float)current_key.Time;
-                axis.Z[i].Value = value.Z;
+                axis.Z[i].Time      = (float)keys[i].Time;
+                axis.Z[i].Value     = keys[i].Value.Z;
+                axis.Z[i].InTangent = 0;
             }
 
             return axis;
@@ -128,12 +128,15 @@ namespace SuperBMDLib.Animation
 
                 axis.X[i].Time  = (float)current_key.Time;
                 axis.X[i].Value = quat_as_vec.X;
+                axis.X[i].InTangent = 0;
 
-                axis.Y[i].Time  = (float)current_key.Time;
-                axis.Y[i].Value = quat_as_vec.Y;
+                axis.Y[i].Time      = (float)current_key.Time;
+                axis.Y[i].Value     = quat_as_vec.Y;
+                axis.Y[i].InTangent = 0;
 
-                axis.Z[i].Time  = (float)current_key.Time;
-                axis.Z[i].Value = quat_as_vec.Z;
+                axis.Z[i].Time      = (float)current_key.Time;
+                axis.Z[i].Value     = quat_as_vec.Z;
+                axis.Z[i].InTangent = 0;
             }
 
             return axis;
