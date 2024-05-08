@@ -1,20 +1,22 @@
 ﻿using GameFormatReader.Common;
+using System;
 using System.Collections.Generic;
 
 namespace SuperBMDLib.Animation
 {
     public class BCA : J3DJointAnimation
     {
-        public BCA(Assimp.Animation src_anim, List<Rigging.Bone> bone_list) : base(src_anim, bone_list)
+        protected override string FileMagic => "J3D1bca1";
+        protected override string SectionMagic => "ANF1";
+
+        public BCA(Assimp.Animation src_anim, List<Rigging.Bone> bone_list) 
+            : base(src_anim, bone_list)
         {
-            FileMagic = "J3D1bca1";
-            SectionMagic = "ANF1";
         }
 
-        public BCA(EndianBinaryReader reader) : base(reader)
+        public BCA(EndianBinaryReader reader) 
+            : base(reader) 
         {
-            FileMagic    = "J3D1bca1";
-            SectionMagic = "ANF1";
         }
 
         protected override Keyframe[] ReadChannel(EndianBinaryReader reader, float[] data) 
@@ -23,10 +25,17 @@ namespace SuperBMDLib.Animation
             ushort dataIndex = reader.ReadUInt16();
 
             Keyframe[] keyframes = new Keyframe[keyCount];
+            if (keyCount == 1)
+            {
+                keyframes[0].Time  = 0;
+                keyframes[0].Value = data[dataIndex];
+                return keyframes;
+            }
+
             for (int i = 0; i < keyCount; i++)
             {
                 keyframes[i].Time  = data[dataIndex];
-                keyframes[i].Value = data[dataIndex + 1];
+                keyframes[i].Value = data[dataIndex + i];
             }
 
             return keyframes;
@@ -38,10 +47,17 @@ namespace SuperBMDLib.Animation
             ushort dataIndex = reader.ReadUInt16();
 
             Keyframe[] keyframes = new Keyframe[keyCount];
+            if (keyCount == 1)
+            {
+                keyframes[0].Time  = 0;
+                keyframes[0].Value = data[dataIndex] * RotationScale;
+                return keyframes;
+            }
+
             for (int i = 0; i < keyCount; i++)
             {
                 keyframes[i].Time  = data[dataIndex];
-                keyframes[i].Value = data[dataIndex + 1] * RotationScale;
+                keyframes[i].Value = data[dataIndex + i] * RotationScale;
             }
 
             return keyframes;
@@ -57,8 +73,8 @@ namespace SuperBMDLib.Animation
 
             int dataIndex = FindSequenceIndex(data, channelSequence);
 
-            writer.Write((short)data.Count);
-            writer.Write((short)dataIndex);
+            writer.Write((ushort)keys.Length);
+            writer.Write((ushort)dataIndex);
         }
 
         protected override void WriteChannel(EndianBinaryWriter writer, Keyframe[] keys, List<short> data) 
@@ -71,8 +87,8 @@ namespace SuperBMDLib.Animation
 
             int dataIndex = FindSequenceIndex(data, channelSequence);
 
-            writer.Write((short)data.Count);
-            writer.Write((short)dataIndex);
+            writer.Write((ushort)keys.Length);
+            writer.Write((ushort)dataIndex);
         }
     }
 }

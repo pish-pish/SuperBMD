@@ -8,16 +8,17 @@ namespace SuperBMDLib.Animation
 {
     public class BCK : J3DJointAnimation
     {
-        public BCK(EndianBinaryReader reader) : base(reader)
+        protected override string FileMagic => "J3D1bck1";
+        protected override string SectionMagic => "ANK1";
+
+        public BCK(EndianBinaryReader reader) 
+            : base(reader)
         {
-            FileMagic = "J3D1bck1";
-            SectionMagic = "ANK1";
         }
 
-        public BCK(Assimp.Animation src_anim, List<Rigging.Bone> bone_list) : base(src_anim, bone_list)
+        public BCK(Assimp.Animation src_anim, List<Rigging.Bone> bone_list) 
+            : base(src_anim, bone_list)
         {
-            FileMagic = "J3D1bck1";
-            SectionMagic = "ANK1";
         }
 
         protected override byte GetAngleFraction()
@@ -144,9 +145,9 @@ namespace SuperBMDLib.Animation
 
             int dataIndex = FindSequenceIndex(data, channelSequence);
 
-            writer.Write((short)data.Count);
-            writer.Write((short)dataIndex);
-            writer.Write((short)tangentMode);
+            writer.Write((ushort)keys.Length);
+            writer.Write((ushort)dataIndex);
+            writer.Write((ushort)tangentMode);
         }
 
         protected override void WriteChannel(EndianBinaryWriter writer, Keyframe[] keys, List<short> data)
@@ -177,9 +178,9 @@ namespace SuperBMDLib.Animation
 
             int dataIndex = FindSequenceIndex(data, channelSequence);
 
-            writer.Write((short)data.Count);
-            writer.Write((short)dataIndex);
-            writer.Write((short)tangentMode);
+            writer.Write((ushort)keys.Length);
+            writer.Write((ushort)dataIndex);
+            writer.Write((ushort)tangentMode);
         }
 
         private TangentMode GetTangentMode(Keyframe[] keys)

@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using GameFormatReader.Common;
+using Newtonsoft.Json;
+using SuperBMDLib.Animation;
+using SuperBMDLib.Animation.Enums;
 using SuperBMDLib.Materials;
 using System;
 using System.Collections.Generic;
@@ -55,7 +58,6 @@ namespace SuperBMDLib
                 else {
                     Console.WriteLine("Profiling is only supported for BMD/BDL!");
                 }
-
             }
 
             if (cmd_args.materials_path != "" || cmd_args.material_folder != "") {
@@ -131,6 +133,34 @@ namespace SuperBMDLib
                 destinationFormat = ".OBJ";
             }
 
+            if (cmd_args.input_path.EndsWith(".bck") || cmd_args.input_path.EndsWith(".bca"))
+            {
+                Console.WriteLine($"Reading {fi.Extension.ToUpper()}...");
+
+                J3DJointAnimation anim = null;
+
+                using (FileStream stream = new FileStream(cmd_args.input_path, FileMode.Open, FileAccess.Read))
+                {
+                    EndianBinaryReader reader = new EndianBinaryReader(stream, Endian.Big);
+
+                    if ((AnimType)Enum.Parse(typeof(AnimType), fi.Extension.Replace(".", "").ToUpper()) == AnimType.BCA)
+                    {
+                        anim = new BCA(reader);
+                    }
+                    else if ((AnimType)Enum.Parse(typeof(AnimType), fi.Extension.Replace(".", "").ToUpper()) == AnimType.BCK)
+                    {
+                        anim = new BCK(reader);
+                    }
+                }
+
+                Console.WriteLine($"\nWriting {fi.Extension.ToUpper()}...");
+                using (FileStream stream = new FileStream(fi.Directory + $"\\test{fi.Extension}", FileMode.Create, FileAccess.Write))
+                {
+                    EndianBinaryWriter writer = new EndianBinaryWriter(stream, Endian.Big);
+                    anim.Write(writer);
+                }
+            }
+
             Console.WriteLine(string.Format("Preparing to convert {0} from {1} to {2}", fi.Name.Replace(fi.Extension, ""), fi.Extension.ToUpper(), destinationFormat));
             mod = Model.Load(cmd_args, mat_presets, additionalTexPath);
 
@@ -150,8 +180,6 @@ namespace SuperBMDLib
                 else {
                     mod.ExportAssImp(cmd_args.output_path, "dae", settings, cmd_args);
                 }
-                
-                
             }
             else
             {

@@ -18,8 +18,8 @@ namespace SuperBMDLib.Animation
         public float RotationScale;
         public short Duration;
 
-        protected string FileMagic;
-        protected string SectionMagic;
+        protected virtual string FileMagic { get; }
+        protected virtual string SectionMagic { get; }
 
         public Track[] Tracks;
 
@@ -27,7 +27,8 @@ namespace SuperBMDLib.Animation
         {
             Name          = src_anim.Name;
             LoopMode      = LoopMode.Loop;
-            Duration      = (short)(src_anim.DurationInTicks * 30.0f);
+            Duration      = (short)(src_anim.DurationInTicks * (30.0f / src_anim.TicksPerSecond));
+            Console.WriteLine(src_anim.TicksPerSecond);
 
             Tracks = new Track[bone_list.Count];
 
@@ -66,7 +67,7 @@ namespace SuperBMDLib.Animation
             reader.ReadUInt32(); // filesize
 
             uint sectionCount = reader.ReadUInt32();
-            Debug.Assert(sectionCount == 1);
+            Debug.Assert(sectionCount == 1, "More than 1 data sections; cannot proceed.");
 
             reader.Skip(16); // skip svn/svr data and sound section offset
 
@@ -185,19 +186,28 @@ namespace SuperBMDLib.Animation
             LoopMode = (LoopMode)reader.ReadByte();
 
             byte angleFrac = reader.ReadByte();
+            Console.WriteLine($"Angle Frac: {angleFrac}");
             if (angleFrac == 0xFF)
             {
                 angleFrac = 0;
             }
             RotationScale = (float)Math.Pow(2.0f, angleFrac) * (180.0f / 32768.0f);
 
-            Duration = reader.ReadInt16();
+            Duration = (short)reader.ReadUInt16();
+            Console.WriteLine($"Duration: {Duration}");
 
             // counts for tracks and component data
             ushort trackCount       = reader.ReadUInt16();
+            Console.WriteLine($"Track Count: {trackCount}");
+
             ushort scaleCount       = reader.ReadUInt16();
+            Console.WriteLine($"Scale Count: {scaleCount}");
+
             ushort rotationCount    = reader.ReadUInt16();
+            Console.WriteLine($"Rotation Count: {rotationCount}");
+
             ushort translationCount = reader.ReadUInt16();
+            Console.WriteLine($"Translation Count: {translationCount}");
 
             // data offsets with an extra 4 bytes added to skip padding between sections
             uint tracksOffset       = reader.ReadUInt32() + 32;
@@ -281,7 +291,7 @@ namespace SuperBMDLib.Animation
             WriteSection(writer);
 
             writer.BaseStream.Seek(sizeOffset, SeekOrigin.Begin);
-            writer.Write((int)writer.BaseStream.Length); // total filesize
+            writer.Write((uint)writer.BaseStream.Length); // total filesize
             writer.BaseStream.Seek(0, SeekOrigin.End);
         }
 
@@ -303,19 +313,19 @@ namespace SuperBMDLib.Animation
             writer.Write(GetAngleFraction());
             Console.WriteLine($"Angle Frac: {GetAngleFraction()}");
 
-            writer.Write(Duration);
+            writer.Write((ushort)Duration);
             Console.WriteLine($"Duration: {Duration}");
 
-            writer.Write((short)Tracks.Length);
+            writer.Write((ushort)Tracks.Length);
             Console.WriteLine($"Tracks Count: {Tracks.Length}");
 
-            writer.Write((short)scaleCount);
+            writer.Write((ushort)scaleCount);
             Console.WriteLine($"Scales Count: {scaleCount}");
 
-            writer.Write((short)rotCount);
+            writer.Write((ushort)rotCount);
             Console.WriteLine($"Rotations Count: {rotCount}");
 
-            writer.Write((short)transCount);
+            writer.Write((ushort)transCount);
             Console.WriteLine($"Translations Count: {transCount}");
 
             // this offset will always be at 0x40
@@ -332,7 +342,7 @@ namespace SuperBMDLib.Animation
             Util.StreamUtility.PadStreamWithString(writer, "Animation made with love and care :)", 32);
 
             writer.BaseStream.Seek(sizeOffset, SeekOrigin.Begin);
-            writer.Write((int)writer.BaseStream.Length - sectionStart);
+            writer.Write((uint)(writer.BaseStream.Length - sectionStart));
             writer.BaseStream.Seek(0, SeekOrigin.End);
         }
 

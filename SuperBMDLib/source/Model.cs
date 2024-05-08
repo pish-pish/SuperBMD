@@ -345,8 +345,6 @@ namespace SuperBMDLib
                 fileName = Path.Combine(outDir, fileNameNoExt + ".bmd");
             }
 
-            
-
             using (FileStream stream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
             {
                 EndianBinaryWriter writer = new EndianBinaryWriter(stream, Endian.Big);
@@ -388,15 +386,17 @@ namespace SuperBMDLib
                 writer.Write((int)writer.BaseStream.Length);
             }
 
+            int i = 0;
             foreach (J3DJointAnimation anim in JointAnims) {
                 string extension = anim.GetType().Name.ToLower();
-                string bckName = Path.Combine(outDir, $"{anim.Name}.{extension}");
+                string bckName = Path.Combine(outDir, $"anim_{i}.{extension}");
 
                 using (FileStream strm = new FileStream(bckName, FileMode.Create, FileAccess.Write))
                 {
                     EndianBinaryWriter bckWriter = new EndianBinaryWriter(strm, Endian.Big);
                     anim.Write(bckWriter);
                 }
+                i++;
             }
         }
 
