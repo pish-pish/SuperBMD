@@ -23,7 +23,7 @@ namespace SuperBMDLib.Animation
 
         public Track[] Tracks;
 
-        public J3DJointAnimation(Assimp.Animation src_anim, List<Bone> bone_list)
+        public J3DJointAnimation(Assimp.Animation src_anim, List<Bone> bone_list, float threshold=0)
         {
             Name          = src_anim.Name;
             LoopMode      = LoopMode.Loop;
@@ -44,9 +44,9 @@ namespace SuperBMDLib.Animation
                 {
                     Tracks[i] = new Track()
                     {
-                        Translation = GenerateTrack(node.PositionKeys, bone_list[i]),
-                        Rotation    = GenerateTrack(node.RotationKeys, bone_list[i]),
-                        Scale       = GenerateTrack(node.ScalingKeys, bone_list[i]),
+                        Scale       = GenerateAxis(node.ScalingKeys, threshold),
+                        Rotation    = GenerateAxis(node.RotationKeys, threshold),
+                        Translation = GenerateAxis(node.PositionKeys, threshold),
                     };
                 }
             }
@@ -84,34 +84,57 @@ namespace SuperBMDLib.Animation
 
         protected virtual byte GetAngleFraction() => 0xFF;
 
-        private Axis GenerateTrack(List<Assimp.VectorKey> keys, Bone bone)
+        private Axis GenerateAxis(List<Assimp.VectorKey> keys, float threshold)
         {
-            Axis axis = new Axis()
-            {
-                X = new Keyframe[keys.Count],
-                Y = new Keyframe[keys.Count],
-                Z = new Keyframe[keys.Count],
-            };
+            List<Keyframe> xKeys = new List<Keyframe>();
+            List<Keyframe> yKeys = new List<Keyframe>();
+            List<Keyframe> zKeys = new List<Keyframe>();
 
             for (int i = 0; i < keys.Count; i++)
             {
-                axis.X[i].Time      = (float)keys[i].Time;
-                axis.X[i].Value     = keys[i].Value.X;
-                axis.X[i].InTangent = 0;
+                xKeys.Add(new Keyframe { 
+                    Time      = (float)keys[i].Time,
+                    Value     = keys[i].Value.X,
+                    InTangent = 0,
+                });
 
-                axis.Y[i].Time      = (float)keys[i].Time;
-                axis.Y[i].Value     = keys[i].Value.Y;
-                axis.Y[i].InTangent = 0;
+                yKeys.Add(new Keyframe
+                {
+                    Time = (float)keys[i].Time,
+                    Value = keys[i].Value.Y,
+                    InTangent = 0,
+                });
 
-                axis.Z[i].Time      = (float)keys[i].Time;
-                axis.Z[i].Value     = keys[i].Value.Z;
-                axis.Z[i].InTangent = 0;
+                zKeys.Add(new Keyframe
+                {
+                    Time = (float)keys[i].Time,
+                    Value = keys[i].Value.Z,
+                    InTangent = 0,
+                });
             }
 
-            return axis;
+            if (threshold > 0.0f)
+            {
+                
+                for (int i = keys.Count - 1; i >= 0; i--)
+                {
+
+                    if (i-2 < keys.Count)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return new Axis
+            {
+                X = xKeys.ToArray(),
+                Y = yKeys.ToArray(),
+                Z = zKeys.ToArray(),
+            };
         }
 
-        private Axis GenerateTrack(List<Assimp.QuaternionKey> keys, Bone bone)
+        private Axis GenerateAxis(List<Assimp.QuaternionKey> keys, float threshold)
         {
             Axis axis = new Axis()
             {

@@ -28,6 +28,7 @@ namespace SuperBMDLib
         public string hierarchyPath;
         public bool exportAnims;
         public Animation.Enums.AnimType animType;
+        public float animThreshold;
         public Geometry.Enums.GXDataType vertextype;
         public byte fraction;
         public bool material_order_strict;
@@ -68,8 +69,9 @@ namespace SuperBMDLib
             readMipmaps = true;
             dumpHierarchy = false;
             hierarchyPath = "";
-            exportAnims = true;
+            exportAnims = false;
             animType = Animation.Enums.AnimType.BCA;
+            animThreshold = 0;
             vertextype = Geometry.Enums.GXDataType.Float32;
             fraction = 0;
             material_order_strict = false;
@@ -194,6 +196,12 @@ namespace SuperBMDLib
                         if (i + 1 >= args.Length)
                             break;
                         animType = (Animation.Enums.AnimType)Enum.Parse(typeof(Animation.Enums.AnimType), args[i+1]);
+                        i++;
+                        break;
+                    case "--decimate_anim":
+                        if (i + 1 >= args.Length)
+                            throw new Exception("The parameters were malformed");
+                        animThreshold = float.Parse(args[i+1]);
                         i++;
                         break;
                     case "--vtxpos":

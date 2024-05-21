@@ -180,7 +180,7 @@ namespace SuperBMDLib.BMD
 
                 if (forceUnweighted) { 
                     Console.WriteLine(String.Format("\nMesh {0} forced to be unweighted.", mesh.Name));
-                    meshShape.SetDescriptorAttributes(mesh, 1, include_normals, addEnvAttrib, matName, mat_presets);
+                    meshShape.SetDescriptorAttributes(mesh, 1, include_normals, false, "", null);
                 }
                 else
                 {

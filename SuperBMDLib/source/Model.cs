@@ -324,13 +324,13 @@ namespace SuperBMDLib
                     if (args.animType == Animation.Enums.AnimType.BCA)
                     {
                         Console.WriteLine("Generating new BCA\n");
-                        JointAnims.Add(new BCA(anm, Joints.FlatSkeleton));
+                        JointAnims.Add(new BCA(anm, Joints.FlatSkeleton, args.animThreshold));
                         Console.WriteLine();
                     } 
                     else if (args.animType == Animation.Enums.AnimType.BCK)
                     {
                         Console.WriteLine("Generating new BCK\n");
-                        JointAnims.Add(new BCK(anm, Joints.FlatSkeleton));
+                        JointAnims.Add(new BCK(anm, Joints.FlatSkeleton, args.animThreshold));
                         Console.WriteLine();
                     }
                 }

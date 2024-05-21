@@ -16,8 +16,8 @@ namespace SuperBMDLib.Animation
         {
         }
 
-        public BCK(Assimp.Animation src_anim, List<Rigging.Bone> bone_list) 
-            : base(src_anim, bone_list)
+        public BCK(Assimp.Animation src_anim, List<Rigging.Bone> bone_list, float threshold) 
+            : base(src_anim, bone_list, threshold)
         {
         }
 

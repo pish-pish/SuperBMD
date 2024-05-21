@@ -9,13 +9,13 @@ namespace SuperBMDLib.Animation
         protected override string FileMagic => "J3D1bca1";
         protected override string SectionMagic => "ANF1";
 
-        public BCA(Assimp.Animation src_anim, List<Rigging.Bone> bone_list) 
-            : base(src_anim, bone_list)
+        public BCA(EndianBinaryReader reader) 
+            : base(reader) 
         {
         }
 
-        public BCA(EndianBinaryReader reader) 
-            : base(reader) 
+        public BCA(Assimp.Animation src_anim, List<Rigging.Bone> bone_list, float threshold) 
+            : base(src_anim, bone_list, threshold)
         {
         }
 

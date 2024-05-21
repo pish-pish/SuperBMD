@@ -233,6 +233,8 @@ namespace SuperBMDLib
             Console.WriteLine("\t\tBCA");
             Console.WriteLine("\t\tBCK");
             Console.WriteLine();
+            Console.WriteLine("\t--decimate_anim\t\tthreshold\t\tUse when generating an animation to decimate unnecessary keyframes using a decimal number threshold.");
+            Console.WriteLine();
         }
     }
 }

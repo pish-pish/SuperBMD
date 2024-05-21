@@ -65,11 +65,14 @@ namespace SuperBMDLib.Geometry
         {
             int indexOffset = 0;
 
-            if (jointCount > 1 && mesh.BoneCount > 1) {
+            if (jointCount > 1 && mesh.BoneCount > 1) 
+            {
                 Descriptor.SetAttribute(Enums.GXVertexAttribute.PositionMatrixIdx, Enums.VertexInputType.Direct, indexOffset++);
 
-                if (addEnvAttrib) { }
+                if (addEnvAttrib) 
+                { 
                     SetEnvTexMtxIdxAttribute(ref indexOffset, matName, mat_presets);
+                }
             }
 
             if (mesh.HasVertices)
