@@ -115,15 +115,9 @@ namespace SuperBMDLib.Animation
 
             if (threshold > 0.0f)
             {
-                
-                for (int i = keys.Count - 1; i >= 0; i--)
-                {
-
-                    if (i-2 < keys.Count)
-                    {
-                        break;
-                    }
-                }
+                CleanAxis(xKeys, threshold);
+                CleanAxis(yKeys, threshold);
+                CleanAxis(zKeys, threshold);
             }
 
             return new Axis
@@ -136,12 +130,9 @@ namespace SuperBMDLib.Animation
 
         private Axis GenerateAxis(List<Assimp.QuaternionKey> keys, float threshold)
         {
-            Axis axis = new Axis()
-            {
-                X = new Keyframe[keys.Count],
-                Y = new Keyframe[keys.Count],
-                Z = new Keyframe[keys.Count],
-            };
+            List<Keyframe> xKeys = new List<Keyframe>();
+            List<Keyframe> yKeys = new List<Keyframe>();
+            List<Keyframe> zKeys = new List<Keyframe>();
 
             for (int i = 0; i < keys.Count; i++)
             {
@@ -149,20 +140,75 @@ namespace SuperBMDLib.Animation
                 Quaternion value = new Quaternion(current_key.Value.X, current_key.Value.Y, current_key.Value.Z, current_key.Value.W);
                 Vector3 quat_as_vec = QuaternionExtensions.ToEulerAngles(value);
 
-                axis.X[i].Time  = (float)current_key.Time;
-                axis.X[i].Value = quat_as_vec.X;
-                axis.X[i].InTangent = 0;
+                xKeys.Add(new Keyframe
+                {
+                    Time = (float)current_key.Time,
+                    Value = quat_as_vec.X,
+                    InTangent = 0,
+                });
 
-                axis.Y[i].Time      = (float)current_key.Time;
-                axis.Y[i].Value     = quat_as_vec.Y;
-                axis.Y[i].InTangent = 0;
+                yKeys.Add(new Keyframe
+                {
+                    Time = (float)current_key.Time,
+                    Value = quat_as_vec.Y,
+                    InTangent = 0,
+                });
 
-                axis.Z[i].Time      = (float)current_key.Time;
-                axis.Z[i].Value     = quat_as_vec.Z;
-                axis.Z[i].InTangent = 0;
+                zKeys.Add(new Keyframe
+                {
+                    Time = (float)current_key.Time,
+                    Value = quat_as_vec.Z,
+                    InTangent = 0,
+                });
             }
 
-            return axis;
+            if (threshold > 0.0f)
+            {
+                CleanAxis(xKeys, threshold);
+                CleanAxis(yKeys, threshold);
+                CleanAxis(zKeys, threshold);
+            }
+
+            return new Axis
+            {
+                X = xKeys.ToArray(),
+                Y = yKeys.ToArray(),
+                Z = zKeys.ToArray(),
+            };
+        }
+
+        /// <summary> Cleans keyframe axis by slopes between frames under a threshold </summary>
+        /// <param name="keys"> list of keyframes </param>
+        /// <param name="threshold"> threshold for cleaning </param>
+        private void CleanAxis(List<Keyframe> keys, float threshold)
+        {
+            for (int i = keys.Count - 1; i - 2 > 0; i--)
+            {
+                int currentFrame    = i;
+                Keyframe currentKey = keys[currentFrame];
+
+                int prevFrame    = currentFrame - 1;
+                Keyframe prevKey = keys[prevFrame];
+
+                float currentSlope = (currentKey.Value - prevKey.Value) / (currentFrame - prevFrame);
+
+                currentFrame = prevFrame;
+                currentKey   = prevKey;
+
+                prevFrame--;
+                prevKey = keys[prevFrame];
+
+                float prevSlope = (currentKey.Value - prevKey.Value) / (currentFrame - prevFrame);
+
+                if (Math.Abs(currentSlope - prevSlope) < threshold)
+                {
+                    keys.RemoveAt(currentFrame);
+                }
+                else
+                {
+                    return;
+                }
+            }
         }
 
         public static int FindSequenceIndex<T>(List<T> dataList, List<T> sequenceList)
