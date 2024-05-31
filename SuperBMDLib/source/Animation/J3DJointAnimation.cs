@@ -182,32 +182,23 @@ namespace SuperBMDLib.Animation
         /// <param name="threshold"> threshold for cleaning </param>
         private void CleanAxis(List<Keyframe> keys, float threshold)
         {
-            for (int i = keys.Count - 1; i - 2 > 0; i--)
+            for (int i = keys.Count - 1; i - 1 >= 0; i--)
             {
-                int currentFrame    = i;
+                int currentFrame = i;
                 Keyframe currentKey = keys[currentFrame];
 
-                int prevFrame    = currentFrame - 1;
+                int prevFrame = currentFrame - 1;
                 Keyframe prevKey = keys[prevFrame];
 
                 float currentSlope = (currentKey.Value - prevKey.Value) / (currentFrame - prevFrame);
 
-                currentFrame = prevFrame;
-                currentKey   = prevKey;
-
-                prevFrame--;
-                prevKey = keys[prevFrame];
-
-                float prevSlope = (currentKey.Value - prevKey.Value) / (currentFrame - prevFrame);
-
-                if (Math.Abs(currentSlope - prevSlope) < threshold)
+                if (Math.Abs(currentSlope) <= threshold)
                 {
                     keys.RemoveAt(currentFrame);
+                    continue;
                 }
-                else
-                {
-                    return;
-                }
+
+                return;
             }
         }
 
