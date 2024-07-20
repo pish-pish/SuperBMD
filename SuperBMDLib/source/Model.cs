@@ -324,13 +324,17 @@ namespace SuperBMDLib
                     if (args.animType == Animation.Enums.AnimType.BCA)
                     {
                         Console.WriteLine("Generating new BCA\n");
-                        JointAnims.Add(new BCA(anm, Joints.FlatSkeleton, args.animThreshold));
+                        BCA bca = new BCA(anm, Joints.FlatSkeleton, args.animThreshold);
+                        bca.PrintAnimInfo();
+                        JointAnims.Add(bca);
                         Console.WriteLine();
                     } 
                     else if (args.animType == Animation.Enums.AnimType.BCK)
                     {
                         Console.WriteLine("Generating new BCK\n");
-                        JointAnims.Add(new BCK(anm, Joints.FlatSkeleton, args.animThreshold));
+                        BCK bck = new BCK(anm, Joints.FlatSkeleton, args.animThreshold);
+                        bck.PrintAnimInfo();
+                        JointAnims.Add(bck);
                         Console.WriteLine();
                     }
                 }
@@ -394,9 +398,10 @@ namespace SuperBMDLib
             int i = 0;
             foreach (J3DJointAnimation anim in JointAnims) {
                 string extension = anim.GetType().Name.ToLower();
-                string bckName = Path.Combine(outDir, $"anim_{i}.{extension}");
+                string animName = anim.Name == "" ? $"anim_{i}" : anim.Name;
+                string outName = Path.Combine(outDir, $"{animName}.{extension}");
 
-                using (FileStream strm = new FileStream(bckName, FileMode.Create, FileAccess.Write))
+                using (FileStream strm = new FileStream(outName, FileMode.Create, FileAccess.Write))
                 {
                     EndianBinaryWriter bckWriter = new EndianBinaryWriter(strm, Endian.Big);
                     anim.Write(bckWriter);

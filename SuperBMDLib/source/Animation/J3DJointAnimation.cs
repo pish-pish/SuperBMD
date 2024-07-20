@@ -25,11 +25,16 @@ namespace SuperBMDLib.Animation
 
         public J3DJointAnimation(Assimp.Animation src_anim, List<Bone> bone_list, float threshold=0)
         {
-            Name          = src_anim.Name;
+            Name = "";
+            // FBX should contain NLA track / action names denoted by AnimStack::<name>
+            if (src_anim.Name.Contains("AnimStack"))
+            {
+                Name = src_anim.Name.Split(':')[2];
+                if (Name == "Scene") Name = ""; // special case for blender's default fbx export
+            }
+
             LoopMode      = LoopMode.Loop;
             Duration      = (short)(src_anim.DurationInTicks * (30.0f / src_anim.TicksPerSecond));
-            Console.WriteLine(src_anim.TicksPerSecond);
-
             Tracks = new Track[bone_list.Count];
 
             for (int i = 0; i < bone_list.Count; i++)
@@ -235,6 +240,15 @@ namespace SuperBMDLib.Animation
             dataList.AddRange(sequenceList);
 
             return start;
+        }
+
+        public void PrintAnimInfo()
+        {
+            Console.WriteLine($"Name: {Name}");
+            Console.WriteLine($"Duration: {Duration}");
+            Console.WriteLine($"LoopMode: {LoopMode}");
+            Console.WriteLine($"Track Number: {Tracks.Length}");
+            Console.WriteLine($"Angle Fraction: {GetAngleFraction()}");
         }
 
         #region Reading
