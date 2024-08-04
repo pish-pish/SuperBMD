@@ -342,8 +342,6 @@ namespace SuperBMDLib.BMD
             else
             {
                 SkeletonRoot = AssimpNodesToBonesRecursive(root, null, FlatSkeleton);
-                
-                
 
                 foreach (Rigging.Bone bone in FlatSkeleton) {
                     //bone.m_MatrixType = 1;

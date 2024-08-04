@@ -156,6 +156,11 @@ namespace SuperBMDLib.BMD
                                                      assMat.A3, assMat.B3, assMat.C3, assMat.D3,
                                                      assMat.A4, assMat.B4, assMat.C4, assMat.D4);
 
+                    if (bone.Name.Contains("_ignore_scale"))
+                    {
+                        bone.Name = bone.Name.Replace("_ignore_scale", "");
+                    }
+
                     int index = flatSkel.FindIndex(x => x.Name == bone.Name); 
                     if (index == -1) {
                         throw new System.Exception(String.Format("Model uses bone that isn't part of the skeleton: {0}", bone.Name));

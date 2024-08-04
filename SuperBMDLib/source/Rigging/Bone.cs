@@ -23,7 +23,7 @@ namespace SuperBMDLib.Rigging
         public BoundingVolume Bounds { get; set; }
 
         public short m_MatrixType;
-        public byte m_UnknownIndex;
+        public bool m_DoIgnoreParentScale = false;
         [JsonConverter(typeof(Vector3Converter))]
         public Vector3 m_Scale;
         [JsonConverter(typeof(QuaternionConverter))]
@@ -45,7 +45,7 @@ namespace SuperBMDLib.Rigging
 
             Name = name;
             m_MatrixType = reader.ReadInt16();
-            m_UnknownIndex = reader.ReadByte();
+            m_DoIgnoreParentScale = reader.ReadBoolean();
 
             reader.SkipByte();
 
@@ -84,6 +84,13 @@ namespace SuperBMDLib.Rigging
             Name = node.Name;
             Parent = parent;
 
+            if (Name.Contains("_ignore_scale"))
+            {
+                m_DoIgnoreParentScale = true;
+                Name = Name.Replace("_ignore_scale", "");
+                Console.WriteLine($"Joint '{Name}' is set to ignore parent scaling.");
+            }
+
             TransformationMatrix = new Matrix4(
                 node.Transform.A1, node.Transform.B1, node.Transform.C1, node.Transform.D1,
                 node.Transform.A2, node.Transform.B2, node.Transform.C2, node.Transform.D2,
@@ -111,7 +118,7 @@ namespace SuperBMDLib.Rigging
                 EndianBinaryWriter writer = new EndianBinaryWriter(mem, Endian.Big);
 
                 writer.Write(m_MatrixType);
-                writer.Write(m_UnknownIndex);
+                writer.Write(m_DoIgnoreParentScale);
                 writer.Write((sbyte)-1);
 
                 ushort[] compressRot = J3DUtility.CompressRotation(m_Rotation.ToEulerAngles());
