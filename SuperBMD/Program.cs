@@ -1,5 +1,6 @@
 ﻿using GameFormatReader.Common;
 using Newtonsoft.Json;
+using SuperBMD.source.Materials;
 using SuperBMDLib.Animation;
 using SuperBMDLib.Animation.Enums;
 using SuperBMDLib.Materials;
@@ -7,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 namespace SuperBMDLib
@@ -42,7 +44,8 @@ namespace SuperBMDLib
 
             List<Material> mat_presets = null;
             Model mod;
-            if (cmd_args.do_profile) {
+            if (cmd_args.do_profile)
+            {
                 if (cmd_args.input_path.EndsWith(".bmd") || cmd_args.input_path.EndsWith(".bdl"))
                 {
                     Console.WriteLine("Reading the model...");
@@ -55,94 +58,66 @@ namespace SuperBMDLib
                     Console.ReadKey();
                     return;
                 }
-                else {
+                else
+                {
                     Console.WriteLine("Profiling is only supported for BMD/BDL!");
                 }
             }
 
-            if (cmd_args.materials_path != "" || cmd_args.material_folder != "") {
-                var mats = new List<string>();
-
-                if (cmd_args.materials_path != "")
-                {
-                    mats.Add(cmd_args.materials_path);
-                }
-
-                if (cmd_args.material_folder != "")
-                {
-                    mats.Clear();
-                    foreach (string fpath in Directory.GetFiles(cmd_args.material_folder)) {
-                        FileInfo fpathinfo = new FileInfo(fpath);
-                        if (fpathinfo.Extension.ToLower() == ".json")
-                        {
-                            mats.Add(fpath);
-                        }
-                    }
-                }
-
-                JsonSerializer serializer = new JsonSerializer();
-
-                serializer.Converters.Add(
-                    (new Newtonsoft.Json.Converters.StringEnumConverter())
-                );
-                Console.WriteLine("Reading the Materials...");
-                mat_presets = new List<Material>();
-
-                foreach (string jsonpath in mats) { 
-                    using (TextReader file = File.OpenText(jsonpath)) {
-                        using (JsonTextReader reader = new JsonTextReader(file)) {
-                            try {
-                                var preset = serializer.Deserialize<List<Material>>(reader);
-
-                                if (cmd_args.file_name_as_mat_name && preset.Count == 1){
-                                    FileInfo fpathinfo = new FileInfo(jsonpath);
-                                    Material mat = preset[0];
-                                    mat.Name = fpathinfo.Name.Substring(0, fpathinfo.Name.Length-fpathinfo.Extension.Length);
-                                }
-                                mat_presets.AddRange(preset);
-                            }
-                            catch (Newtonsoft.Json.JsonReaderException e) {
-                                Console.WriteLine(String.Format("Error encountered while reading {0}", jsonpath));
-                                Console.WriteLine(String.Format("JsonReaderException: {0}", e.Message));
-                                return;
-                            }
-                            catch (Newtonsoft.Json.JsonSerializationException e) {
-                                Console.WriteLine(String.Format("Error encountered while reading {0}", jsonpath));
-                                Console.WriteLine(String.Format("JsonSerializationException: {0}", e.Message));
-                                return;
-                            }
-                        }
-                    }
-                }
+            if (cmd_args.materials_path != "" || cmd_args.material_folder != "")
+            {
+                mat_presets = CreateMatPresets(cmd_args, cmd_args.materials_path);
             }
             string additionalTexPath = null;
-            if (cmd_args.materials_path != "") {
+            if (cmd_args.materials_path != "")
+            {
                 additionalTexPath = Path.GetDirectoryName(cmd_args.materials_path);
             }
             if (cmd_args.material_folder != "")
             {
                 additionalTexPath = Path.GetDirectoryName(cmd_args.material_folder);
             }
-            if (cmd_args.texture_path != "") {
+            if (cmd_args.texture_path != "")
+            {
                 additionalTexPath = cmd_args.texture_path;
             }
+
             FileInfo fi = new FileInfo(cmd_args.input_path);
+
+            if (fi.Extension == ".bmt")
+            {
+                Console.WriteLine($"Converting {fi.Name}...");
+                BinaryMaterialTable.DumpContents(cmd_args);
+                return;
+            }
+
+            if (cmd_args.create_bmt && fi.Extension == ".json")
+            {
+                if (mat_presets == null)
+                {
+                    mat_presets = CreateMatPresets(cmd_args, cmd_args.input_path);
+                }
+
+                BinaryMaterialTable bmt = new BinaryMaterialTable(cmd_args, mat_presets, additionalTexPath);
+                bmt.ExportBMT(cmd_args.output_path);
+                return;
+            }
+
             string destinationFormat = (fi.Extension == ".bmd" || fi.Extension == ".bdl") ? ".DAE" : (cmd_args.output_bdl ? ".BDL" : ".BMD");
-            
-            if (destinationFormat == ".DAE" && cmd_args.export_obj) {
+
+            if (destinationFormat == ".DAE" && cmd_args.export_obj)
+            {
                 destinationFormat = ".OBJ";
             }
 
-            if (cmd_args.input_path.EndsWith(".bck") || cmd_args.input_path.EndsWith(".bca"))
+            /*if (cmd_args.input_path.EndsWith(".bck") || cmd_args.input_path.EndsWith(".bca"))
             {
                 Console.WriteLine($"Reading {fi.Extension.ToUpper()}...");
-
-                J3DJointAnimation anim = null;
-
                 using (FileStream stream = new FileStream(cmd_args.input_path, FileMode.Open, FileAccess.Read))
                 {
                     EndianBinaryReader reader = new EndianBinaryReader(stream, Endian.Big);
 
+                    J3DJointAnimation anim;
                     if (fi.Extension == ".bca")
                     {
                         anim = new BCA(reader);
@@ -152,12 +127,13 @@ namespace SuperBMDLib
                         anim = new BCK(reader);
                     }
                 }
-            }
+            }*/
 
             Console.WriteLine(string.Format("Preparing to convert {0} from {1} to {2}", fi.Name.Replace(fi.Extension, ""), fi.Extension.ToUpper(), destinationFormat));
             mod = Model.Load(cmd_args, mat_presets, additionalTexPath);
 
-            if (cmd_args.hierarchyPath != "") {
+            if (cmd_args.hierarchyPath != "")
+            {
                 mod.Scenegraph.LoadHierarchyFromJson(cmd_args.hierarchyPath);
             }
 
@@ -165,17 +141,32 @@ namespace SuperBMDLib
             {
                 Console.WriteLine(string.Format("Converting {0} into {1}...", fi.Extension.ToUpper(), destinationFormat));
 
+                if (cmd_args.extract_bmt)
+                {
+                    Console.WriteLine($"Extracting BMT from {fi.Name.Replace(fi.Extension, "")}...");
+                    BinaryMaterialTable bmt = new BinaryMaterialTable(mod.Materials, mod.Textures);
+                    bmt.ExportBMT(cmd_args.output_path);
+                }
+
                 ExportSettings settings = new ExportSettings(cmd_args.export_skeleton_root);
 
-                if (cmd_args.export_obj) {
+                if (cmd_args.export_obj)
+                {
                     mod.ExportAssImp(cmd_args.output_path, "obj", settings, cmd_args);
                 }
-                else {
+                else
+                {
                     mod.ExportAssImp(cmd_args.output_path, "dae", settings, cmd_args);
                 }
             }
             else
             {
+                if (cmd_args.extract_bmt)
+                {
+                    BinaryMaterialTable bmt = new BinaryMaterialTable(cmd_args, mat_presets, additionalTexPath);
+                    bmt.ExportBMT(cmd_args.output_path);
+                }
+
                 Console.Write("Finishing the Job...");
                 mod.ExportBMD(cmd_args.output_path, cmd_args.output_bdl, headerString);
                 Console.WriteLine("✓");
@@ -184,6 +175,73 @@ namespace SuperBMDLib
             Console.WriteLine();
             Console.WriteLine("The Conversion is complete!");
             Console.WriteLine();
+        }
+
+        private static List<Material> CreateMatPresets(Arguments cmd_args, string materials_path)
+        {
+            var mats = new List<string>();
+
+            if (materials_path != "")
+            {
+                mats.Add(materials_path);
+            }
+
+            if (cmd_args.material_folder != "")
+            {
+                mats.Clear();
+                foreach (string fpath in Directory.GetFiles(cmd_args.material_folder))
+                {
+                    FileInfo fpathinfo = new FileInfo(fpath);
+                    if (fpathinfo.Extension.ToLower() == ".json")
+                    {
+                        mats.Add(fpath);
+                    }
+                }
+            }
+
+            JsonSerializer serializer = new JsonSerializer();
+
+            serializer.Converters.Add(
+                (new Newtonsoft.Json.Converters.StringEnumConverter())
+            );
+            Console.WriteLine("Reading the Materials...");
+            List<Material> mat_presets = new List<Material>();
+
+            foreach (string jsonpath in mats)
+            {
+                using (TextReader file = File.OpenText(jsonpath))
+                {
+                    using (JsonTextReader reader = new JsonTextReader(file))
+                    {
+                        try
+                        {
+                            var preset = serializer.Deserialize<List<Material>>(reader);
+
+                            if (cmd_args.file_name_as_mat_name && preset.Count == 1)
+                            {
+                                FileInfo fpathinfo = new FileInfo(jsonpath);
+                                Material mat = preset[0];
+                                mat.Name = fpathinfo.Name.Substring(0, fpathinfo.Name.Length - fpathinfo.Extension.Length);
+                            }
+                            mat_presets.AddRange(preset);
+                        }
+                        catch (Newtonsoft.Json.JsonReaderException e)
+                        {
+                            Console.WriteLine(String.Format("Error encountered while reading {0}", jsonpath));
+                            Console.WriteLine(String.Format("JsonReaderException: {0}", e.Message));
+                            return null;
+                        }
+                        catch (Newtonsoft.Json.JsonSerializationException e)
+                        {
+                            Console.WriteLine(String.Format("Error encountered while reading {0}", jsonpath));
+                            Console.WriteLine(String.Format("JsonSerializationException: {0}", e.Message));
+                            return null;
+                        }
+                    }
+                }
+            }
+
+            return mat_presets;
         }
 
         /// <summary>
@@ -234,6 +292,9 @@ namespace SuperBMDLib
             Console.WriteLine("\t\tBCK");
             Console.WriteLine();
             Console.WriteLine("\t--decimate_anim\t\tthreshold\t\tUse when generating an animation to decimate unnecessary keyframes using a decimal number threshold.");
+            Console.WriteLine();
+            Console.WriteLine("\t--bmt\t\t\tCreate a BMT (Binary Material Table) file from material.json and tex_headers.json.");
+            Console.WriteLine("\t--extract_bmt\t\t\tOn extraction/creation of a BMD, extract the materials and textures into a BMT file.");
             Console.WriteLine();
         }
     }

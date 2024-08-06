@@ -44,6 +44,8 @@ namespace SuperBMDLib
         public byte texfraction;
         public Scenegraph.Enums.TransformMode transform_mode;
         public bool add_envtex_attribute;
+        public bool create_bmt;
+        public bool extract_bmt;
 
         /// <summary>
         /// Initializes a new Arguments instance from the arguments passed in to SuperBMD.
@@ -87,6 +89,8 @@ namespace SuperBMDLib
             texfraction = 8;
             transform_mode = Scenegraph.Enums.TransformMode.Xsi;
             add_envtex_attribute = false;
+            create_bmt = false;
+            extract_bmt = false;
             int positional_arguments = 0;
 
             for (int i = 0; i < args.Length; i++)
@@ -250,6 +254,12 @@ namespace SuperBMDLib
                         break;
                     case "--envtex_attribute":
                         add_envtex_attribute = true;
+                        break;
+                    case "--bmt":
+                        create_bmt = true;
+                        break;
+                    case "--extract_bmt":
+                        extract_bmt = true;
                         break;
                     default:
                         if (positional_arguments == 0) {

@@ -73,6 +73,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="source\J3DHeader.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -109,6 +110,7 @@
     <Compile Include="source\Geometry\TriStrip\Policy.cs" />
     <Compile Include="source\Geometry\TriStrip\TriStripper.cs" />
     <Compile Include="source\Geometry\TriStrip\Types.cs" />
+    <Compile Include="source\Materials\BinaryMaterialTable.cs" />
     <Compile Include="source\Materials\Mdl\BPCommand.cs" />
     <Compile Include="source\Materials\Mdl\BPRegisters.cs" />
     <Compile Include="source\Materials\Mdl\MdlEntry.cs" />
@@ -233,6 +235,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="resources\default_checker.png" />
   </ItemGroup>

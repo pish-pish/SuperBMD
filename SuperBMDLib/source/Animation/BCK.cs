@@ -11,12 +11,12 @@ namespace SuperBMDLib.Animation
         protected override string FileMagic => "J3D1bck1";
         protected override string SectionMagic => "ANK1";
 
-        public BCK(EndianBinaryReader reader) 
+        public BCK(EndianBinaryReader reader)
             : base(reader)
         {
         }
 
-        public BCK(Assimp.Animation src_anim, List<Rigging.Bone> bone_list, float threshold) 
+        public BCK(Assimp.Animation src_anim, List<Rigging.Bone> bone_list, float threshold)
             : base(src_anim, bone_list, threshold)
         {
         }
@@ -41,14 +41,14 @@ namespace SuperBMDLib.Animation
 
         protected override Keyframe[] ReadChannel(EndianBinaryReader reader, float[] data)
         {
-            ushort keyCount         = reader.ReadUInt16();
-            ushort dataIndex        = reader.ReadUInt16();
+            ushort keyCount = reader.ReadUInt16();
+            ushort dataIndex = reader.ReadUInt16();
             TangentMode tangentMode = (TangentMode)reader.ReadUInt16();
 
             Keyframe[] keyframes = new Keyframe[keyCount];
             if (keyCount == 1)
             {
-                keyframes[0].Time  = 0;
+                keyframes[0].Time = 0;
                 keyframes[0].Value = data[dataIndex];
                 return keyframes;
             }
@@ -65,8 +65,8 @@ namespace SuperBMDLib.Animation
                     currentIndex += 4 * i;
                 }
 
-                keyframes[i].Time      = data[currentIndex];
-                keyframes[i].Value     = data[currentIndex + 1];
+                keyframes[i].Time = data[currentIndex];
+                keyframes[i].Value = data[currentIndex + 1];
                 keyframes[i].InTangent = data[currentIndex + 2];
 
                 if (tangentMode == TangentMode.Piecewise)
@@ -80,14 +80,14 @@ namespace SuperBMDLib.Animation
 
         protected override Keyframe[] ReadChannel(EndianBinaryReader reader, short[] data)
         {
-            ushort keyCount         = reader.ReadUInt16();
-            ushort dataIndex        = reader.ReadUInt16();
+            ushort keyCount = reader.ReadUInt16();
+            ushort dataIndex = reader.ReadUInt16();
             TangentMode tangentMode = (TangentMode)reader.ReadUInt16();
 
             Keyframe[] keyframes = new Keyframe[keyCount];
             if (keyCount == 1)
             {
-                keyframes[0].Time  = 0;
+                keyframes[0].Time = 0;
                 keyframes[0].Value = data[dataIndex] * RotationScale;
                 return keyframes;
             }
@@ -104,8 +104,8 @@ namespace SuperBMDLib.Animation
                     currentIndex += 4 * i;
                 }
 
-                keyframes[i].Time      = data[currentIndex];
-                keyframes[i].Value     = data[currentIndex + 1] * RotationScale;
+                keyframes[i].Time = data[currentIndex];
+                keyframes[i].Value = data[currentIndex + 1] * RotationScale;
                 keyframes[i].InTangent = data[currentIndex + 2] * RotationScale;
 
                 if (tangentMode == TangentMode.Piecewise)

@@ -1,5 +1,6 @@
 ﻿using GameFormatReader.Common;
 using OpenTK;
+using SuperBMD;
 using SuperBMD.Util;
 using SuperBMDLib.Animation.Enums;
 using SuperBMDLib.Rigging;
@@ -7,23 +8,22 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.Remoting.Messaging;
 
 namespace SuperBMDLib.Animation
-{ 
-    public class J3DJointAnimation
+{
+    public class J3DJointAnimation : J3DHeader
     {
         public string Name { get; private set; }
         public LoopMode LoopMode;
         public float RotationScale;
         public short Duration;
 
-        protected virtual string FileMagic { get; }
         protected virtual string SectionMagic { get; }
+        protected override int SectionCount => 1;
 
         public Track[] Tracks;
 
-        public J3DJointAnimation(Assimp.Animation src_anim, List<Bone> bone_list, float threshold=0)
+        public J3DJointAnimation(Assimp.Animation src_anim, List<Bone> bone_list, float threshold = 0)
         {
             Name = "";
             // FBX should contain NLA track / action names denoted by AnimStack::<name>
@@ -33,8 +33,8 @@ namespace SuperBMDLib.Animation
                 if (Name == "Scene") Name = ""; // special case for blender's default fbx export
             }
 
-            LoopMode      = LoopMode.Loop;
-            Duration      = (short)(src_anim.DurationInTicks * (30.0f / src_anim.TicksPerSecond));
+            LoopMode = LoopMode.Loop;
+            Duration = (short)(src_anim.DurationInTicks * (30.0f / src_anim.TicksPerSecond));
             Tracks = new Track[bone_list.Count];
 
             for (int i = 0; i < bone_list.Count; i++)
@@ -49,8 +49,8 @@ namespace SuperBMDLib.Animation
                 {
                     Tracks[i] = new Track()
                     {
-                        Scale       = GenerateAxis(node.ScalingKeys, threshold),
-                        Rotation    = GenerateAxis(node.RotationKeys, threshold),
+                        Scale = GenerateAxis(node.ScalingKeys, threshold),
+                        Rotation = GenerateAxis(node.RotationKeys, threshold),
                         Translation = GenerateAxis(node.PositionKeys, threshold),
                     };
                 }
@@ -64,22 +64,13 @@ namespace SuperBMDLib.Animation
             RotationScale = (float)Math.Pow(2.0f, angleFrac) * (180.0f / 32768.0f);
         }
 
-        public J3DJointAnimation(EndianBinaryReader reader) 
+        public J3DJointAnimation(EndianBinaryReader reader) : base(reader)
         {
-            string magic = new string(reader.ReadChars(FileMagic.Length));
-            Debug.Assert(magic.Equals(FileMagic), "File Magic is invalid.");
-
-            reader.ReadUInt32(); // filesize
-
-            uint sectionCount = reader.ReadUInt32();
-            Debug.Assert(sectionCount == 1, "More than 1 data sections; cannot proceed.");
-
-            reader.Skip(16); // skip svn/svr data and sound section offset
-
+            Debug.Assert(SectionCount == 1, "More than 1 data section, cannot proceed!");
             ReadSection(reader);
         }
 
-        protected virtual Keyframe[] ReadChannel(EndianBinaryReader reader, float[] data) => new Keyframe[] { }; 
+        protected virtual Keyframe[] ReadChannel(EndianBinaryReader reader, float[] data) => new Keyframe[] { };
 
         protected virtual Keyframe[] ReadChannel(EndianBinaryReader reader, short[] data) => new Keyframe[] { };
 
@@ -97,9 +88,10 @@ namespace SuperBMDLib.Animation
 
             for (int i = 0; i < keys.Count; i++)
             {
-                xKeys.Add(new Keyframe { 
-                    Time      = (float)keys[i].Time,
-                    Value     = keys[i].Value.X,
+                xKeys.Add(new Keyframe
+                {
+                    Time = (float)keys[i].Time,
+                    Value = keys[i].Value.X,
                     InTangent = 0,
                 });
 
@@ -274,26 +266,26 @@ namespace SuperBMDLib.Animation
             Console.WriteLine($"Duration: {Duration}");
 
             // counts for tracks and component data
-            ushort trackCount       = reader.ReadUInt16();
+            ushort trackCount = reader.ReadUInt16();
             Console.WriteLine($"Track Count: {trackCount}");
 
-            ushort scaleCount       = reader.ReadUInt16();
+            ushort scaleCount = reader.ReadUInt16();
             Console.WriteLine($"Scale Count: {scaleCount}");
 
-            ushort rotationCount    = reader.ReadUInt16();
+            ushort rotationCount = reader.ReadUInt16();
             Console.WriteLine($"Rotation Count: {rotationCount}");
 
             ushort translationCount = reader.ReadUInt16();
             Console.WriteLine($"Translation Count: {translationCount}");
 
             // data offsets with an extra 4 bytes added to skip padding between sections
-            uint tracksOffset       = reader.ReadUInt32() + 32;
-            uint scalesOffset       = reader.ReadUInt32() + 32;
-            uint rotationsOffset    = reader.ReadUInt32() + 32;
+            uint tracksOffset = reader.ReadUInt32() + 32;
+            uint scalesOffset = reader.ReadUInt32() + 32;
+            uint rotationsOffset = reader.ReadUInt32() + 32;
             uint translationsOffset = reader.ReadUInt32() + 32;
 
-            float[] scaleData       = ReadFloatTable(scalesOffset, scaleCount, reader);
-            short[] rotationData    = ReadShortTable(rotationsOffset, rotationCount, reader);
+            float[] scaleData = ReadFloatTable(scalesOffset, scaleCount, reader);
+            short[] rotationData = ReadShortTable(rotationsOffset, rotationCount, reader);
             float[] translationData = ReadFloatTable(translationsOffset, translationCount, reader);
 
             Tracks = new Track[trackCount];
@@ -301,16 +293,16 @@ namespace SuperBMDLib.Animation
 
             for (int i = 0; i < trackCount; i++)
             {
-                Tracks[i].Scale.X       = ReadChannel(reader, scaleData);
-                Tracks[i].Rotation.X    = ReadChannel(reader, rotationData);
+                Tracks[i].Scale.X = ReadChannel(reader, scaleData);
+                Tracks[i].Rotation.X = ReadChannel(reader, rotationData);
                 Tracks[i].Translation.X = ReadChannel(reader, translationData);
 
-                Tracks[i].Scale.Y       = ReadChannel(reader, scaleData);
-                Tracks[i].Rotation.Y    = ReadChannel(reader, rotationData);
+                Tracks[i].Scale.Y = ReadChannel(reader, scaleData);
+                Tracks[i].Rotation.Y = ReadChannel(reader, rotationData);
                 Tracks[i].Translation.Y = ReadChannel(reader, translationData);
 
-                Tracks[i].Scale.Z       = ReadChannel(reader, scaleData);
-                Tracks[i].Rotation.Z    = ReadChannel(reader, rotationData);
+                Tracks[i].Scale.Z = ReadChannel(reader, scaleData);
+                Tracks[i].Rotation.Z = ReadChannel(reader, rotationData);
                 Tracks[i].Translation.Z = ReadChannel(reader, translationData);
             }
         }
@@ -347,36 +339,20 @@ namespace SuperBMDLib.Animation
 
         #region Writing
 
-        public void Write(EndianBinaryWriter writer)
+        public override void Write(EndianBinaryWriter writer)
         {
-            writer.Write(FileMagic.ToCharArray()); // magic
-
-            long sizeOffset = writer.BaseStream.Length;
-            writer.Write(0); // placeholder for filesize
-
-            writer.Write(1); // section count-- only ever 1
-
-            // These are placeholder for SVN that were never used
-            writer.Write(-1);
-            writer.Write(-1);
-            writer.Write(-1);
-
-            // This spot, however, was used for hacking sound data into the animation.
-            // It's the offset to the start of the sound data. Unsupported for now.
-            writer.Write(-1);
+            base.Write(writer);
 
             WriteSection(writer);
 
-            writer.BaseStream.Seek(sizeOffset, SeekOrigin.Begin);
-            writer.Write((uint)writer.BaseStream.Length); // total filesize
-            writer.BaseStream.Seek(0, SeekOrigin.End);
+            base.WriteSize(writer);
         }
 
         private void WriteSection(EndianBinaryWriter writer)
         {
             int sectionStart = (int)writer.BaseStream.Length;
 
-            byte[] keyframeData = WriteKeyframeData(out int scaleCount, out int rotCount, 
+            byte[] keyframeData = WriteKeyframeData(out int scaleCount, out int rotCount,
                 out int transCount, out int scaleOffset, out int rotOffset, out int transOffset);
 
             writer.Write(SectionMagic.ToCharArray()); // magic
@@ -423,11 +399,11 @@ namespace SuperBMDLib.Animation
             writer.BaseStream.Seek(0, SeekOrigin.End);
         }
 
-        private byte[] WriteKeyframeData(out int scaleCount, out int rotCount, 
+        private byte[] WriteKeyframeData(out int scaleCount, out int rotCount,
             out int transCount, out int scaleOffset, out int rotOffset, out int transOffset)
         {
-            List<float> scaleData       = new List<float>();
-            List<short> rotationData    = new List<short>();
+            List<float> scaleData = new List<float>();
+            List<short> rotationData = new List<short>();
             List<float> translationData = new List<float>();
             byte[] keyframeData;
 
@@ -472,7 +448,7 @@ namespace SuperBMDLib.Animation
             }
 
             scaleCount = scaleData.Count;
-            rotCount   = rotationData.Count;
+            rotCount = rotationData.Count;
             transCount = translationData.Count;
 
             return keyframeData;

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using GameFormatReader.Common;
 using Assimp;
 using System.IO;
@@ -10,25 +8,24 @@ using SuperBMDLib.BMD;
 using SuperBMDLib.Animation;
 using System.Text.RegularExpressions;
 using System.Xml;
-using System.Reflection;
-
 using SuperBMDLib.Geometry;
 using SuperBMDLib.Geometry.Enums;
+using SuperBMD;
 
 namespace SuperBMDLib
 {
-    public class Model
+    public class Model : J3DHeader
     {
-        public INF1 Scenegraph        { get; private set; }
-        public VTX1 VertexData        { get; private set; }
+        public INF1 Scenegraph { get; private set; }
+        public VTX1 VertexData { get; private set; }
         public EVP1 SkinningEnvelopes { get; private set; }
         public DRW1 PartialWeightData { get; private set; }
-        public JNT1 Joints            { get; private set; }
-        public SHP1 Shapes            { get; private set; }
-        public MAT3 Materials         { get; private set; }
-        public MDL3 MatDisplayList    { get; private set; }
-        public TEX1 Textures          { get; private set; }
-        public BMDInfo ModelStats     { get; private set; }
+        public JNT1 Joints { get; private set; }
+        public SHP1 Shapes { get; private set; }
+        public MAT3 Materials { get; private set; }
+        public MDL3 MatDisplayList { get; private set; }
+        public TEX1 Textures { get; private set; }
+        public BMDInfo ModelStats { get; private set; }
         static private string[] characters_to_replace = new string[] { " ", "(", ")", ":", "-" };
 
         public List<J3DJointAnimation> JointAnims { get; private set; }
@@ -52,27 +49,25 @@ namespace SuperBMDLib
             else
             {
                 Assimp.AssimpContext cont = new Assimp.AssimpContext();
-                
+
                 // AssImp adds dummy nodes for pivots from FBX, so we'll force them off
                 cont.SetConfig(new Assimp.Configs.FBXPreservePivotsConfig(false));
 
                 Assimp.PostProcessSteps postprocess = Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.JoinIdenticalVertices;
-                
-                if (args.tristrip_mode == "none") {
+
+                if (args.tristrip_mode == "none")
+                {
                     // By not joining identical vertices, the Tri Strip algorithm we use cannot make tristrips, 
                     // effectively disabling tri stripping
-                    postprocess = Assimp.PostProcessSteps.Triangulate; 
+                    postprocess = Assimp.PostProcessSteps.Triangulate;
                 }
 
-                
-                
                 Assimp.Scene aiScene = cont.ImportFile(args.input_path, postprocess);
 
                 if (Path.GetExtension(args.input_path).ToLower() == ".dae")
                 {
                     Model.RenameMat(aiScene, args.input_path);
                 }
-
 
                 output = new Model(aiScene, args, mat_presets, additionalTexPath);
             }
@@ -81,56 +76,49 @@ namespace SuperBMDLib
             return output;
         }
 
-        public Model(EndianBinaryReader reader, Arguments args)
+        public Model(EndianBinaryReader reader, Arguments args) : base(reader, "J3D2bmd3", "J3D2bdl4")
         {
             ModelStats = new BMDInfo();
             JointAnims = new List<J3DJointAnimation>();
 
-            int j3d2Magic = reader.ReadInt32();
-            int modelMagic = reader.ReadInt32();
-
-            if (j3d2Magic != 0x4A334432)
-                throw new Exception("Model was not a BMD or BDL! (J3D2 magic not found)");
-            if ((modelMagic != 0x62646C34) && (modelMagic != 0x626D6433))
-                throw new Exception("Model was not a BMD or BDL! (Model type was not bmd3 or bdl4)");
-
-            int modelSize = reader.ReadInt32();
-            int sectionCount = reader.ReadInt32();
-            ModelStats.TotalSize = modelSize;
+            ModelStats.TotalSize = FileSize;
 
             // Skip the dummy section, SVR3
             reader.Skip(16);
 
-            Scenegraph        = new INF1(reader, 32, ModelStats);
-            VertexData        = new VTX1(reader, (int)reader.BaseStream.Position, ModelStats);
+            Scenegraph = new INF1(reader, 32, ModelStats);
+            VertexData = new VTX1(reader, (int)reader.BaseStream.Position, ModelStats);
             SkinningEnvelopes = new EVP1(reader, (int)reader.BaseStream.Position, ModelStats);
             PartialWeightData = new DRW1(reader, (int)reader.BaseStream.Position, ModelStats);
-            Joints            = new JNT1(reader, (int)reader.BaseStream.Position, ModelStats);
+            Joints = new JNT1(reader, (int)reader.BaseStream.Position, ModelStats);
             SkinningEnvelopes.SetInverseBindMatrices(Joints.FlatSkeleton);
-            Shapes            = SHP1.Create(reader, (int)reader.BaseStream.Position, ModelStats);
+            Shapes = SHP1.Create(reader, (int)reader.BaseStream.Position, ModelStats);
             Shapes.SetVertexWeights(SkinningEnvelopes, PartialWeightData);
-            Materials         = new MAT3(reader, (int)reader.BaseStream.Position, ModelStats);
+            Materials = new MAT3(reader, (int)reader.BaseStream.Position, ModelStats);
             SkipMDL3(reader);
-            Textures          = new TEX1(reader, (int)reader.BaseStream.Position, ModelStats);
+            Textures = new TEX1(reader, (int)reader.BaseStream.Position, ModelStats);
             Materials.SetTextureNames(Textures);
 
-            
-            if (args.output_materials_path != "") {
+
+            if (args.output_materials_path != "")
+            {
                 Materials.DumpMaterials(Path.GetDirectoryName(args.output_materials_path));
             }
-            else {
-                if (args.output_path != "") {
+            else
+            {
+                if (args.output_path != "")
+                {
                     string outDir = Path.GetDirectoryName(args.output_path);
                     string filenameNoExt = Path.GetFileNameWithoutExtension(args.input_path);
-                    Materials.DumpMaterials(Path.Combine(outDir, filenameNoExt+"_materials.json"));
+                    Materials.DumpMaterials(Path.Combine(outDir, filenameNoExt + "_materials.json"));
                 }
-                else {
+                else
+                {
                     string inDir = Path.GetDirectoryName(args.input_path);
                     string filenameNoExt = Path.GetFileNameWithoutExtension(args.input_path);
 
-                    Materials.DumpMaterials(Path.Combine(inDir, filenameNoExt+"_materials.json"));
+                    Materials.DumpMaterials(Path.Combine(inDir, filenameNoExt + "_materials.json"));
                 }
-
             }
 
             if (args.output_material_folder != "")
@@ -159,12 +147,14 @@ namespace SuperBMDLib
             ModelStats = new BMDInfo();
             JointAnims = new List<J3DJointAnimation>();
 
-            if (args.ensure_one_material_per_mesh || args.material_order_strict) {
+            if (args.ensure_one_material_per_mesh || args.material_order_strict)
+            {
                 EnsureOneMaterialPerMesh(scene);
             }
 
             Console.WriteLine();
-            if (args.sort_meshes) {
+            if (args.sort_meshes)
+            {
                 SortMeshesByObjectNames(scene, args.sort_strict);
                 Console.WriteLine();
             }
@@ -172,10 +162,13 @@ namespace SuperBMDLib
 
             // For FBX mesh names are empty, instead we need to check the nodes and rename
             // the meshes after the node names.
-            foreach (Assimp.Node node in scene.RootNode.Children) {
-                foreach (int meshindex in node.MeshIndices) {
+            foreach (Assimp.Node node in scene.RootNode.Children)
+            {
+                foreach (int meshindex in node.MeshIndices)
+                {
                     Assimp.Mesh mesh = scene.Meshes[meshindex];
-                    if (mesh.Name == String.Empty) {
+                    if (mesh.Name == String.Empty)
+                    {
                         mesh.Name = node.Name;
                     }
                 }
@@ -200,8 +193,10 @@ namespace SuperBMDLib
             Console.Write(root == null ? "✓ No Skeleton found" : "✓ Skeleton Found");
             Console.WriteLine();
 
-            foreach (Mesh mesh in scene.Meshes) {
-                if (mesh.HasBones && root == null) {
+            foreach (Mesh mesh in scene.Meshes)
+            {
+                if (mesh.HasBones && root == null)
+                {
                     throw new System.Exception(
                         String.Format("Model uses bones but the skeleton root has not been found! Make sure your skeleton is inside a dummy object or armature called '{0}'.",
                         args.skeleton_root_marker));
@@ -209,7 +204,8 @@ namespace SuperBMDLib
             }
 
 
-            if (args.rotate_model) {
+            if (args.rotate_model)
+            {
                 Console.WriteLine();
                 Console.Write("Rotating the model");
                 int i = 0;
@@ -220,19 +216,23 @@ namespace SuperBMDLib
 
                 foreach (Mesh mesh in scene.Meshes)
                 {
-                    if (root != null) {
-                        foreach (Assimp.Bone bone in mesh.Bones) {
+                    if (root != null)
+                    {
+                        foreach (Assimp.Bone bone in mesh.Bones)
+                        {
                             bone.OffsetMatrix = rotateinv * bone.OffsetMatrix;
                             Console.Write("|");
                         }
                     }
 
-                    for (i = 0; i < mesh.VertexCount; i++) {
+                    for (i = 0; i < mesh.VertexCount; i++)
+                    {
                         Vector3D vertex = mesh.Vertices[i];
                         vertex.Set(vertex.X, vertex.Z, -vertex.Y);
                         mesh.Vertices[i] = vertex;
                     }
-                    for (i = 0; i < mesh.Normals.Count; i++) {
+                    for (i = 0; i < mesh.Normals.Count; i++)
+                    {
                         Vector3D norm = mesh.Normals[i];
                         norm.Set(norm.X, norm.Z, -norm.Y);
 
@@ -244,9 +244,12 @@ namespace SuperBMDLib
                 Console.WriteLine();
             }
 
-            foreach (Mesh mesh in scene.Meshes) {
-                if (mesh.HasNormals) {
-                    for (int i = 0; i < mesh.Normals.Count; i++) {
+            foreach (Mesh mesh in scene.Meshes)
+            {
+                if (mesh.HasNormals)
+                {
+                    for (int i = 0; i < mesh.Normals.Count; i++)
+                    {
                         Vector3D normal = mesh.Normals[i];
                         normal.X = (float)Math.Round(normal.X, 4);
                         normal.Y = (float)Math.Round(normal.Y, 4);
@@ -277,7 +280,7 @@ namespace SuperBMDLib
 
             Console.WriteLine();
             Console.WriteLine("Generating the Mesh Data ->");
-            Shapes = SHP1.Create(scene, Joints.BoneNameIndices, VertexData.Attributes, SkinningEnvelopes, PartialWeightData, 
+            Shapes = SHP1.Create(scene, Joints.BoneNameIndices, VertexData.Attributes, SkinningEnvelopes, PartialWeightData,
                 args.tristrip_mode, args.include_normals, args.degenerateTriangles, args.add_envtex_attribute, mat_presets);
 
             //Joints.UpdateBoundingBoxes(VertexData);
@@ -285,7 +288,7 @@ namespace SuperBMDLib
 
             Console.WriteLine();
             Console.WriteLine("Generating the Material Data ->");
-            Materials = new MAT3(scene, Textures, Shapes, args, mat_presets);
+            Materials = new MAT3(scene, Textures, args, Shapes, mat_presets);
 
             Console.WriteLine();
             Console.WriteLine("Loading the Textures ->");
@@ -328,7 +331,7 @@ namespace SuperBMDLib
                         bca.PrintAnimInfo();
                         JointAnims.Add(bca);
                         Console.WriteLine();
-                    } 
+                    }
                     else if (args.animType == Animation.Enums.AnimType.BCK)
                     {
                         Console.WriteLine("Generating new BCK\n");
@@ -349,7 +352,8 @@ namespace SuperBMDLib
             if (isBDL)
             {
                 fileName = Path.Combine(outDir, fileNameNoExt + ".bdl");
-            } else
+            }
+            else
             {
                 fileName = Path.Combine(outDir, fileNameNoExt + ".bmd");
             }
@@ -396,7 +400,8 @@ namespace SuperBMDLib
             }
 
             int i = 0;
-            foreach (J3DJointAnimation anim in JointAnims) {
+            foreach (J3DJointAnimation anim in JointAnims)
+            {
                 string extension = anim.GetType().Name.ToLower();
                 string animName = anim.Name == "" ? $"anim_{i}" : anim.Name;
                 string outName = Path.Combine(outDir, $"{animName}.{extension}");
@@ -415,10 +420,12 @@ namespace SuperBMDLib
             fileName = Path.GetFullPath(fileName); // Get absolute path instead of relative
             string outDir = Path.GetDirectoryName(fileName);
             string fileNameNoExt = Path.GetFileNameWithoutExtension(fileName);
-            if (modelType == "obj") {
+            if (modelType == "obj")
+            {
                 fileName = Path.Combine(outDir, fileNameNoExt + ".obj");
             }
-            else {
+            else
+            {
                 fileName = Path.Combine(outDir, fileNameNoExt + ".dae");
             }
             Scene outScene = new Scene { RootNode = new Node("RootNode") };
@@ -436,9 +443,9 @@ namespace SuperBMDLib
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine("Processing Textures ->");
-            Textures.DumpTextures(outDir, fileNameNoExt+"_tex_headers.json", true, cmdargs.readMipmaps);
+            Textures.DumpTextures(outDir, fileNameNoExt + "_tex_headers.json", true, cmdargs.readMipmaps);
 
-            this.Scenegraph.DumpJson(Path.Combine(outDir, fileNameNoExt+"_hierarchy.json"));
+            this.Scenegraph.DumpJson(Path.Combine(outDir, fileNameNoExt + "_hierarchy.json"));
             //this.Joints.DumpJson(Path.Combine(outDir, fileNameNoExt+"_joints.json"));
             //this.PartialWeightData.DumpJson(Path.Combine(outDir, fileNameNoExt+"_partialweights.json"));
             //this.Shapes.DumpJson(Path.Combine(outDir, fileNameNoExt+"_shapes.json"));
@@ -448,7 +455,7 @@ namespace SuperBMDLib
             Console.WriteLine("Removing Duplicate Verticies ->");
             foreach (Mesh mesh in outScene.Meshes)
             {
-                Console.Write(mesh.Name.Replace('_',' ')+": ");
+                Console.Write(mesh.Name.Replace('_', ' ') + ": ");
                 // Assimp has a JoinIdenticalVertices post process step, but we can't use that or the skinning info we manually add won't take it into account.
                 RemoveDuplicateVertices(mesh);
                 Console.Write("✓");
@@ -458,27 +465,36 @@ namespace SuperBMDLib
 
             AssimpContext cont = new AssimpContext();
 
-            if (modelType == "obj") {
+            if (modelType == "obj")
+            {
                 Console.WriteLine("Writing the OBJ file...");
                 cont.ExportFile(outScene, fileName, "obj");//, PostProcessSteps.ValidateDataStructure);
-                using (System.IO.StreamWriter file = new System.IO.StreamWriter(fileName)) {
-                    string mtllibname = fileName.Split(new char[] {'\\', '/'}, StringSplitOptions.RemoveEmptyEntries).Last()+".mtl";
+                using (System.IO.StreamWriter file = new System.IO.StreamWriter(fileName))
+                {
+                    string mtllibname = fileName.Split(new char[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries).Last() + ".mtl";
                     file.WriteLine(String.Format("mtllib {0}", mtllibname));
-                    foreach (Assimp.Mesh mesh in outScene.Meshes) {
-                        foreach (Assimp.Vector3D vertex in mesh.Vertices) {
+                    foreach (Assimp.Mesh mesh in outScene.Meshes)
+                    {
+                        foreach (Assimp.Vector3D vertex in mesh.Vertices)
+                        {
                             file.WriteLine(String.Format("v {0} {1} {2}", vertex.X, vertex.Y, vertex.Z));
                         }
                     }
 
-                    foreach (Assimp.Mesh mesh in outScene.Meshes) {
-                        foreach (Assimp.Vector3D normal in mesh.Normals) {
+                    foreach (Assimp.Mesh mesh in outScene.Meshes)
+                    {
+                        foreach (Assimp.Vector3D normal in mesh.Normals)
+                        {
                             file.WriteLine(String.Format("vn {0} {1} {2}", normal.X, normal.Y, normal.Z));
                         }
                     }
 
-                    foreach (Assimp.Mesh mesh in outScene.Meshes) {
-                        if (mesh.HasTextureCoords(0)) {
-                            foreach(Assimp.Vector3D uv in mesh.TextureCoordinateChannels[0]) {
+                    foreach (Assimp.Mesh mesh in outScene.Meshes)
+                    {
+                        if (mesh.HasTextureCoords(0))
+                        {
+                            foreach (Assimp.Vector3D uv in mesh.TextureCoordinateChannels[0])
+                            {
                                 file.WriteLine(String.Format("vt {0} {1}", uv.X, uv.Y));
                             }
                         }
@@ -486,27 +502,33 @@ namespace SuperBMDLib
 
                     int vertex_offset = 1;
 
-                    foreach (Assimp.Mesh mesh in outScene.Meshes) {
+                    foreach (Assimp.Mesh mesh in outScene.Meshes)
+                    {
                         string material_name = outScene.Materials[mesh.MaterialIndex].Name;
                         file.WriteLine(String.Format("usemtl {0}", material_name));
 
 
 
-                        foreach (Assimp.Face face in mesh.Faces) {
+                        foreach (Assimp.Face face in mesh.Faces)
+                        {
                             file.Write("f ");
-                            foreach (int index in face.Indices) {
-                                file.Write(index+vertex_offset);
-                                if (mesh.HasTextureCoords(0)) {
+                            foreach (int index in face.Indices)
+                            {
+                                file.Write(index + vertex_offset);
+                                if (mesh.HasTextureCoords(0))
+                                {
                                     file.Write("/");
-                                    file.Write(index+vertex_offset);
+                                    file.Write(index + vertex_offset);
                                 }
-                                if (!mesh.HasTextureCoords(0) && mesh.HasNormals) {
+                                if (!mesh.HasTextureCoords(0) && mesh.HasNormals)
+                                {
                                     file.Write("//");
-                                    file.Write(index+vertex_offset);
+                                    file.Write(index + vertex_offset);
                                 }
-                                else if (mesh.HasNormals) {
+                                else if (mesh.HasNormals)
+                                {
                                     file.Write("/");
-                                    file.Write(index+vertex_offset);
+                                    file.Write(index + vertex_offset);
                                 }
                                 file.Write(" ");
                             }
@@ -519,7 +541,8 @@ namespace SuperBMDLib
                 }
                 return;
             }
-            else {
+            else
+            {
                 cont.ExportFile(outScene, fileName, "collada", PostProcessSteps.ValidateDataStructure);
             }
 
@@ -550,7 +573,7 @@ namespace SuperBMDLib
 
                     if (Joints.FlatSkeleton.Exists(x => x.Name == name))
                     {
-                        string jointLine = line.Replace(">", $" sid=\"{ name }\" type=\"JOINT\">");
+                        string jointLine = line.Replace(">", $" sid=\"{name}\" type=\"JOINT\">");
                         test.WriteLine(jointLine);
                         test.Flush();
                     }
@@ -562,19 +585,22 @@ namespace SuperBMDLib
                 }
                 else if (line.Contains("</visual_scene>"))
                 {
-                    foreach (Mesh mesh in outScene.Meshes) {
+                    foreach (Mesh mesh in outScene.Meshes)
+                    {
                         string matname = "mat";
                         bool keepmatnames = false;
-                        if (keepmatnames == true) {
+                        if (keepmatnames == true)
+                        {
                             matname = AssimpMatnameSanitize(mesh.MaterialIndex, outScene.Materials[mesh.MaterialIndex].Name);
                         }
-                        else {
+                        else
+                        {
                             matname = AssimpMatnameSanitize(mesh.MaterialIndex, Materials.m_Materials[mesh.MaterialIndex].Name);
                         }
 
-                        test.WriteLine($"      <node id=\"{ mesh.Name }\" name=\"{ mesh.Name }\" type=\"NODE\">");
+                        test.WriteLine($"      <node id=\"{mesh.Name}\" name=\"{mesh.Name}\" type=\"NODE\">");
 
-                        test.WriteLine($"       <instance_controller url=\"#{ mesh.Name }-skin\">");
+                        test.WriteLine($"       <instance_controller url=\"#{mesh.Name}-skin\">");
                         test.WriteLine("        <skeleton>#skeleton_root</skeleton>");
                         test.WriteLine("        <bind_material>");
                         test.WriteLine("         <technique_common>");
@@ -623,9 +649,9 @@ namespace SuperBMDLib
                 Mesh curMesh = scene.Meshes[i];
                 curMesh.Name = curMesh.Name.Replace('_', '-');
 
-                writer.WriteLine($"   <controller id=\"{ curMesh.Name }-skin\" name=\"{ curMesh.Name }Skin\">");
+                writer.WriteLine($"   <controller id=\"{curMesh.Name}-skin\" name=\"{curMesh.Name}Skin\">");
 
-                writer.WriteLine($"    <skin source=\"#meshId{ i }\">");
+                writer.WriteLine($"    <skin source=\"#meshId{i}\">");
 
                 WriteBindShapeMatrixToStream(writer);
                 WriteJointNameArrayToStream(curMesh, writer);
@@ -634,8 +660,8 @@ namespace SuperBMDLib
 
                 writer.WriteLine("     <joints>");
 
-                writer.WriteLine($"      <input semantic=\"JOINT\" source=\"#{ curMesh.Name }-skin-joints-array\"></input>");
-                writer.WriteLine($"      <input semantic=\"INV_BIND_MATRIX\" source=\"#{ curMesh.Name }-skin-bind_poses-array\"></input>");
+                writer.WriteLine($"      <input semantic=\"JOINT\" source=\"#{curMesh.Name}-skin-joints-array\"></input>");
+                writer.WriteLine($"      <input semantic=\"INV_BIND_MATRIX\" source=\"#{curMesh.Name}-skin-bind_poses-array\"></input>");
 
                 writer.WriteLine("     </joints>");
                 writer.Flush();
@@ -667,13 +693,13 @@ namespace SuperBMDLib
 
         private void WriteJointNameArrayToStream(Mesh mesh, StreamWriter writer)
         {
-            writer.WriteLine($"      <source id =\"{ mesh.Name }-skin-joints-array\">");
-            writer.WriteLine($"      <Name_array id=\"{ mesh.Name }-skin-joints-array\" count=\"{ mesh.Bones.Count }\">");
+            writer.WriteLine($"      <source id =\"{mesh.Name}-skin-joints-array\">");
+            writer.WriteLine($"      <Name_array id=\"{mesh.Name}-skin-joints-array\" count=\"{mesh.Bones.Count}\">");
 
             writer.Write("       ");
             foreach (Bone bone in mesh.Bones)
             {
-                writer.Write($"{ bone.Name }");
+                writer.Write($"{bone.Name}");
                 if (bone != mesh.Bones.Last())
                     writer.Write(' ');
                 else
@@ -686,7 +712,7 @@ namespace SuperBMDLib
             writer.Flush();
 
             writer.WriteLine("      <technique_common>");
-            writer.WriteLine($"       <accessor source=\"#{ mesh.Name }-skin-joints-array\" count=\"{ mesh.Bones.Count }\" stride=\"1\">");
+            writer.WriteLine($"       <accessor source=\"#{mesh.Name}-skin-joints-array\" count=\"{mesh.Bones.Count}\" stride=\"1\">");
             writer.WriteLine("         <param name=\"JOINT\" type=\"Name\"></param>");
             writer.WriteLine("       </accessor>");
             writer.WriteLine("      </technique_common>");
@@ -696,8 +722,8 @@ namespace SuperBMDLib
 
         private void WriteInverseBindMatricesToStream(Mesh mesh, StreamWriter writer)
         {
-            writer.WriteLine($"      <source id =\"{ mesh.Name }-skin-bind_poses-array\">");
-            writer.WriteLine($"      <float_array id=\"{ mesh.Name }-skin-bind_poses-array\" count=\"{ mesh.Bones.Count * 16 }\">");
+            writer.WriteLine($"      <source id =\"{mesh.Name}-skin-bind_poses-array\">");
+            writer.WriteLine($"      <float_array id=\"{mesh.Name}-skin-bind_poses-array\" count=\"{mesh.Bones.Count * 16}\">");
 
             foreach (Bone bone in mesh.Bones)
             {
@@ -717,7 +743,7 @@ namespace SuperBMDLib
             writer.Flush();
 
             writer.WriteLine("      <technique_common>");
-            writer.WriteLine($"       <accessor source=\"#{ mesh.Name }-skin-bind_poses-array\" count=\"{ mesh.Bones.Count }\" stride=\"16\">");
+            writer.WriteLine($"       <accessor source=\"#{mesh.Name}-skin-bind_poses-array\" count=\"{mesh.Bones.Count}\" stride=\"16\">");
             writer.WriteLine("         <param name=\"TRANSFORM\" type=\"float4x4\"></param>");
             writer.WriteLine("       </accessor>");
             writer.WriteLine("      </technique_common>");
@@ -734,15 +760,15 @@ namespace SuperBMDLib
                 totalWeightCount += bone.VertexWeightCount;
             }
 
-            writer.WriteLine($"      <source id =\"{ mesh.Name }-skin-weights-array\">");
-            writer.WriteLine($"      <float_array id=\"{ mesh.Name }-skin-weights-array\" count=\"{ totalWeightCount }\">");
+            writer.WriteLine($"      <source id =\"{mesh.Name}-skin-weights-array\">");
+            writer.WriteLine($"      <float_array id=\"{mesh.Name}-skin-weights-array\" count=\"{totalWeightCount}\">");
             writer.Write("       ");
 
             foreach (Bone bone in mesh.Bones)
             {
                 foreach (VertexWeight weight in bone.VertexWeights)
                 {
-                    writer.Write($"{ weight.Weight } " );
+                    writer.Write($"{weight.Weight} ");
                 }
 
                 if (bone == mesh.Bones.Last())
@@ -753,7 +779,7 @@ namespace SuperBMDLib
             writer.Flush();
 
             writer.WriteLine("      <technique_common>");
-            writer.WriteLine($"       <accessor source=\"#{ mesh.Name }-skin-weights-array\" count=\"{ totalWeightCount }\" stride=\"1\">");
+            writer.WriteLine($"       <accessor source=\"#{mesh.Name}-skin-weights-array\" count=\"{totalWeightCount}\" stride=\"1\">");
             writer.WriteLine("         <param name=\"WEIGHT\" type=\"float\"></param>");
             writer.WriteLine("       </accessor>");
             writer.WriteLine("      </technique_common>");
@@ -779,16 +805,16 @@ namespace SuperBMDLib
                 }
             }
 
-            writer.WriteLine($"      <vertex_weights count=\"{ vertIDWeights.Count }\">");
+            writer.WriteLine($"      <vertex_weights count=\"{vertIDWeights.Count}\">");
 
-            writer.WriteLine($"       <input semantic=\"JOINT\" source=\"#{ mesh.Name }-skin-joints-array\" offset=\"0\"></input>");
-            writer.WriteLine($"       <input semantic=\"WEIGHT\" source=\"#{ mesh.Name }-skin-weights-array\" offset=\"1\"></input>");
+            writer.WriteLine($"       <input semantic=\"JOINT\" source=\"#{mesh.Name}-skin-joints-array\" offset=\"0\"></input>");
+            writer.WriteLine($"       <input semantic=\"WEIGHT\" source=\"#{mesh.Name}-skin-weights-array\" offset=\"1\"></input>");
 
             writer.WriteLine("       <vcount>");
 
             writer.Write("        ");
             for (int i = 0; i < vertIDWeights.Count; i++)
-                writer.Write($"{ vertIDWeights[i].WeightCount } ");
+                writer.Write($"{vertIDWeights[i].WeightCount} ");
 
             writer.WriteLine("\n       </vcount>");
 
@@ -801,7 +827,7 @@ namespace SuperBMDLib
 
                 for (int j = 0; j < curWeight.WeightCount; j++)
                 {
-                    writer.Write($"{ curWeight.BoneIndices[j] } { weights.IndexOf(curWeight.Weights[j]) } ");
+                    writer.Write($"{curWeight.BoneIndices[j]} {weights.IndexOf(curWeight.Weights[j])} ");
                 }
             }
 
@@ -811,17 +837,21 @@ namespace SuperBMDLib
         }
 
         // Attempt to replicate Assimp's behaviour for sanitizing material names
-        private string AssimpMatnameSanitize(int meshindex, string matname) {
+        private string AssimpMatnameSanitize(int meshindex, string matname)
+        {
             matname = matname.Replace("#", "_");
-            foreach (string letter in characters_to_replace) {
+            foreach (string letter in characters_to_replace)
+            {
                 matname = matname.Replace(letter, "_");
             }
-            return $"m{meshindex}{matname}"; 
+            return $"m{meshindex}{matname}";
         }
 
-        static public string AssimpMatnamePartSanitize(string matname) {
+        static public string AssimpMatnamePartSanitize(string matname)
+        {
             matname = matname.Replace("#", "_");
-            foreach (string letter in characters_to_replace) {
+            foreach (string letter in characters_to_replace)
+            {
                 matname = matname.Replace(letter, "_");
             }
             return matname;
@@ -857,7 +887,8 @@ namespace SuperBMDLib
                 if (origVertexID < mesh.Normals.Count)
                 {
                     normal = mesh.Normals[origVertexID];
-                } else
+                }
+                else
                 {
                     normal = null;
                 }
@@ -872,7 +903,7 @@ namespace SuperBMDLib
                 {
                     Tuple<Vector3D, Vector3D?, List<Vector3D>, List<Color4D>> otherVertInfo = uniqueVertInfos[i];
                     if (CheckVertInfosAreDuplicates(
-                        vertInfo.Item1, vertInfo.Item2, vertInfo.Item3, vertInfo.Item4, 
+                        vertInfo.Item1, vertInfo.Item2, vertInfo.Item3, vertInfo.Item4,
                         otherVertInfo.Item1, otherVertInfo.Item2, otherVertInfo.Item3, otherVertInfo.Item4))
                     {
                         duplicateVertexIndex = i;
@@ -1017,11 +1048,13 @@ namespace SuperBMDLib
 
             if (meshNames.Count != scene.Meshes.Count)
             {
-                if (strict) { 
-                    throw new Exception($"Number of meshes ({scene.Meshes.Count}) is not the same as the number of mesh objects ({meshNames.Count}); cannot sort.\nMesh objects: {String.Join(", ", meshNames)}\nMeshes: {String.Join(", ", scene.Meshes.Select(mesh => mesh.Name))}");
-                } else
+                if (strict)
                 {
-                    Console.WriteLine($"Number of meshes({ scene.Meshes.Count}) is not the same as the number of mesh objects({ meshNames.Count}); Sorting skipped.");
+                    throw new Exception($"Number of meshes ({scene.Meshes.Count}) is not the same as the number of mesh objects ({meshNames.Count}); cannot sort.\nMesh objects: {String.Join(", ", meshNames)}\nMeshes: {String.Join(", ", scene.Meshes.Select(mesh => mesh.Name))}");
+                }
+                else
+                {
+                    Console.WriteLine($"Number of meshes({scene.Meshes.Count}) is not the same as the number of mesh objects({meshNames.Count}); Sorting skipped.");
                     return;
                 }
             }
@@ -1058,7 +1091,7 @@ namespace SuperBMDLib
                 }
             }
         }
-    
+
         private static void RenameMat(Assimp.Scene scene, string colladafile)
         {
             var reader = new XmlTextReader(colladafile);
@@ -1074,8 +1107,9 @@ namespace SuperBMDLib
             {
                 var id = xmlnode.Attributes["id"].Value;
                 var name = xmlnode.Attributes["name"].Value;
-                if (id != null && name != null) { 
-                    materialmap[id] = name; 
+                if (id != null && name != null)
+                {
+                    materialmap[id] = name;
                 }
             }
 
@@ -1087,12 +1121,11 @@ namespace SuperBMDLib
                 }
             }
 
-        }    
+        }
     }
 
-
-
-    public class BMDInfo {
+    public class BMDInfo
+    {
         public int TotalSize; //{ get; private set; }
         public int INF1Size; //{ get; private set; }
         public int VTX1Size; //{ get; private set; }
@@ -1104,7 +1137,8 @@ namespace SuperBMDLib
         public int MDL3Size; //{ get; private set; }
         public int TEX1Size; //{ get; private set; }
         public List<Tuple<int, int>> PacketInfo;
-        public BMDInfo() {
+        public BMDInfo()
+        {
             TotalSize = 0;
             INF1Size = 0;
             VTX1Size = 0;
@@ -1118,8 +1152,9 @@ namespace SuperBMDLib
             PacketInfo = new List<Tuple<int, int>>();
         }
 
-        public void DisplayInfo() {
-            Console.WriteLine("Total size: {0} bytes ({1} KiB)", TotalSize, (float)TotalSize/(float)1024);
+        public void DisplayInfo()
+        {
+            Console.WriteLine("Total size: {0} bytes ({1} KiB)", TotalSize, (float)TotalSize / (float)1024);
             DisplaySize("INF1", "SceneGraph", INF1Size);
             DisplaySize("VTX1", "Vertex Attributes", VTX1Size);
             DisplaySize("EVP1", "Envelopes", EVP1Size);
@@ -1130,17 +1165,19 @@ namespace SuperBMDLib
             DisplaySize("MDL3", "Display Lists", MDL3Size);
             DisplaySize("TEX1", "Textures", TEX1Size);
         }
-        private void DisplaySize(string sectionName, string longDescription, int size) {
+        private void DisplaySize(string sectionName, string longDescription, int size)
+        {
             Console.WriteLine("Section {0} ({1}) size: {2} bytes ({3} KiB, {4:0.00}% of total)",
-                            sectionName, longDescription, size, (float)size/(float)1024, ((float)size/(float)TotalSize)*100);
+                            sectionName, longDescription, size, (float)size / (float)1024, ((float)size / (float)TotalSize) * 100);
         }
-        public void DisplayModelInfo(Model mod) {
+        public void DisplayModelInfo(Model mod)
+        {
             DisplayVertexAttributeInfo(mod.VertexData);
             DisplayShapeDescriptorInfo(mod.Shapes);
             Console.WriteLine("INF: {0} scene nodes", mod.Scenegraph.FlatNodes.Count);
             Console.WriteLine("EVP1: {0} weights", mod.SkinningEnvelopes.Weights.Count);
             Console.WriteLine("EVP1: {0} inverse bind matrices", mod.SkinningEnvelopes.InverseBindMatrices.Count);
-            Console.WriteLine("DRW1: {0} WeightTypeCheck flags, {1} indices", 
+            Console.WriteLine("DRW1: {0} WeightTypeCheck flags, {1} indices",
                 mod.PartialWeightData.WeightTypeCheck.Count, mod.PartialWeightData.Indices.Count);
             Console.WriteLine("JNT1: {0} joints", mod.Joints.FlatSkeleton.Count);
             Console.WriteLine("SHP1: {0} meshes", mod.Shapes.Shapes.Count);
@@ -1149,59 +1186,71 @@ namespace SuperBMDLib
             DisplayTextureInfo(mod.Textures);
         }
 
-        private void DisplayTextureInfo(TEX1 textures) {
+        private void DisplayTextureInfo(TEX1 textures)
+        {
             int i = 0;
             Console.WriteLine("Textures in model:");
-            foreach (Materials.BinaryTextureImage tex in textures.Textures) {
-                Console.WriteLine("{0}) {1} Format: {2}, {3}x{4}, {5} mipmaps", i, tex.Name, tex.Format, 
+            foreach (Materials.BinaryTextureImage tex in textures.Textures)
+            {
+                Console.WriteLine("{0}) {1} Format: {2}, {3}x{4}, {5} mipmaps", i, tex.Name, tex.Format,
                     tex.Width, tex.Height, tex.ImageCount);
                 i++;
 
             }
         }
 
-        private void DisplayVertexAttributeInfo(VTX1 vertexData) {
+        private void DisplayVertexAttributeInfo(VTX1 vertexData)
+        {
             Console.WriteLine("{0} Vertex Positions", vertexData.Attributes.Positions.Count);
             DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Position);
             Console.WriteLine("{0} Vertex Normals", vertexData.Attributes.Normals.Count);
             DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Normal);
-            if (vertexData.Attributes.Color_0.Count > 0) {
+            if (vertexData.Attributes.Color_0.Count > 0)
+            {
                 Console.WriteLine("{0} Vertex Colors (Channel 0)", vertexData.Attributes.Color_0.Count);
                 DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Color0);
             }
-            if (vertexData.Attributes.Color_1.Count > 0) {
+            if (vertexData.Attributes.Color_1.Count > 0)
+            {
                 Console.WriteLine("{0} Vertex Colors (Channel 1)", vertexData.Attributes.Color_1.Count);
                 DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Color1);
             }
 
             Console.WriteLine("{0} Vertex Texture Coords (Channel 0)", vertexData.Attributes.TexCoord_0.Count);
             DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Tex0);
-            
-            if (vertexData.Attributes.TexCoord_1.Count > 0) {
+
+            if (vertexData.Attributes.TexCoord_1.Count > 0)
+            {
                 Console.WriteLine("{0} Vertex Texture Coords (Channel 1)", vertexData.Attributes.TexCoord_1.Count);
                 DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Tex1);
             }
-            if (vertexData.Attributes.TexCoord_2.Count > 0) {
+            if (vertexData.Attributes.TexCoord_2.Count > 0)
+            {
                 Console.WriteLine("{0} Vertex Texture Coords (Channel 2)", vertexData.Attributes.TexCoord_2.Count);
                 DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Tex2);
             }
-            if (vertexData.Attributes.TexCoord_3.Count > 0) {
+            if (vertexData.Attributes.TexCoord_3.Count > 0)
+            {
                 Console.WriteLine("{0} Vertex Texture Coords (Channel 3)", vertexData.Attributes.TexCoord_3.Count);
                 DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Tex3);
             }
-            if (vertexData.Attributes.TexCoord_4.Count > 0) {
+            if (vertexData.Attributes.TexCoord_4.Count > 0)
+            {
                 Console.WriteLine("{0} Vertex Texture Coords (Channel 4)", vertexData.Attributes.TexCoord_4.Count);
                 DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Tex4);
             }
-            if (vertexData.Attributes.TexCoord_5.Count > 0) {
+            if (vertexData.Attributes.TexCoord_5.Count > 0)
+            {
                 Console.WriteLine("{0} Vertex Texture Coords (Channel 5)", vertexData.Attributes.TexCoord_5.Count);
                 DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Tex5);
             }
-            if (vertexData.Attributes.TexCoord_6.Count > 0) {
+            if (vertexData.Attributes.TexCoord_6.Count > 0)
+            {
                 Console.WriteLine("{0} Vertex Texture Coords (Channel 6)", vertexData.Attributes.TexCoord_6.Count);
                 DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Tex6);
             }
-            if (vertexData.Attributes.TexCoord_7.Count > 0) {
+            if (vertexData.Attributes.TexCoord_7.Count > 0)
+            {
                 Console.WriteLine("{0} Vertex Texture Coords (Channel 7)", vertexData.Attributes.TexCoord_7.Count);
                 DisplayAttributeFormat(vertexData, Geometry.Enums.GXVertexAttribute.Tex7);
             }
@@ -1221,11 +1270,14 @@ namespace SuperBMDLib
             }
         }
 
-        private void DisplayAttributeFormat(VTX1 vertexData, Geometry.Enums.GXVertexAttribute attr) {
-            if (vertexData.StorageFormats.ContainsKey(attr)) {
+        private void DisplayAttributeFormat(VTX1 vertexData, Geometry.Enums.GXVertexAttribute attr)
+        {
+            if (vertexData.StorageFormats.ContainsKey(attr))
+            {
                 Tuple<Geometry.Enums.GXDataType, byte> tuple;
-                if (vertexData.StorageFormats.TryGetValue(attr, out tuple)) {
-                    Console.WriteLine("Attribute {0} has format {1} with fractional part of {2} bits", 
+                if (vertexData.StorageFormats.TryGetValue(attr, out tuple))
+                {
+                    Console.WriteLine("Attribute {0} has format {1} with fractional part of {2} bits",
                         attr, tuple.Item1, tuple.Item2);
                 };
             }
