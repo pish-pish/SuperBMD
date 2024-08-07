@@ -1,6 +1,6 @@
 ﻿using GameFormatReader.Common;
 using OpenTK;
-using SuperBMD;
+using SuperBMDLib.Util;
 using SuperBMD.Util;
 using SuperBMDLib.Animation.Enums;
 using SuperBMDLib.Rigging;

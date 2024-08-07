@@ -1,5 +1,6 @@
 ﻿using GameFormatReader.Common;
 using SuperBMDLib;
+using SuperBMDLib.Util;
 using SuperBMDLib.BMD;
 using SuperBMDLib.Materials;
 using System;

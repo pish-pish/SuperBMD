@@ -3,7 +3,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 
-namespace SuperBMD
+namespace SuperBMDLib.Util
 {
     public class J3DHeader
     {

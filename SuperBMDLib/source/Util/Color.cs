@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Newtonsoft.Json;
+using System;
 using System.Globalization;
+using System.Linq;
 
 namespace SuperBMDLib.Util
 {
+    [JsonConverter(typeof(ColorConverter))]
     public struct Color
     {
         /// <summary> Red component of the <see cref="Color"/>. </summary>
@@ -20,6 +19,15 @@ namespace SuperBMDLib.Util
 
         /// <summary> Alpha component of the <see cref="Color"/>. Defaults to 1f. </summary>
         public float A;
+
+        public Color(string hexString)
+        {
+            Color color = FromHexString(hexString);
+            R = color.R;
+            G = color.G;
+            B = color.B;
+            A = color.A;
+        }
 
         /// <summary>
         /// Construct new <see cref="Color"/> with the given R, G, B, and A components.
@@ -122,47 +130,46 @@ namespace SuperBMDLib.Util
 
         public override int GetHashCode()
         {
-            return ((byte)(R * 255) << 24 | (byte)(R * 255) << 16 | (byte)(G * 255) << 8 | (byte)(A * 255));
+            return ((byte)(R * 255) << 24 | (byte)(G * 255) << 16 | (byte)(B * 255) << 8 | (byte)(A * 255));
         }
 
         public static Color FromHexString(string hexString)
         {
             if (string.IsNullOrEmpty(hexString))
+            {
                 throw new ArgumentException("Empty/Null hex string!", "hexString");
+            }
 
             if (hexString.StartsWith("0x"))
+            {
                 hexString = hexString.Substring(2);
+            }
 
-            uint colorVal;
-            bool bSuccess = uint.TryParse(hexString, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out colorVal);
+            bool bSuccess = uint.TryParse(hexString, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out uint colorVal);
             if (!bSuccess)
+            {
                 throw new ArgumentException("Not a valid hex number!", "hexString");
+            }
 
             Color outputColor = new Color();
-            byte[] bytes = BitConverter.GetBytes(colorVal);
+            byte[] bytes = BitConverter.GetBytes(colorVal).Reverse().ToArray();
             for (int i = 0; i < 4; i++)
+            {
                 outputColor[i] = bytes[i] / 255f;
+            }
 
-            // This code is untested, comment this out once you've tested it.
-            throw new NotImplementedException();
-            //return outputColor;
+            return outputColor;
         }
         #endregion
 
         public override string ToString()
         {
-            return string.Format("RGBA({0:F3}, {1:F3}, {2:F3}, {3, F3})", R, G, B, A);
+            return string.Format("RGBA({0:F3}, {1:F3}, {2:F3}, {3:F3})", R, G, B, A);
         }
 
         public string ToHexString()
         {
-            StringBuilder sb = new StringBuilder(10);
-            sb.Append("0x");
-            sb.Append(R.ToString("X2"));
-            sb.Append(G.ToString("X2"));
-            sb.Append(B.ToString("X2"));
-            sb.Append(A.ToString("X2"));
-            return sb.ToString();
+            return GetHashCode().ToString("X").PadRight(8, '0');
         }
 
         public Assimp.Color4D ToColor4D()

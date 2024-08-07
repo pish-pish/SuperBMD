@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using SuperBMDLib.Geometry;
 using SuperBMDLib.Geometry.Enums;
-using SuperBMD;
+using SuperBMDLib.Util;
 
 namespace SuperBMDLib
 {

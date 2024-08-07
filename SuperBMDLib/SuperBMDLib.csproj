@@ -73,7 +73,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="source\J3DHeader.cs" />
+    <Compile Include="source\Util\ColorConverter.cs" />
+    <Compile Include="source\Util\J3DHeader.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
