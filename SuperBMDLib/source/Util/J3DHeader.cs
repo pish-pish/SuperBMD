@@ -8,7 +8,7 @@ namespace SuperBMDLib.Util
     public class J3DHeader
     {
         protected virtual string FileMagic { get; }
-        protected virtual int SectionCount { get; private set; }
+        protected virtual int SectionCount { get; set; }
 
         public int FileSize { get; private set; }
 

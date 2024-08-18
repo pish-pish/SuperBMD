@@ -1643,33 +1643,30 @@ namespace SuperBMDLib.BMD
                 {
                     if (texname != null && texname != "")
                     {
-                        if (tex1[texname] == null || texname == "")
+                        Console.WriteLine();
+                        Console.Write("Searching for " + texname);
+                        string path = "";
+                        foreach (string extension in new string[] { ".png", ".jpg", ".tga", ".bmp" })
                         {
-                            Console.WriteLine();
-                            Console.Write("Searching for " + texname);
-                            string path = "";
-                            foreach (string extension in new string[] { ".png", ".jpg", ".tga", ".bmp" })
+                            Console.Write(".");
+                            string tmppath = Path.Combine(texpath, texname + extension);
+                            if (File.Exists(tmppath))
                             {
-                                Console.Write(".");
-                                string tmppath = Path.Combine(texpath, texname + extension);
-                                if (File.Exists(tmppath))
-                                {
-                                    path = tmppath;
-                                    break;
-                                }
+                                path = tmppath;
+                                break;
                             }
-                            Console.WriteLine();
-                            if (path != "")
-                            {
-                                tex1.AddTextureFromPath(path, readMipmaps);
-                                short texindex = (short)(tex1.Textures.Count - 1);
-                                m_TexRemapBlock.Add(texindex);
-                                Console.WriteLine("----------------------------------------");
-                            }
-                            else
-                            {
-                                Console.WriteLine(string.Format("Could not find texture {0} in file path {1}", texname, texpath));
-                            }
+                        }
+                        Console.WriteLine();
+                        if (path != "")
+                        {
+                            tex1.AddTextureFromPath(path, readMipmaps);
+                            short texindex = (short)(tex1.Textures.Count - 1);
+                            m_TexRemapBlock.Add(texindex);
+                            Console.WriteLine("----------------------------------------");
+                        }
+                        else
+                        {
+                            Console.WriteLine(string.Format("Could not find texture {0} in file path {1}", texname, texpath));
                         }
                     }
                 }

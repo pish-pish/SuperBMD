@@ -62,11 +62,6 @@ namespace SuperBMDLib.BMD
         {
             Textures = new List<BinaryTextureImage>();
 
-            if (args.texheaders_path == "")
-            {
-                return;
-            }
-
             string dir_path = Path.GetDirectoryName(args.texheaders_path);
             LoadTexturesFromJson(args.texheaders_path, dir_path, args);
         }

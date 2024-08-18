@@ -6,6 +6,8 @@ using SuperBMDLib.Materials;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace SuperBMD.source.Materials
 {
@@ -15,7 +17,6 @@ namespace SuperBMD.source.Materials
         public TEX1 Textures { get; private set; }
 
         protected override string FileMagic => "J3D2bmt3";
-        protected override int SectionCount => 2;
 
         public BinaryMaterialTable(MAT3 materials, TEX1 textures)
         {
@@ -25,9 +26,18 @@ namespace SuperBMD.source.Materials
 
         public BinaryMaterialTable(EndianBinaryReader reader) : base(reader)
         {
+            SectionCount = 1;
+
             Materials = new MAT3(reader, (int)reader.BaseStream.Position);
-            Textures = new TEX1(reader, (int)reader.BaseStream.Position);
-            Materials.SetTextureNames(Textures);
+            Textures = null;
+
+            byte[] magicByes = reader.PeekReadBytes(4);
+            if (Encoding.UTF8.GetString(magicByes) == "TEX1")
+            {
+                SectionCount = 2;
+                Textures = new TEX1(reader, (int)reader.BaseStream.Position);
+                Materials.SetTextureNames(Textures);
+            }
         }
 
         public BinaryMaterialTable(Arguments args, List<Material> mat_presets, string additionalTexPath)
@@ -37,11 +47,21 @@ namespace SuperBMD.source.Materials
                 throw new ArgumentException("Material JSON files are required to create a BMT!");
             }
 
-            Console.WriteLine("Generating the Texture Data -> ");
-            Textures = new TEX1(args);
+            SectionCount = 1;
 
             Console.WriteLine("Generating the Material Data ->");
             Materials = new MAT3(mat_presets);
+
+            Textures = null;
+            if (args.texheaders_path == "")
+            {
+                return;
+            }
+
+            SectionCount = 2;
+
+            Console.WriteLine("Generating the Texture Data -> ");
+            Textures = new TEX1(args);
 
             Console.WriteLine("Loading the Textures ->");
             if (additionalTexPath == null)
@@ -77,7 +97,7 @@ namespace SuperBMD.source.Materials
                 table.Materials.DumpMaterials(Path.Combine(inDir, filenameNoExt + "_materials.json"));
             }
 
-            table.Textures.DumpTextures(inDir, filenameNoExt + "_tex_headers.json", true, args.readMipmaps);
+            table.Textures?.DumpTextures(inDir, filenameNoExt + "_tex_headers.json", true, args.readMipmaps);
 
             if (args.output_material_folder != "")
             {
@@ -91,7 +111,7 @@ namespace SuperBMD.source.Materials
             string outDir = Path.GetDirectoryName(fileName);
             string fileNameNoExt = Path.GetFileNameWithoutExtension(fileName);
 
-            Console.WriteLine($"Creating new BMT with name {fileNameNoExt}...");
+            Console.WriteLine($"Creating new BMT with name \"{fileNameNoExt}\"...");
 
             fileName = Path.Combine(outDir, fileNameNoExt + ".bmt");
             using (FileStream stream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
@@ -99,7 +119,7 @@ namespace SuperBMD.source.Materials
                 EndianBinaryWriter writer = new EndianBinaryWriter(stream, Endian.Big);
                 Write(writer);
                 Materials.Write(writer);
-                Textures.Write(writer);
+                Textures?.Write(writer);
                 WriteSize(writer);
             }
         }
