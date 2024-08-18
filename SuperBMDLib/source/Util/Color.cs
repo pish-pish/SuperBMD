@@ -169,7 +169,7 @@ namespace SuperBMDLib.Util
 
         public string ToHexString()
         {
-            return GetHashCode().ToString("X").PadRight(8, '0');
+            return GetHashCode().ToString("X").PadLeft(8, '0');
         }
 
         public Assimp.Color4D ToColor4D()
