@@ -34,7 +34,7 @@ namespace SuperBMDLib.Animation
             }
 
             LoopMode = LoopMode.Loop;
-            Duration = (short)(src_anim.DurationInTicks * (30.0f / src_anim.TicksPerSecond));
+            Duration = (short)(src_anim.DurationInTicks * (30.0f / src_anim.TicksPerSecond) + 1);
             Tracks = new Track[bone_list.Count];
 
             for (int i = 0; i < bone_list.Count; i++)
