@@ -267,7 +267,7 @@ namespace SuperBMDLib
             Joints = new JNT1(scene, VertexData, args);
             Console.WriteLine();
             Console.WriteLine("Generating the Texture Data -> ");
-            Textures = new TEX1(scene, args);
+            Textures = new TEX1(scene, args, additionalTexPath);
             Console.WriteLine();
             Console.Write("Generating the Envelope Data");
             SkinningEnvelopes = new EVP1();

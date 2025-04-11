@@ -69,14 +69,14 @@ namespace SuperBMDLib
                 mat_presets = CreateMatPresets(cmd_args, cmd_args.materials_path);
             }
             string additionalTexPath = null;
-            if (cmd_args.materials_path != "")
+            /*if (cmd_args.materials_path != "")
             {
                 additionalTexPath = Path.GetDirectoryName(cmd_args.materials_path);
             }
             if (cmd_args.material_folder != "")
             {
                 additionalTexPath = Path.GetDirectoryName(cmd_args.material_folder);
-            }
+            }*/
             if (cmd_args.texture_path != "")
             {
                 additionalTexPath = cmd_args.texture_path;

@@ -61,7 +61,7 @@ namespace SuperBMD.source.Materials
             SectionCount = 2;
 
             Console.WriteLine("Generating the Texture Data -> ");
-            Textures = new TEX1(args);
+            Textures = new TEX1(args, additionalTexPath);
 
             Console.WriteLine("Loading the Textures ->");
             if (additionalTexPath == null)

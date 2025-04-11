@@ -45,24 +45,37 @@ namespace SuperBMDLib.BMD
             }
         }
 
-        public TEX1(Assimp.Scene scene, Arguments args)
+        public TEX1(Assimp.Scene scene, Arguments args, string additionalTexPath=null)
         {
             Textures = new List<BinaryTextureImage>();
 
+            string dir_path = Path.GetDirectoryName(args.input_path);
+            if (additionalTexPath != null)
+            {
+                dir_path = additionalTexPath;
+            }
+
             if (args.texheaders_path != "")
             {
-                string dir_path = Path.GetDirectoryName(args.texheaders_path);
+                if (additionalTexPath == null) 
+                {
+                    dir_path = Path.GetDirectoryName(args.texheaders_path);
+                }
                 LoadTexturesFromJson(args.texheaders_path, dir_path, args);
             }
             else
-                LoadTexturesFromScene(scene, Path.GetDirectoryName(args.input_path), args);
+                LoadTexturesFromScene(scene, dir_path, args);
         }
 
-        public TEX1(Arguments args)
+        public TEX1(Arguments args, string additionalTexPath=null)
         {
             Textures = new List<BinaryTextureImage>();
 
             string dir_path = Path.GetDirectoryName(args.texheaders_path);
+            if (additionalTexPath != null)
+            {
+                dir_path = additionalTexPath;
+            }
             LoadTexturesFromJson(args.texheaders_path, dir_path, args);
         }
 
