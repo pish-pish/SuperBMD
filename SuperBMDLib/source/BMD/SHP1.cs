@@ -311,8 +311,7 @@ namespace SuperBMDLib.BMD
                         break;
                 }
 
-                Mesh mesh = new Mesh(meshname, PrimitiveType.Triangle);
-                mesh.MaterialIndex = i;
+                Mesh mesh = new Mesh(meshname, PrimitiveType.Triangle) { MaterialIndex = i };
                 bool[] outOfRangeCoords_detected = { false, false, false, false, false, false, false, false };
                 List<String> usedbones = new List<String>();
 

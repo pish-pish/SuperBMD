@@ -46,6 +46,10 @@ namespace SuperBMDLib.Rigging
             Name = name;
             m_MatrixType = reader.ReadInt16();
             m_DoIgnoreParentScale = reader.ReadBoolean();
+            if (m_DoIgnoreParentScale)
+            {
+                Name += "_ignore_scale";
+            }
 
             reader.SkipByte();
 
