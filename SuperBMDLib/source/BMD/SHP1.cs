@@ -28,7 +28,7 @@ namespace SuperBMDLib.BMD
             RemapTable = new List<int>();
         }
 
-        private SHP1(EndianBinaryReader reader, int offset, BMDInfo modelstats=null)
+        private SHP1(EndianBinaryReader reader, int offset, BMDInfo modelstats = null)
         {
             Shapes = new List<Shape>();
             RemapTable = new List<int>();
@@ -39,7 +39,8 @@ namespace SuperBMDLib.BMD
             int entryCount = reader.ReadInt16();
             reader.SkipInt16();
 
-            if (modelstats != null) {
+            if (modelstats != null)
+            {
                 modelstats.SHP1Size = shp1Size;
             }
 
@@ -155,22 +156,25 @@ namespace SuperBMDLib.BMD
 
             foreach (Mesh mesh in scene.Meshes)
             {
-                Console.Write(mesh.Name+": ");
+                Console.Write(mesh.Name + ": ");
                 Shape meshShape;
                 string matName = scene.Materials[mesh.MaterialIndex].Name;
 
                 /*if (mesh.Name.Contains("Bill0")) {
                     meshShape = new Shape(0); // Matrix Type 0, unknown
                 }*/
-                if (mesh.Name.Contains("BillXY")) {
+                if (mesh.Name.Contains("BillXY"))
+                {
                     meshShape = new Shape(MatrixType.BillboardXY); // Matrix Type 1, XY Billboard
                     Console.WriteLine("Billboarding on the X & Y axis");
                 }
-                else if (mesh.Name.Contains("BillX")) {
+                else if (mesh.Name.Contains("BillX"))
+                {
                     meshShape = new Shape(MatrixType.BillboardX); // Matrix Type 2, X Billboard, i.e. the X axis is always turned towards camera
                     Console.WriteLine("Billboarding on the X axis");
                 }
-                else {
+                else
+                {
                     meshShape = new Shape(); // Matrix Type 3, normal
                     Console.WriteLine("Normal Mesh");
                 }
@@ -178,7 +182,8 @@ namespace SuperBMDLib.BMD
                 // Force a mesh in an otherwise rigged model to be "unrigged"
                 bool forceUnweighted = mesh.Name.Contains("_NoWeights");
 
-                if (forceUnweighted) { 
+                if (forceUnweighted)
+                {
                     Console.WriteLine(String.Format("\nMesh {0} forced to be unweighted.", mesh.Name));
                     meshShape.SetDescriptorAttributes(mesh, 1, include_normals, false, "", null);
                 }
@@ -188,16 +193,16 @@ namespace SuperBMDLib.BMD
                 }
 
                 if (boneNames.Count > 1 && !forceUnweighted)
+                {
                     meshShape.ProcessVerticesWithWeights(mesh, vertData, boneNames, envelopes, partialWeight, tristripMode == "all", degenerateTriangles);
+                }
                 else
                 {
-                    
-
                     var jointindex = 0;
                     var transformVerts = false;
                     if (mesh.Name.Contains("_NoWeights_"))
                     {
-                        string[] result = mesh.Name.Split(new string[] {"_NoWeights_" }, StringSplitOptions.None);
+                        string[] result = mesh.Name.Split(new string[] { "_NoWeights_" }, StringSplitOptions.None);
                         if (result.Length == 1)
                         {
                             throw new Exception(String.Format("Missing Bone Name after _NoWeights_: {0}", mesh.Name));
@@ -213,10 +218,9 @@ namespace SuperBMDLib.BMD
                     partialWeight.WeightTypeCheck.Add(false);
                     partialWeight.Indices.Add(jointindex);
 
-                    meshShape.ProcessVerticesWithoutWeights(mesh, vertData, envelopes, degenerateTriangles, jointindex, partialWeight.Indices.Count-1, transformVerts);
-                    
+                    meshShape.ProcessVerticesWithoutWeights(mesh, vertData, envelopes, degenerateTriangles, jointindex, partialWeight.Indices.Count - 1, transformVerts);
+
                     Console.WriteLine("Assigned joint index {0} to {1}", jointindex, mesh.Name);
-                    
                 }
 
                 Shapes.Add(meshShape);
@@ -224,7 +228,7 @@ namespace SuperBMDLib.BMD
             }
         }
 
-        public static SHP1 Create(EndianBinaryReader reader, int offset, BMDInfo modelstats=null)
+        public static SHP1 Create(EndianBinaryReader reader, int offset, BMDInfo modelstats = null)
         {
             return new SHP1(reader, offset, modelstats);
         }
@@ -285,15 +289,16 @@ namespace SuperBMDLib.BMD
         {
             for (int i = 0; i < Shapes.Count; i++)
             {
-                
+
 
                 int vertexID = 0;
                 Shape curShape = Shapes[i];
 
                 Console.Write("Mesh " + i + ": ");
-                string meshname = $"mesh_{ i }";
+                string meshname = $"mesh_{i}";
 
-                switch (curShape.MatrixType) {
+                switch (curShape.MatrixType)
+                {
                     case MatrixType.BillboardX:
                         meshname += "_BillX";
                         Console.Write("X Billboarding Detected! ");
@@ -305,10 +310,10 @@ namespace SuperBMDLib.BMD
                     default:
                         break;
                 }
-                
+
                 Mesh mesh = new Mesh(meshname, PrimitiveType.Triangle);
                 mesh.MaterialIndex = i;
-                bool[] outOfRangeCoords_detected = {false, false, false, false, false, false, false, false};
+                bool[] outOfRangeCoords_detected = { false, false, false, false, false, false, false, false };
                 List<String> usedbones = new List<String>();
 
                 foreach (Packet pack in curShape.Packets)
@@ -481,7 +486,8 @@ namespace SuperBMDLib.BMD
                                                 {
                                                     outOfRangeCoords_detected[7] = true;
                                                 }
-                                                else { 
+                                                else
+                                                {
                                                     texCoord = vertData.TexCoord_7[(int)vert.TexCoord7Index].ToVector2D();
                                                 }
                                                 break;
@@ -508,7 +514,7 @@ namespace SuperBMDLib.BMD
                 Console.Write("✓");
                 Console.WriteLine();
                 Console.WriteLine("Used bones by {0}:", mesh.Name);
-                foreach( string name in usedbones)
+                foreach (string name in usedbones)
                 {
                     Console.Write(name);
                     Console.Write(",");
@@ -580,7 +586,8 @@ namespace SuperBMDLib.BMD
 
             foreach (Tuple<Packet, int> tup in packetMatrixOffsets)
             {
-                writer.Write((short)0); // ???
+                // I don't know for sure if this is right, but for the purposes of billboarding, it works
+                writer.Write((short)tup.Item1.MatrixIndices[0]); 
                 writer.Write((short)tup.Item1.MatrixIndices.Count);
                 writer.Write(tup.Item2);
             }
@@ -688,7 +695,8 @@ namespace SuperBMDLib.BMD
 
             return outList;
         }
-        public void DumpJson(string path) {
+        public void DumpJson(string path)
+        {
             JsonSerializer serial = new JsonSerializer();
             serial.Formatting = Formatting.Indented;
             serial.Converters.Add(new StringEnumConverter());
